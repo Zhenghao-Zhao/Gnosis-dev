@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Papers</title>
-</head>
-<body>
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
 <h2>Papers in our DB</h2>
 <ul>
 {% for paper in papers %}
@@ -15,5 +12,4 @@
 <p>Number of papers {{ num_papers }}</p>
 <p><a href="{% url 'home' %}">Home</a></p>
 
-</body>
-</html>
+{% endblock %}

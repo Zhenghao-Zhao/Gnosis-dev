@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
 {% if user.is_authenticated %}
 <p>!! You have Permission !!</p>
 {% else %}
 <p>No permission</p>
 {% endif %}
 <p>Paper Detail</p>
-</body>
-</html>
+
+{% endblock %}

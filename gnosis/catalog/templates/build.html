@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
 Print DataBase build with {{ num_authors }} authors and {{ num_papers }} papers.
 
 <p><a href="{% url 'papers_index' %}">View Catalog.</a></p>
-</body>
-</html>
+
+{% endblock %}

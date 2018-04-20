@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Authors</title>
-</head>
-<body>
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
 <h2>Authors in our DB</h2>
 <ul>
 {% for author in authors %}
@@ -14,5 +11,4 @@
 <p>Number of authors {{ num_authors }}</p>
 <p><a href="{% url 'home' %}">Home</a>|<a href="{% url 'papers_index' %}">Papers</a></p>
 
-</body>
-</html>
+{% endblock %}
