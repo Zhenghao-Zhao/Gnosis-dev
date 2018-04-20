@@ -73,16 +73,19 @@ def build(request):
     try:
         p1 = Paper()
         p1.title = "The best paper in the world."
+        p1.abstract = 'Abstract goes here'
         p1.save()
 
         p2 = Paper()
         p2.title = "The second best paper in the world."
+        p2.abstract = 'Abstract goes here'
         p2.save()
 
         p2.cites.connect(p1)
 
         p3 = Paper()
         p3.title = "I wish I could write a paper with a great title."
+        p3.abstract = 'Abstract goes here'
         p3.save()
 
         p3.cites.connect(p1)
