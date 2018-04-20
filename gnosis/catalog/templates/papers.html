@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Papers</title>
+</head>
+<body>
+<h2>Papers in our DB</h2>
+<ul>
+{% for paper in papers %}
+    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+        {% if user.is_authenticated %}|| <a href="{% url 'paper_update' paper.id %}">Edit</a>{% endif %}</li>
+{% endfor %}
+</ul>
+<p>Number of papers {{ num_papers }}</p>
+<p><a href="{% url 'home' %}">Home</a></p>
+
+</body>
+</html>
