@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import Paper, Person
+from .models import Paper, Person, Dataset
 
 
 class PaperForm(ModelForm):
@@ -38,3 +38,19 @@ class PersonForm(ModelForm):
     class Meta:
         model = Person
         fields = ['first_name', 'middle_name', 'last_name', 'affiliation', 'website']
+
+
+class DatasetForm(ModelForm):
+
+    def clean_name(self):
+        return self.cleaned_data['name']
+
+    def clean_source_type(self):
+        return self.cleaned_data['source_type']
+
+    def clean_website(self):
+        return self.cleaned_data['website']
+
+    class Meta:
+        model = Dataset
+        fields = ['name', 'source_type', 'website']

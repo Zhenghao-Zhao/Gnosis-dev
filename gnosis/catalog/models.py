@@ -78,13 +78,17 @@ class Dataset(DjangoNode):
 
     # These are always required
     name = StringProperty(required=True)
-    type = StringProperty(required=True)
-
+    # data_types = {'N': 'Network', 'I': 'Image(s)', 'V': 'Video(s)', 'M': 'Mix'}
+    data_types = (('N', 'Network'),
+                  ('I', 'Image(s)'),
+                  ('V', 'Video(s)'),
+                  ('M', 'Mix'),)
+    source_type = StringProperty(choices=data_types)
     website = StringProperty()
 
     class Meta:
         app_label = 'catalog'
-        ordering = ['last_name', 'first_name', 'affiliation']
+        ordering = ['name', 'type']
 
     def __str__(self):
         return '{%s}'.format(self.name)
@@ -106,7 +110,7 @@ class Venue(DjangoNode):
     publisher = StringProperty(required=True)
     keywords = StringProperty(required=True)
 
-    peer_reviewed = StringProperty(choices=(('Yes', 'Y'), ('No', 'N')), default='No')  # Yes or no
+    peer_reviewed = StringProperty(choices=(('Yes', 'Y'), ('No', 'N'),), default='No')  # Yes or no
     website = StringProperty()
 
     class Meta:

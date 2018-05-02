@@ -76,8 +76,9 @@
   <div class="row content">
     <div class="col-sm-2 sidenav">
       <p><a href="{% url 'papers_index' %}">Catalog</a></p>
-      <p><a href="{% url 'paper_create' %}">+ Paper&nbsp</a></p>
-      <p><a href="{% url 'person_create' %}">+ Person</a></p>
+      <p><a href="{% url 'paper_create' %}">+ Paper&nbsp&nbsp</a></p>
+      <p><a href="{% url 'person_create' %}">+ Person&nbsp</a></p>
+      <p><a href="{% url 'dataset_create' %}">+ Dataset</a></p>
     </div>
     <div class="col-sm-8 text-left">
         {% block content %}

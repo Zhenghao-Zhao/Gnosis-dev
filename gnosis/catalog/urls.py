@@ -22,3 +22,11 @@ urlpatterns += [
     path('person/<int:id>/', views.person_detail, name='person_detail'),
     path('person/<int:id>/update', views.person_update, name='person_update'),
 ]
+
+# for updating/creating a new Person node
+urlpatterns += [
+    path('datasets/', views.datasets, name='datasets_index'),
+    path('dataset/create/', views.dataset_create, name='dataset_create'),
+    path('dataset/<int:id>/', views.dataset_detail, name='dataset_detail'),
+    path('dataset/<int:id>/update', views.dataset_update, name='dataset_update'),
+]

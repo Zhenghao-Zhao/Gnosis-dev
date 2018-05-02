@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.shortcuts import render
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm
+from .forms import PaperForm, PersonForm, DatasetForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -144,6 +144,72 @@ def person_update(request, id):
 
     return render(request, 'person_update.html', {'form': form, 'person': person_inst})
 
+#
+# Dataset Views
+#
+def datasets(request):
+    return render(request, 'datasets.html', {'datasets': Dataset.nodes.all(), 'num_datasets': len(Dataset.nodes.all())})
+
+
+def dataset_detail(request, id):
+    return render(request, 'dataset_detail.html', {'dataset': Dataset.nodes.all()})
+
+
+@login_required
+def dataset_create(request):
+    user = request.user
+
+    if request.method == 'POST':
+        dataset = Dataset()
+        dataset.created_by = user.id
+        form = DatasetForm(instance=dataset, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('datasets_index'))
+    else:  # GET
+        form = DatasetForm()
+
+    return render(request, 'dataset_form.html', {'form': form})
+
+@login_required
+def dataset_update(request, id):
+    # retrieve paper by ID
+    # https://github.com/neo4j-contrib/neomodel/issues/199
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        datasets = [Dataset.inflate(row[0]) for row in results]
+        dataset = datasets[0]
+    else:
+        dataset = Dataset()
+
+    # if this is POST request then process the Form data
+    if request.method == 'POST':
+        form = DatasetForm(request.POST)
+        if form.is_valid():
+            dataset.name = form.cleaned_data['name']
+            dataset.source_type = form.cleaned_data['source_type']
+            dataset.website = form.cleaned_data['website']
+            dataset.save()
+
+            return HttpResponseRedirect(reverse('datasets_index'))
+    # GET request
+    else:
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=id))
+        if len(results) > 0:
+            datasets = [Dataset.inflate(row[0]) for row in results]
+            dataset = datasets[0]
+        else:
+            dataset = Dataset()
+        form = DatasetForm(initial={'name': dataset.name,
+                                    'source_type': dataset.source_type,
+                                    'website': dataset.website,
+                                    }
+                           )
+
+    return render(request, 'dataset_update.html', {'form': form, 'dataset': dataset})
+
 
 #
 # Utility Views (admin required)
@@ -154,7 +220,7 @@ def build(request):
     try:
         d1 = Dataset()
         d1.name = 'Yelp'
-        d1.type = 'Graph'
+        d1.source_type = 'N'
         d1.save()
 
         v1 = Venue()
