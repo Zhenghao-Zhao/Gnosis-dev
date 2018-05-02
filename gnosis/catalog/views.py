@@ -78,16 +78,71 @@ def paper_create(request):
 # Person Views
 #
 def persons(request):
-    return render(request, 'people.html', {'persons': Person.nodes.all(), 'num_people': len(Person.nodes.all())})
+    return render(request, 'people.html', {'people': Person.nodes.all(), 'num_people': len(Person.nodes.all())})
+
+
+def person_detail(request, id):
+    return render(request, 'person_detail.html', {'person': Person.nodes.all()})
 
 
 @login_required
 def person_create(request):
-    person = Person()
+    user = request.user
 
-    form = PersonForm()
+    if request.method == 'POST':
+        person = Person()
+        person.created_by = user.id
+        form = PersonForm(instance=person, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('persons_index'))
+    else:  # GET
+        form = PersonForm()
 
-    return render(request, 'person_form.html', {'form': form, 'person': person})
+    return render(request, 'person_form.html', {'form': form})
+
+@login_required
+def person_update(request, id):
+    # retrieve paper by ID
+    # https://github.com/neo4j-contrib/neomodel/issues/199
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_people = [Person.inflate(row[0]) for row in results]
+        person_inst = all_people[0]
+    else:
+        person_inst = Person()
+
+    # if this is POST request then process the Form data
+    if request.method == 'POST':
+        form = PersonForm(request.POST)
+        if form.is_valid():
+            person_inst.first_name = form.cleaned_data['first_name']
+            person_inst.middle_name = form.cleaned_data['middle_name']
+            person_inst.last_name = form.cleaned_data['last_name']
+            person_inst.affiliation = form.cleaned_data['affiliation']
+            person_inst.website = form.cleaned_data['website']
+            person_inst.save()
+
+            return HttpResponseRedirect(reverse('persons_index'))
+    # GET request
+    else:
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=id))
+        if len(results) > 0:
+            all_people = [Person.inflate(row[0]) for row in results]
+            person_inst = all_people[0]
+        else:
+            person_inst = Person()
+        form = PersonForm(initial={'first_name': person_inst.first_name,
+                                   'middle_name': person_inst.middle_name,
+                                   'last_name': person_inst.last_name,
+                                   'affiliation': person_inst.affiliation,
+                                   'website': person_inst.website,
+                                   }
+                          )
+
+    return render(request, 'person_update.html', {'form': form, 'person': person_inst})
 
 
 #

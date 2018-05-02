@@ -19,4 +19,6 @@ urlpatterns += [
 # for updating/creating a new Person node
 urlpatterns += [
     path('person/create/', views.person_create, name='person_create'),
+    path('person/<int:id>/', views.person_detail, name='person_detail'),
+    path('person/<int:id>/update', views.person_update, name='person_update'),
 ]

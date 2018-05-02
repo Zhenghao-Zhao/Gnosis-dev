@@ -1,0 +1,12 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+<p>!! You have Permission !!</p>
+{% else %}
+<p>No permission</p>
+{% endif %}
+<p>Person Detail</p>
+
+{% endblock %}

@@ -67,7 +67,7 @@ class Person(DjangoNode):
         return '{%s} {%s} {%s}'.format(self.first_name[0], self.middle_name, self.last_name)
 
     def get_absolute_url(self):
-        return reverse('person-detail', args=[self.id])
+        return reverse('person_detail', args=[self.id])
 
 
 class Dataset(DjangoNode):
@@ -90,7 +90,7 @@ class Dataset(DjangoNode):
         return '{%s}'.format(self.name)
 
     def get_absolute_url(self):
-        return reverse('dataset-detail', args=[self.id])
+        return reverse('dataset_detail', args=[self.id])
 
 
 class Venue(DjangoNode):
@@ -117,7 +117,7 @@ class Venue(DjangoNode):
         return '{%s}'.format(self.name)
 
     def get_absolute_url(self):
-        return reverse('venue-detail', args=[self.id])
+        return reverse('venue_detail', args=[self.id])
 
 
 class Comment(DjangoNode):
@@ -142,4 +142,4 @@ class Comment(DjangoNode):
         return '{%s}'.format(self.author)
 
     def get_absolute_url(self):
-        return reverse('comment-detail', args=[self.id])
+        return reverse('comment_detail', args=[self.id])
