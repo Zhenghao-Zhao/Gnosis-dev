@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import Paper, Author
+from .models import Paper, Person
 
 
 class PaperForm(ModelForm):
@@ -10,12 +10,15 @@ class PaperForm(ModelForm):
     def clean_abstract(self):
         return self.cleaned_data['abstract']
 
+    def clean_keywords(self):
+        return self.cleaned_data['keywords']
+
     class Meta:
         model = Paper
-        fields = ['title', 'abstract']
+        fields = ['title', 'abstract', 'keywords']
 
 
-class AuthorForm(ModelForm):
+class PersonForm(ModelForm):
 
     def clean_first_name(self):
         return self.cleaned_data['first_name']
@@ -26,7 +29,6 @@ class AuthorForm(ModelForm):
     def clean_affiliation(self):
         return self.cleaned_data['affiliation']
 
-
     class Meta:
-        model = Author
+        model = Person
         fields = ['first_name', 'last_name', 'affiliation', ]

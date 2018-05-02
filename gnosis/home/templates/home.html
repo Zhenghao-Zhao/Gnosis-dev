@@ -14,7 +14,7 @@
 
 <p><a href="{% url 'papers_index' %}">View</a> our catalog.</p>
 
-<p>We have {{ num_papers }} papers and {{ num_authors }} authors in our DB</p>
+<p>We have {{ num_papers }} papers and {{ num_people }} people in our DB</p>
 
 {% if user.is_superuser %}
 <p><p><a href="{% url 'build_db' %}">Populate test DB</a></p>

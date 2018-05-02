@@ -2,13 +2,13 @@
 
 {% block content %}
 
-<h2>Authors in our DB</h2>
+<h2>People in our DB</h2>
 <ul>
-{% for author in authors %}
-    <li>{{ author.first_name }} {{ author.last_name }}</li>
+{% for person in persons %}
+    <li>{{ person.first_name }} {{ person.last_name }}</li>
 {% endfor %}
 </ul>
-<p>Number of authors {{ num_authors }}</p>
+<p>Number of people {{ num_people }}</p>
 <p><a href="{% url 'home' %}">Home</a>|<a href="{% url 'papers_index' %}">Papers</a></p>
 
 {% endblock %}
