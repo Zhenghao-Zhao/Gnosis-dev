@@ -2,11 +2,30 @@
 
 {% block content %}
 
+<h3>{{ paper.title }}</h3>
+
+<h5 class="text-right"><small>keywords:{{ paper.keywords }}</small></h5>
+
+<p><strong>Abstract:</strong> {{ paper.abstract }} </p>
+
 {% if user.is_authenticated %}
-<p>!! You have Permission !!</p>
+<p><a href="{% url 'comment_create' %}">+ Comment&nbsp&nbsp&nbsp</a></p>
 {% else %}
-<p>No permission</p>
+<p><a href="{% url 'login' %}?next={{request.path}}">Login</a> to comment</p>
 {% endif %}
-<p>Paper Detail</p>
+
+{% if num_comments > 0 %}
+<h3>{{ num_comments }} Comments</h3>
+{% for comment in comments %}
+<div class="well">
+    <p>{{comment.author }} says:</p>
+    <p><small><a href="{{ comment.get_absolute_url }}">{{ comment.publication_date }}</small></a></p>
+    <p>{{ comment.text }}</p>
+    {% if comment.created_by == user.id %}
+    <a href="{% url 'comment_update' comment.id %}">Edit</a>
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
 
 {% endblock %}

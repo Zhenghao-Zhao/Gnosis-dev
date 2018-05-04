@@ -18,7 +18,22 @@ def papers(request):
 
 
 def paper_detail(request, id):
-    return render(request, 'paper_detail.html', {'paper': Paper.nodes.all()})
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+
+    # Retrieve all comments about this paper.
+    query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    if len(results) > 0:
+        comments = [Comment.inflate(row[0]) for row in results]
+        num_comments = len(comments)
+
+    request.session['last-viewed-paper'] = id
+    return render(request, 'paper_detail.html', {'paper': paper, 'comments': comments, 'num_comments': num_comments})
 
 
 @login_required
@@ -301,13 +316,25 @@ def comment_detail(request, id):
 def comment_create(request):
     user = request.user
 
+    # Retrieve paper using paper id
+    paper_id = request.session['last-viewed-paper']
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=paper_id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        pass  # Should probably redirect to an error page!
+
     if request.method == 'POST':
         comment = Comment()
         comment.created_by = user.id
         comment.author = user.username
         form = CommentForm(instance=comment, data=request.POST)
         if form.is_valid():
+            # add link from new comment to paper
             form.save()
+            comment.discusses.connect(paper)
             return HttpResponseRedirect(reverse('comments_index'))
     else:  # GET
         form = CommentForm()
