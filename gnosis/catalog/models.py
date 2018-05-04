@@ -99,6 +99,16 @@ class Dataset(DjangoNode):
 
 class Venue(DjangoNode):
 
+    venue_types = (('J', 'Journal'),
+                   ('C', 'Conference'),
+                   ('W', 'Workshop'),
+                   ('O', 'Open Source'),
+                   ('R', 'Tech Report'),
+                   ('O', 'Other'),)
+
+    review_types = (('Y', 'Yes'),
+                    ('N', 'No'),)
+
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -106,19 +116,19 @@ class Venue(DjangoNode):
     # These are always required
     name = StringProperty(required=True)
     publication_date = DateProperty(required=True)
-    type = StringProperty(required=True)  # journal, tech report, open source, conference, workshop
+    type = StringProperty(required=True, choices=venue_types)  # journal, tech report, open source, conference, workshop
     publisher = StringProperty(required=True)
     keywords = StringProperty(required=True)
 
-    peer_reviewed = StringProperty(choices=(('Yes', 'Y'), ('No', 'N'),), default='No')  # Yes or no
+    peer_reviewed = StringProperty(required=True, choices=review_types)  # Yes or no
     website = StringProperty()
 
     class Meta:
         app_label = 'catalog'
-        ordering = ['name', 'publication_date']
+        ordering = ['name', 'publisher', 'publication_date', 'type']
 
     def __str__(self):
-        return '{%s}'.format(self.name)
+        return '{%s} by {%s} on {}'.format(self.name, self.publisher, self.publication_date)
 
     def get_absolute_url(self):
         return reverse('venue_detail', args=[self.id])
@@ -131,7 +141,7 @@ class Comment(DjangoNode):
     created_by = IntegerProperty()  # The uid of the user who created this node
 
     # These are always required
-    author = StringProperty(required=True)  # required but should be able to get it from user object
+    author = StringProperty()  # required but should be able to get it from user object
     text = StringProperty(required=True)
 
     publication_date = DateTimeProperty(default_now=True)

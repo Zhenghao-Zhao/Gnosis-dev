@@ -1,0 +1,15 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<h2>Venues in our DB</h2>
+<ul>
+{% for venue in venues %}
+    <li><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a>
+        {% if user.is_authenticated %}|| <a href="{% url 'venue_update' venue.id %}">Edit</a>{% endif %}</li>
+{% endfor %}
+</ul>
+<p>Number of venues {{ num_venues }}</p>
+<p><a href="{% url 'home' %}">Home</a>|<a href="{% url 'papers_index' %}">Papers</a></p>
+
+{% endblock %}

@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.shortcuts import render
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -212,6 +212,153 @@ def dataset_update(request, id):
 
 
 #
+# Venue Views
+#
+def venues(request):
+    return render(request, 'venues.html', {'venues': Venue.nodes.all(), 'num_venues': len(Venue.nodes.all())})
+
+
+def venue_detail(request, id):
+    return render(request, 'venue_detail.html', {'venue': Venue.nodes.all()})
+
+
+@login_required
+def venue_create(request):
+    user = request.user
+
+    if request.method == 'POST':
+        venue = Venue()
+        venue.created_by = user.id
+        form = VenueForm(instance=venue, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('venues_index'))
+    else:  # GET
+        form = VenueForm()
+
+    return render(request, 'venue_form.html', {'form': form})
+
+@login_required
+def venue_update(request, id):
+    # retrieve paper by ID
+    # https://github.com/neo4j-contrib/neomodel/issues/199
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        venues = [Venue.inflate(row[0]) for row in results]
+        venue = venues[0]
+    else:
+        venue = Venue()
+
+    # if this is POST request then process the Form data
+    if request.method == 'POST':
+        form = VenueForm(request.POST)
+        if form.is_valid():
+            venue.name = form.cleaned_data['name']
+            venue.publication_date = form.cleaned_data['publication_date']
+            venue.type = form.cleaned_data['type']
+            venue.publisher = form.cleaned_data['publisher']
+            venue.keywords = form.cleaned_data['keywords']
+            venue.peer_reviewed = form.cleaned_data['peer_reviewed']
+            venue.website = form.cleaned_data['website']
+            venue.save()
+
+            return HttpResponseRedirect(reverse('venues_index'))
+    # GET request
+    else:
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=id))
+        if len(results) > 0:
+            venues = [Venue.inflate(row[0]) for row in results]
+            venue = venues[0]
+        else:
+            venue = Venue()
+        form = VenueForm(initial={'name': venue.name,
+                                  'type': venue.type,
+                                  'publication_date': venue.publication_date,
+                                  'publisher': venue.publisher,
+                                  'keywords': venue.keywords,
+                                  'peer_reviewed': venue.peer_reviewed,
+                                  'website': venue.website,
+                                  }
+                         )
+
+    return render(request, 'venue_update.html', {'form': form, 'venue': venue})
+
+
+#
+# Comment Views
+#
+def comments(request):
+    return render(request, 'comments.html', {'comments': Comment.nodes.all(), 'num_comments': len(Comment.nodes.all())})
+
+
+def comment_detail(request, id):
+    return render(request, 'comment_detail.html', {'comment': Comment.nodes.all()})
+
+
+@login_required
+def comment_create(request):
+    user = request.user
+
+    if request.method == 'POST':
+        comment = Comment()
+        comment.created_by = user.id
+        comment.author = user.username
+        form = CommentForm(instance=comment, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('comments_index'))
+    else:  # GET
+        form = CommentForm()
+
+    return render(request, 'comment_form.html', {'form': form})
+
+@login_required
+def comment_update(request, id):
+    # retrieve paper by ID
+    # https://github.com/neo4j-contrib/neomodel/issues/199
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        comments = [Comment.inflate(row[0]) for row in results]
+        comment = comments[0]
+    else:
+        comment = Comment()
+
+    # if this is POST request then process the Form data
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment.text = form.cleaned_data['text']
+            # comment.author = form.cleaned_data['author']
+            comment.save()
+
+            return HttpResponseRedirect(reverse('comments_index'))
+    # GET request
+    else:
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=id))
+        if len(results) > 0:
+            comments = [Comment.inflate(row[0]) for row in results]
+            comment = comments[0]
+        else:
+            comment = Comment()
+        # form = CommentForm(initial={'author': comment.author,
+        #                             'text': comment.text,
+        #                             'publication_date': comment.publication_date,
+        #                             }
+        #                    )
+        form = CommentForm(initial={'text': comment.text,
+                                    'publication_date': comment.publication_date,
+                                    }
+                           )
+
+
+    return render(request, 'comment_update.html', {'form': form, 'comment': comment})
+
+
+#
 # Utility Views (admin required)
 #
 @login_required
@@ -226,20 +373,20 @@ def build(request):
         v1 = Venue()
         v1.name = 'Neural Information Processing Systems'
         v1.publication_date = date(2017, 12, 15)
-        v1.type = 'Conference'
+        v1.type = 'C'
         v1.publisher = 'NIPS Foundation'
         v1.keywords = 'machine learning, machine learning, computational neuroscience'
         v1.website = 'https://nips.cc'
-        v1.peer_reviewed = 'Yes'
+        v1.peer_reviewed = 'Y'
         v1.save()
 
         v2 = Venue()
         v2.name = 'International Conference on Machine Learning'
         v2.publication_date = date(2016, 5, 24)
-        v2.type = 'Conference'
+        v2.type = 'C'
         v2.publisher = 'International Machine Learning Society (IMLS)'
         v2.keywords = 'machine learning, computer science'
-        v2.peer_reviewed = 'Yes'
+        v2.peer_reviewed = 'Y'
         v2.website = 'https://icml.cc/2016/'
         v2.save()
 

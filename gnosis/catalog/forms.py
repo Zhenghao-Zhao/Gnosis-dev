@@ -1,8 +1,13 @@
 from django.forms import ModelForm
-from .models import Paper, Person, Dataset
+from .models import Paper, Person, Dataset, Venue, Comment
 
 
 class PaperForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
 
     def clean_title(self):
         return self.cleaned_data['title']
@@ -54,3 +59,47 @@ class DatasetForm(ModelForm):
     class Meta:
         model = Dataset
         fields = ['name', 'source_type', 'website']
+
+
+class VenueForm(ModelForm):
+
+    def clean_name(self):
+        return self.cleaned_data['name']
+
+    def clean_publisher(self):
+        return self.cleaned_data['publisher']
+
+    def clean_publication_date(self):
+        return self.cleaned_data['publication_date']
+
+    def clean_type(self):
+        return self.cleaned_data['type']
+
+    def clean_peer_reviewed(self):
+        return self.cleaned_data['peer_reviewed']
+
+    def clean_keywords(self):
+        return self.cleaned_data['keywords']
+
+    def clean_website(self):
+        return self.cleaned_data['website']
+
+    class Meta:
+        model = Venue
+        fields = ['name', 'publisher', 'publication_date', 'type', 'peer_reviewed', 'keywords', 'website']
+
+
+class CommentForm(ModelForm):
+
+    def clean_text(self):
+        return self.cleaned_data['text']
+
+    def clean_publication_date(self):
+        return self.cleaned_data['publication_date']
+
+    # def clean_author(self):
+    #     return self.cleaned_data['author']
+
+    class Meta:
+        model = Comment
+        fields = ['text']
