@@ -75,7 +75,14 @@
 <div class="container-fluid text-center">
   <div class="row content">
     <div class="col-sm-2 sidenav">
-      <p><a href="{% url 'papers_index' %}">Catalog</a></p>
+      <h4>Catalog</h4>
+      <div class="list-group">
+        <a href="{% url 'papers_index' %}" class="list-group-item">Papers</a>
+        <a href="{% url 'persons_index' %}" class="list-group-item">People</a>
+        <a href="{% url 'venues_index' %}" class="list-group-item">Venues</a>
+        <a href="{% url 'datasets_index' %}" class="list-group-item">Datasets</a>
+      </div>
+      <hr>
       <p><a href="{% url 'paper_create' %}">+ Paper&nbsp&nbsp</a></p>
       <p><a href="{% url 'person_create' %}">+ Person&nbsp</a></p>
       <p><a href="{% url 'dataset_create' %}">+ Dataset</a></p>

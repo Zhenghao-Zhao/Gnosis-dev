@@ -1,7 +1,22 @@
-from django.forms import ModelForm
+from django import forms
+from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment
 
 
+#
+# Search forms
+#
+class SearchVenuesForm(Form):
+
+    def clean_venue_name(self):
+        return self.cleaned_data['venue_name']
+
+    venue_name = forms.CharField(required=True)
+
+
+#
+# Model forms
+#
 class PaperForm(ModelForm):
 
     def __init__(self, *args, **kwargs):

@@ -1,9 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -24,6 +22,8 @@ def paper_detail(request, id):
     if len(results) > 0:
         all_papers = [Paper.inflate(row[0]) for row in results]
         paper = all_papers[0]
+    else:  # go back to the paper index page
+        return render(request, 'papers.html', {'papers': Paper.nodes.all(), 'num_papers': len(Paper.nodes.all())})
 
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
@@ -31,9 +31,51 @@ def paper_detail(request, id):
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
         num_comments = len(comments)
+    else:
+        comments = []
+        num_comments = 0
 
     request.session['last-viewed-paper'] = id
     return render(request, 'paper_detail.html', {'paper': paper, 'comments': comments, 'num_comments': num_comments})
+
+
+@login_required
+def paper_connect_venue(request, id):
+
+    if request.method == 'POST':
+        form = SearchVenuesForm(request.POST)
+        if form.is_valid():
+            # search the db for the venue
+            # if venue found, then link with paper and go back to paper view
+            # if not, ask the user to create a new venue
+            query = "MATCH (v:Venue {name: {venue_name}}) RETURN v"
+            results, meta = db.cypher_query(query, dict(venue_name=form.cleaned_data['venue_name']))
+            if len(results) > 0:
+                venues = [Venue.inflate(row[0]) for row in results]
+                venue = venues[0]
+                # retrieve the paper
+                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                results, meta = db.cypher_query(query, dict(id=id))
+                if len(results) > 0:
+                    all_papers = [Paper.inflate(row[0]) for row in results]
+                    paper = all_papers[0]
+                else:
+                    # should not get here since we started from the actual paper...but what if we do end up here?
+                    pass  # Should raise an exception but for now just pass
+                # we have a venue and a paper, so connect them.
+                paper.was_published_at.connect(venue)
+                paper.save()
+                return render(request, 'papers.html',
+                              {'papers': Paper.nodes.all(), 'num_papers': len(Paper.nodes.all())})
+
+            else:
+                # render new Venue form with the searched name as
+                pass
+
+    if request.method == 'GET':
+        form = SearchVenuesForm()
+
+    return render(request, 'paper_connect_venue.html', {'form': form})
 
 
 @login_required
@@ -253,6 +295,7 @@ def venue_create(request):
 
     return render(request, 'venue_form.html', {'form': form})
 
+
 @login_required
 def venue_update(request, id):
     # retrieve paper by ID
@@ -323,8 +366,8 @@ def comment_create(request):
     if len(results) > 0:
         all_papers = [Paper.inflate(row[0]) for row in results]
         paper = all_papers[0]
-    else:
-        pass  # Should probably redirect to an error page!
+    else:  # just send him to the list of papers
+        HttpResponseRedirect(reverse('papers_index'))
 
     if request.method == 'POST':
         comment = Comment()
@@ -335,7 +378,10 @@ def comment_create(request):
             # add link from new comment to paper
             form.save()
             comment.discusses.connect(paper)
-            return HttpResponseRedirect(reverse('comments_index'))
+            del request.session['last-viewed-paper']
+            return redirect('paper_detail', id=paper_id)
+            #return render(request, 'paper_detail.html', {'paper': paper})
+            # return HttpResponseRedirect(reverse('comments_index'))
     else:  # GET
         form = CommentForm()
 
@@ -360,7 +406,6 @@ def comment_update(request, id):
             comment.text = form.cleaned_data['text']
             # comment.author = form.cleaned_data['author']
             comment.save()
-
             return HttpResponseRedirect(reverse('comments_index'))
     # GET request
     else:
