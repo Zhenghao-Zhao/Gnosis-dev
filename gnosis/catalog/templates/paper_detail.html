@@ -3,10 +3,14 @@
 {% block content %}
 
 <h3>{{ paper.title }}</h3>
+<p>Download <a href= {{ paper.download_link }}><span class="glyphicon glyphicon-link"></span></a></p>
 
-<h5 class="text-right"><small>keywords:{{ paper.keywords }}</small></h5>
+<h5 class="text-right"><small>keywords: {{ paper.keywords }}</small></h5>
 
 <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
+{% if venue %}
+<p><small><strong>Venue:</strong> {{ venue }}</small></p>
+{% endif%}
 
 {% if user.is_authenticated %}
 <p><a href="{% url 'comment_create' %}">+ Comment&nbsp&nbsp&nbsp</a></p>

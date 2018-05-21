@@ -18,6 +18,7 @@ class Paper(DjangoNode):
     title = StringProperty(required=True)
     abstract = StringProperty(required=True)
     keywords = StringProperty(required=True)
+    download_link = StringProperty()
 
     # Links
     cites = RelationshipTo("Paper", "cites")
@@ -128,7 +129,7 @@ class Venue(DjangoNode):
         ordering = ['name', 'publisher', 'publication_date', 'type']
 
     def __str__(self):
-        return '{%s} by {%s} on {}'.format(self.name, self.publisher, self.publication_date)
+        return '{} by {} on {}'.format(self.name, self.publisher, self.publication_date)
 
     def get_absolute_url(self):
         return reverse('venue_detail', args=[self.id])

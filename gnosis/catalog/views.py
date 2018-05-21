@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
 from datetime import date
+from nltk.corpus import stopwords
 
 
 #
@@ -35,8 +36,19 @@ def paper_detail(request, id):
         comments = []
         num_comments = 0
 
+    # Retrieve venue where paper was published.
+    query = "MATCH (:Paper {title: {paper_title}})-->(v:Venue) RETURN v"
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    if len(results) > 0:
+        venues = [Venue.inflate(row[0]) for row in results]
+        venue = venues[0]
+    else:
+        venue = None
+
     request.session['last-viewed-paper'] = id
-    return render(request, 'paper_detail.html', {'paper': paper, 'comments': comments, 'num_comments': num_comments})
+    return render(request,
+                  'paper_detail.html',
+                  {'paper': paper, 'venue': venue, 'comments': comments, 'num_comments': num_comments})
 
 
 @login_required
@@ -48,18 +60,50 @@ def paper_connect_venue(request, id):
             # search the db for the venue
             # if venue found, then link with paper and go back to paper view
             # if not, ask the user to create a new venue
-            query = "MATCH (v:Venue {name: {venue_name}}) RETURN v"
-            results, meta = db.cypher_query(query, dict(venue_name=form.cleaned_data['venue_name']))
+            english_stopwords = stopwords.words('english')
+            venue_name = form.cleaned_data['venue_name'].lower()
+            venue_publication_year = form.cleaned_data['venue_publication_year']
+            # TO DO: should probably check that data is 4 digits...
+            venue_name_tokens = [w for w in venue_name.split(' ') if not w in english_stopwords]
+            venue_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in venue_name_tokens) + '+.*'
+            query = "MATCH (v:Venue) WHERE v.publication_date =~ '" + venue_publication_year[0:4] + \
+                    ".*' AND v.name =~ { venue_query } RETURN v"
+            results, meta = db.cypher_query(query, dict(venue_publication_year=venue_publication_year[0:4],
+                                                        venue_query=venue_query))
             if len(results) > 0:
                 venues = [Venue.inflate(row[0]) for row in results]
-                venue = venues[0]
+                print("Found {} venues that match".format(len(venues)))
+                for v in venues:
+                    print("\t{}".format(v))
+
+                if len(results) > 1:
+                    # ask the user to select one of them
+                    return render(request, 'paper_connect_venue.html', {'form': form,
+                                                                        'venues': venues,
+                                                                        'message': 'Found more than one matching venues. Please narrow your search'})
+                else:
+                    venue = venues[0]
+                    print('Selected Venue: {}'.format(venue))
+
                 # retrieve the paper
                 query = "MATCH (a) WHERE ID(a)={id} RETURN a"
                 results, meta = db.cypher_query(query, dict(id=id))
                 if len(results) > 0:
                     all_papers = [Paper.inflate(row[0]) for row in results]
                     paper = all_papers[0]
+                    print("Found paper: {}".format(paper.title))
+                    # check if the paper is connect with a venue; if yes, the remove link to
+                    # venue before adding link to the new venue
+                    query = 'MATCH (p:Paper)-[r:was_published_at]->(v:Venue) where id(p)={id} return v'
+                    results, meta = db.cypher_query(query, dict(id=id))
+                    if len(results) > 0:
+                        venues = [Venue.inflate(row[0]) for row in results]
+                        for v in venues:
+                            print("Disconnecting from: {}".format(v))
+                            paper.was_published_at.disconnect(v)
+                            paper.save()
                 else:
+                    print("Could not find paper!")
                     # should not get here since we started from the actual paper...but what if we do end up here?
                     pass  # Should raise an exception but for now just pass
                 # we have a venue and a paper, so connect them.
@@ -70,12 +114,13 @@ def paper_connect_venue(request, id):
 
             else:
                 # render new Venue form with the searched name as
-                pass
+                message = 'No matching venues found'
 
     if request.method == 'GET':
         form = SearchVenuesForm()
+        message = None
 
-    return render(request, 'paper_connect_venue.html', {'form': form})
+    return render(request, 'paper_connect_venue.html', {'form': form, 'venues': None, 'message': message})
 
 
 @login_required
@@ -97,6 +142,8 @@ def paper_update(request, id):
         if form.is_valid():
             paper_inst.title = form.cleaned_data['title']
             paper_inst.abstract = form.cleaned_data['abstract']
+            paper_inst.keywords = form.cleaned_data['keywords']
+            paper_inst.download_link = form.cleaned_data['download_link']
             paper_inst.save()
 
             return HttpResponseRedirect(reverse('papers_index'))
@@ -110,7 +157,10 @@ def paper_update(request, id):
         else:
             paper_inst = Paper()
         # paper_inst = Paper()
-        form = PaperForm(initial={'title': paper_inst.title, 'abstract': paper_inst.abstract, })
+        form = PaperForm(initial={'title': paper_inst.title,
+                                  'abstract': paper_inst.abstract,
+                                  'keywords': paper_inst.keywords,
+                                  'download_link': paper_inst.download_link, })
 
     return render(request, 'paper_update.html', {'form': form, 'paper': paper_inst})
 

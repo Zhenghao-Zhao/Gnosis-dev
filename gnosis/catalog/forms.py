@@ -11,7 +11,11 @@ class SearchVenuesForm(Form):
     def clean_venue_name(self):
         return self.cleaned_data['venue_name']
 
+    def clean_venue_publication_year(self):
+        return self.cleaned_data['venue_publication_year']
+
     venue_name = forms.CharField(required=True)
+    venue_publication_year = forms.CharField(required=True)
 
 
 #
@@ -33,9 +37,12 @@ class PaperForm(ModelForm):
     def clean_keywords(self):
         return self.cleaned_data['keywords']
 
+    def clean_download_link(self):
+        return self.cleaned_data['download_link']
+
     class Meta:
         model = Paper
-        fields = ['title', 'abstract', 'keywords']
+        fields = ['title', 'abstract', 'keywords', 'download_link']
 
 
 class PersonForm(ModelForm):
