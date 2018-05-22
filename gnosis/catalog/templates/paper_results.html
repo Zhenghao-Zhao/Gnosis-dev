@@ -1,0 +1,13 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<h4>Papers that match your query</h4>
+<ul>
+{% for paper in papers %}
+    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
+{% endfor %}
+</ul>
+<p><a href="{% url 'home' %}">Home</a> | <a href="{% url 'papers_index' %}">Papers</a> | <a href="{% url 'venues_index' %}">Venues</a></p>
+
+{% endblock %}

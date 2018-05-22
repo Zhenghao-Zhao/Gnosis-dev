@@ -18,6 +18,14 @@ class SearchVenuesForm(Form):
     venue_publication_year = forms.CharField(required=True)
 
 
+class SearchPapersForm(Form):
+
+    def clean_paper_title(self):
+        return self.cleaned_data['paper_title']
+
+    paper_title = forms.CharField(required=True)
+
+
 #
 # Model forms
 #

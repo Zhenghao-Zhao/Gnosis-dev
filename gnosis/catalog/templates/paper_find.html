@@ -1,0 +1,12 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+<h4>Find a paper</h4>
+
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+
+</form>
+{% endblock %}

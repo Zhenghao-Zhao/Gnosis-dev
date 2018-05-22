@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm, SearchPapersForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -49,6 +49,30 @@ def paper_detail(request, id):
     return render(request,
                   'paper_detail.html',
                   {'paper': paper, 'venue': venue, 'comments': comments, 'num_comments': num_comments})
+
+
+def paper_find(request):
+    if request.method == 'POST':
+        form = SearchPapersForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+            english_stopwords = stopwords.words('english')
+            paper_title = form.cleaned_data['paper_title'].lower()
+            paper_title_tokens = [w for w in paper_title.split(' ') if not w in english_stopwords]
+            paper_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in paper_title_tokens) + '+.*'
+            query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
+            print("Cypher query string {}".format(query))
+            results, meta = db.cypher_query(query, dict( paper_query=paper_query))
+            if len(results) > 0:
+                print("Found {} matching papers".format(len(results)))
+                papers = [Paper.inflate(row[0]) for row in results]
+                return render(request, 'paper_results.html', {'papers': papers})
+
+    elif request.method == 'GET':
+        print("Received GET request")
+        form = SearchPapersForm()
+
+    return render(request, 'paper_find.html', {'form': form})
 
 
 @login_required
