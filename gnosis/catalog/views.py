@@ -52,6 +52,7 @@ def paper_detail(request, id):
 
 
 def paper_find(request):
+    message = None
     if request.method == 'POST':
         form = SearchPapersForm(request.POST)
         print("Received POST request")
@@ -67,12 +68,14 @@ def paper_find(request):
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
                 return render(request, 'paper_results.html', {'papers': papers})
+            else:
+                message = "No results found. Please try again!"
 
     elif request.method == 'GET':
         print("Received GET request")
         form = SearchPapersForm()
 
-    return render(request, 'paper_find.html', {'form': form})
+    return render(request, 'paper_find.html', {'form': form, 'message': message})
 
 
 @login_required

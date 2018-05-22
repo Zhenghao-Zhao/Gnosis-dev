@@ -8,6 +8,11 @@ from .models import Paper, Person, Dataset, Venue, Comment
 #
 class SearchVenuesForm(Form):
 
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
     def clean_venue_name(self):
         return self.cleaned_data['venue_name']
 
@@ -20,11 +25,16 @@ class SearchVenuesForm(Form):
 
 class SearchPapersForm(Form):
 
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
     def clean_paper_title(self):
         return self.cleaned_data['paper_title']
 
     paper_title = forms.CharField(required=True)
-
+    
 
 #
 # Model forms
