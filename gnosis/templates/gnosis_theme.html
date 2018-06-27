@@ -82,11 +82,13 @@
         <a href="{% url 'venues_index' %}" class="list-group-item">Venues</a>
         <a href="{% url 'datasets_index' %}" class="list-group-item">Datasets</a>
       </div>
+      {% if user.is_authenticated %}
       <hr>
       <p><a href="{% url 'paper_create' %}">+ Paper&nbsp&nbsp</a></p>
       <p><a href="{% url 'person_create' %}">+ Person&nbsp</a></p>
       <p><a href="{% url 'dataset_create' %}">+ Dataset</a></p>
       <p><a href="{% url 'venue_create' %}">+ Venue&nbsp&nbsp&nbsp</a></p>
+      {% endif %}
     </div>
     <div class="col-sm-8 text-left">
         {% block content %}

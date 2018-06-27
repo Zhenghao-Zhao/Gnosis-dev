@@ -34,7 +34,7 @@ class SearchPapersForm(Form):
         return self.cleaned_data['paper_title']
 
     paper_title = forms.CharField(required=True)
-    
+
 
 #
 # Model forms
