@@ -216,7 +216,29 @@ def persons(request):
 
 
 def person_detail(request, id):
-    return render(request, 'person_detail.html', {'person': Person.nodes.all()})
+
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        # There should be only one results because ID should be unique. Here we check that at
+        # least one result has been returned and take the first result as the correct match.
+        # Now, it should not happen that len(results) > 1 since IDs are meant to be unique.
+        # For the MVP we are going to ignore the latter case and just continue but ultimately,
+        # we should be checking for > 1 and failing gracefully.
+        all_people = [Person.inflate(row[0]) for row in results]
+        person = all_people[0]
+    else:  # go back to the paper index page
+        return render(request, 'people.html', {'people': Person.nodes.all(), 'num_people': len(Person.nodes.all())})
+
+    #
+    # TO DO: Retrieve all papers co-authored by this person and list them; same for
+    # co-authors and advisees.
+    #
+    request.session['last-viewed-person'] = id
+    return render(request,
+                  'person_detail.html',
+                  {'person': person})
 
 
 @login_required

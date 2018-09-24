@@ -2,11 +2,16 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
-<p>!! You have Permission !!</p>
-{% else %}
-<p>No permission</p>
+<h3>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</h3>
+
+{% if person.website %}
+<p>Website <a href= {{ person.website }}><span class="glyphicon glyphicon-link"></span></a></p>
 {% endif %}
-<p>Person Detail</p>
+
+{% if person.affiliation %}
+<h4 class="text-right"><small>Affiliation: {{ person.affiliation }}</small></h4>
+{% else %}
+<h4 class="text-right"><small>Affiliation: Unknown</small></h4>
+{% endif %}
 
 {% endblock %}
