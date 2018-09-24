@@ -216,7 +216,6 @@ def persons(request):
 
 
 def person_detail(request, id):
-
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -327,6 +326,7 @@ def dataset_create(request):
 
     return render(request, 'dataset_form.html', {'form': form})
 
+
 @login_required
 def dataset_update(request, id):
     # retrieve paper by ID
@@ -375,8 +375,27 @@ def venues(request):
 
 
 def venue_detail(request, id):
-    return render(request, 'venue_detail.html', {'venue': Venue.nodes.all()})
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        # There should be only one results because ID should be unique. Here we check that at
+        # least one result has been returned and take the first result as the correct match.
+        # Now, it should not happen that len(results) > 1 since IDs are meant to be unique.
+        # For the MVP we are going to ignore the latter case and just continue but ultimately,
+        # we should be checking for > 1 and failing gracefully.
+        all_venues = [Venue.inflate(row[0]) for row in results]
+        venue = all_venues[0]
+    else:  # go back to the paper index page
+        return render(request, 'venues.html', {'venues': Venue.nodes.all(), 'num_venues': len(Venue.nodes.all())})
 
+    #
+    # TO DO: Retrieve all papers published at this venue and list them
+    #
+    request.session['last-viewed-venue'] = id
+    return render(request,
+                  'venue_detail.html',
+                  {'venue': venue})
 
 @login_required
 def venue_create(request):
