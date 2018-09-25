@@ -2,11 +2,18 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
-<p>!! You have Permission !!</p>
-{% else %}
-<p>No permission</p>
+
+<h3>{{ dataset.name}}</h3>
+
+{% if dataset.website %}
+<p>Download <a href= {{ dataset.website }}><span class="glyphicon glyphicon-link"></span></a></p>
 {% endif %}
-<p>Dataset Detail</p>
+
+<h4 class="text-right"><small>Keywords: {{ dataset.keywords }}</small></h4>
+<h4 class="text-right"><small>Publication Date: {{ dataset.publication_date }}</small></h4>
+
+<p><strong>Description:</strong> {{ dataset.description }}</p>
+
+<p>Type: {{dataset.source_type}}</p>
 
 {% endblock %}

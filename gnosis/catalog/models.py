@@ -79,6 +79,13 @@ class Dataset(DjangoNode):
 
     # These are always required
     name = StringProperty(required=True)
+    # keywords that describe the dataset
+    keywords = StringProperty(required=True)
+    # A brief description of the dataset
+    description = StringProperty(required=True)
+    # The date of publication.
+    publication_date = DateProperty(required=True)
+
     # data_types = {'N': 'Network', 'I': 'Image(s)', 'V': 'Video(s)', 'M': 'Mix'}
     data_types = (('N', 'Network'),
                   ('I', 'Image(s)'),
@@ -86,6 +93,12 @@ class Dataset(DjangoNode):
                   ('M', 'Mix'),)
     source_type = StringProperty(choices=data_types)
     website = StringProperty()
+
+    # We should be able to link a dataset to a paper if the dataset was
+    # published as part of the evaluation for a new algorithm. We note
+    # that the Paper model already includes a link of type 'published'
+    # so a dataset list or detail view should provide a link to add a
+    # 'published' edge between a dataset and a paper.
 
     class Meta:
         app_label = 'catalog'

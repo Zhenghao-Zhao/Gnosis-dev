@@ -90,15 +90,24 @@ class DatasetForm(ModelForm):
     def clean_name(self):
         return self.cleaned_data['name']
 
+    def clean_keywords(self):
+        return self.cleaned_data['keywords']
+
+    def clean_description(self):
+        return self.cleaned_data['description']
+
     def clean_source_type(self):
         return self.cleaned_data['source_type']
+
+    def clean_publication_date(self):
+        return self.cleaned_data['publication_date']
 
     def clean_website(self):
         return self.cleaned_data['website']
 
     class Meta:
         model = Dataset
-        fields = ['name', 'source_type', 'website']
+        fields = ['name', 'keywords', 'description', 'source_type', 'publication_date', 'website']
 
 
 class VenueForm(ModelForm):

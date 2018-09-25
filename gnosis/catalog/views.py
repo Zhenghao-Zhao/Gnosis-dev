@@ -299,6 +299,7 @@ def person_update(request, id):
 
     return render(request, 'person_update.html', {'form': form, 'person': person_inst})
 
+
 #
 # Dataset Views
 #
@@ -307,7 +308,31 @@ def datasets(request):
 
 
 def dataset_detail(request, id):
-    return render(request, 'dataset_detail.html', {'dataset': Dataset.nodes.all()})
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        # There should be only one results because ID should be unique. Here we check that at
+        # least one result has been returned and take the first result as the correct match.
+        # Now, it should not happen that len(results) > 1 since IDs are meant to be unique.
+        # For the MVP we are going to ignore the latter case and just continue but ultimately,
+        # we should be checking for > 1 and failing gracefully.
+        all_datasets = [Dataset.inflate(row[0]) for row in results]
+        dataset = all_datasets[0]
+    else:  # go back to the paper index page
+        return render(request, 'datasets.html',
+                      {'datasets': Dataset.nodes.all(), 'num_datasets': len(Dataset.nodes.all())})
+
+    #
+    # TO DO: Retrieve and list all papers that evaluate on this dataset.
+    #
+
+    request.session['last-viewed-dataset'] = id
+
+    return render(request,
+                  'dataset_detail.html',
+                  {'dataset': dataset})
+
 
 
 @login_required
@@ -344,6 +369,9 @@ def dataset_update(request, id):
         form = DatasetForm(request.POST)
         if form.is_valid():
             dataset.name = form.cleaned_data['name']
+            dataset.keywords = form.cleaned_data['keywords']
+            dataset.description = form.cleaned_data['description']
+            dataset.publication_date = form.cleaned_data['publication_date']
             dataset.source_type = form.cleaned_data['source_type']
             dataset.website = form.cleaned_data['website']
             dataset.save()
@@ -359,6 +387,9 @@ def dataset_update(request, id):
         else:
             dataset = Dataset()
         form = DatasetForm(initial={'name': dataset.name,
+                                    'keywords': dataset.keywords,
+                                    'description': dataset.description,
+                                    'publication_date': dataset.publication_date,
                                     'source_type': dataset.source_type,
                                     'website': dataset.website,
                                     }
@@ -392,10 +423,12 @@ def venue_detail(request, id):
     #
     # TO DO: Retrieve all papers published at this venue and list them
     #
+
     request.session['last-viewed-venue'] = id
     return render(request,
                   'venue_detail.html',
                   {'venue': venue})
+
 
 @login_required
 def venue_create(request):
@@ -504,6 +537,7 @@ def comment_create(request):
         form = CommentForm()
 
     return render(request, 'comment_form.html', {'form': form})
+
 
 @login_required
 def comment_update(request, id):
