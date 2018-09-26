@@ -43,6 +43,15 @@ class PaperForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
+
+        self.fields['abstract'].widget = forms.Textarea()
+        self.fields['abstract'].widget.attrs.update({'rows': '8'})
+
+        self.fields['title'].label = 'Title'
+        self.fields['abstract'].label = 'Abstract'
+        self.fields['keywords'].label = 'Keywords'
+        self.fields['download_link'].label = 'Download Link'
+
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
 
@@ -65,6 +74,20 @@ class PaperForm(ModelForm):
 
 class PersonForm(ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        self.fields['first_name'].label = 'First Name'
+        self.fields['middle_name'].label = 'Middle Name'
+        self.fields['last_name'].label = 'Last Name'
+        self.fields['affiliation'].label = 'Affiliation'
+        self.fields['website'].label = 'Website'
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            visible.field.widget.attrs.update({'style': 'width:25em'})
+            print(visible.field.widget.attrs.items())
+
     def clean_first_name(self):
         return self.cleaned_data['first_name']
 
@@ -86,6 +109,27 @@ class PersonForm(ModelForm):
 
 
 class DatasetForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields['description'].widget = forms.Textarea()
+        self.fields['description'].widget.attrs.update({'rows': '5'})
+
+        self.fields['name'].label = 'Name'
+        self.fields['keywords'].label = 'Keywords'
+        self.fields['description'].label = 'Description'
+        self.fields['source_type'].label = 'Type'
+        self.fields['publication_date'].label = 'Publication Date'
+        self.fields['website'].label = 'Website'
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            visible.field.widget.attrs.update({'style': 'width:25em'})
+
+        print(type(self.fields['description'].widget))
+        print(self.fields['description'].widget.attrs.items())
 
     def clean_name(self):
         return self.cleaned_data['name']
@@ -111,6 +155,24 @@ class DatasetForm(ModelForm):
 
 
 class VenueForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        self.fields['name'].label = 'Name'
+        self.fields['publisher'].label = 'Publisher'
+        self.fields['publication_date'].label = 'Publication Date'
+        self.fields['type'].label = 'Type'
+        self.fields['peer_reviewed'].label = 'Peer Reviewed'
+        self.fields['keywords'].label = 'Keywords'
+        self.fields['website'].label = 'Website'
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            visible.field.widget.attrs.update({'style': 'width:25em'})
+            print(visible.field.widget.attrs.items())
+
+
 
     def clean_name(self):
         return self.cleaned_data['name']
@@ -139,6 +201,18 @@ class VenueForm(ModelForm):
 
 
 class CommentForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        self.fields['text'].widget = forms.Textarea()
+        self.fields['text'].widget.attrs.update({'rows': '5'})
+        self.fields['text'].label = ''
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            visible.field.widget.attrs.update({'style': 'width:25em'})
+            print(visible.field.widget.attrs.items())
 
     def clean_text(self):
         return self.cleaned_data['text']

@@ -256,6 +256,7 @@ def person_create(request):
 
     return render(request, 'person_form.html', {'form': form})
 
+
 @login_required
 def person_update(request, id):
     # retrieve paper by ID
@@ -498,12 +499,30 @@ def venue_update(request, id):
 #
 # Comment Views
 #
+@login_required
 def comments(request):
-    return render(request, 'comments.html', {'comments': Comment.nodes.all(), 'num_comments': len(Comment.nodes.all())})
+    """
+    We should only show the list of comments if the user is admin. Otherwise, the user should
+    be redirected to the home page.
+    :param request:
+    :return:
+    """
+    # Only superusers can view all the comments
+    if request.user.is_superuser:
+        return render(request, 'comments.html', {'comments': Comment.nodes.all(), 'num_comments': len(Comment.nodes.all())})
+    else:
+        # other users are sent back to the paper index
+        return HttpResponseRedirect(reverse('papers_index'))
 
 
+@login_required
 def comment_detail(request, id):
-    return render(request, 'comment_detail.html', {'comment': Comment.nodes.all()})
+    # Only superusers can view comment details.
+    if request.user.is_superuser:
+        return render(request, 'comment_detail.html', {'comment': Comment.nodes.all()})
+    else:
+        # other users are sent back to the papers index
+        return HttpResponseRedirect(reverse('papers_index'))
 
 
 @login_required
@@ -531,8 +550,6 @@ def comment_create(request):
             comment.discusses.connect(paper)
             del request.session['last-viewed-paper']
             return redirect('paper_detail', id=paper_id)
-            #return render(request, 'paper_detail.html', {'paper': paper})
-            # return HttpResponseRedirect(reverse('comments_index'))
     else:  # GET
         form = CommentForm()
 
@@ -551,6 +568,9 @@ def comment_update(request, id):
     else:
         comment = Comment()
 
+    # Retrieve paper using paper id
+    paper_id = request.session['last-viewed-paper']
+
     # if this is POST request then process the Form data
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -558,7 +578,10 @@ def comment_update(request, id):
             comment.text = form.cleaned_data['text']
             # comment.author = form.cleaned_data['author']
             comment.save()
-            return HttpResponseRedirect(reverse('comments_index'))
+            # return HttpResponseRedirect(reverse('comments_index'))
+            del request.session['last-viewed-paper']
+            return redirect('paper_detail', id=paper_id)
+
     # GET request
     else:
         query = "MATCH (a) WHERE ID(a)={id} RETURN a"
@@ -577,7 +600,6 @@ def comment_update(request, id):
                                     'publication_date': comment.publication_date,
                                     }
                            )
-
 
     return render(request, 'comment_update.html', {'form': form, 'comment': comment})
 
