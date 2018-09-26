@@ -9,11 +9,11 @@
 </a>
 </p>
 
-{% for paper, authors in papers %}
+{% for paper, authors, venue in papers %}
 <div class="well well-sm">
     <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
-    {{ authors }}
-    <h6 class="text-right">keywords: {{ paper.keywords }}</h6>
+    <p>{{ authors }}</p>
+    <p>{{ venue }}</p>
     {{ paper.abstract|truncatewords:50 }}
 </div>
 {% endfor %}

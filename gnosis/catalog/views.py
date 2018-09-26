@@ -9,19 +9,35 @@ from datetime import date
 from nltk.corpus import stopwords
 import pdb
 
+
 #
 # Paper Views
 #
 def get_paper_authors(paper):
-    # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(a:Person) RETURN a"
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
     if len(results) > 0:
         authors = [Person.inflate(row[0]) for row in results]
     else:
-        authors = None
-    # only returns the last name
-    return [author.last_name for author in authors]
+        authors = []
+    # pdb.set_trace()
+    authors = ['{}. {}'.format(author.first_name[0], author.last_name) for author in authors]
+
+    return authors
+
+
+def get_paper_venue(paper):
+    query = "MATCH (:Paper {title: {paper_title}})--(v:Venue) RETURN v"
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    if len(results) == 1:  # there should only be one venue associated with a paper
+        venue = [Venue.inflate(row[0]) for row in results][0]
+    else:
+        venue = None
+    # pdb.set_trace()
+    if venue is not None:
+        return '{}, {}'.format(venue.name, venue.publication_date)
+    else:
+        return ''
 
 
 def papers(request):
@@ -32,23 +48,14 @@ def papers(request):
     # the DB grows large.
     all_papers = Paper.nodes.order_by('-created')[:10]
     # Retrieve all comments about this paper.
-    all_authors = []
-    for paper in all_papers:
-        query = "MATCH (:Paper {title: {paper_title}})<--(a:Person) RETURN a"
-        results, meta = db.cypher_query(query, dict(paper_title=paper.title))
-        if len(results) > 0:
-            authors = [Person.inflate(row[0]) for row in results]
-        else:
-            authors = []
-        # pdb.set_trace()
-        authors = ['{}. {}'.format(author.first_name[0], author.last_name) for author in authors]
-        all_authors.append(', '.join(authors))
+    all_authors = [', '.join(get_paper_authors(paper)) for paper in all_papers]
+    all_venues = [get_paper_venue(paper) for paper in all_papers]
 
-    papers_and_authors = zip(all_papers, all_authors)
+    papers = zip(all_papers, all_authors, all_venues)
 
     return render(request,
                   'papers.html',
-                  {'papers': papers_and_authors,
+                  {'papers': papers,
                    'num_papers': len(Paper.nodes.all())})
 
 
