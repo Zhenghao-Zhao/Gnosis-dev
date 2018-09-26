@@ -7,13 +7,49 @@ from django.http import HttpResponseRedirect
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
-
+import pdb
 
 #
 # Paper Views
 #
+def get_paper_authors(paper):
+    # Retrieve all comments about this paper.
+    query = "MATCH (:Paper {title: {paper_title}})<--(a:Person) RETURN a"
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    if len(results) > 0:
+        authors = [Person.inflate(row[0]) for row in results]
+    else:
+        authors = None
+    # only returns the last name
+    return [author.last_name for author in authors]
+
+
 def papers(request):
-    return render(request, 'papers.html', {'papers': Paper.nodes.all(), 'num_papers': len(Paper.nodes.all())})
+    # Retrieve the papers ordered by newest addition to DB first.
+    # limit to maximum 10 papers until we get pagination to work.
+    # However, even with pagination, we are going to want to limit
+    # the number of papers retrieved for speed, especially when the
+    # the DB grows large.
+    all_papers = Paper.nodes.order_by('-created')[:10]
+    # Retrieve all comments about this paper.
+    all_authors = []
+    for paper in all_papers:
+        query = "MATCH (:Paper {title: {paper_title}})<--(a:Person) RETURN a"
+        results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+        if len(results) > 0:
+            authors = [Person.inflate(row[0]) for row in results]
+        else:
+            authors = []
+        # pdb.set_trace()
+        authors = ['{}. {}'.format(author.first_name[0], author.last_name) for author in authors]
+        all_authors.append(', '.join(authors))
+
+    papers_and_authors = zip(all_papers, all_authors)
+
+    return render(request,
+                  'papers.html',
+                  {'papers': papers_and_authors,
+                   'num_papers': len(Paper.nodes.all())})
 
 
 def paper_detail(request, id):
@@ -190,6 +226,7 @@ def paper_update(request, id):
                                   'download_link': paper_inst.download_link, })
 
     return render(request, 'paper_update.html', {'form': form, 'paper': paper_inst})
+
 
 @login_required
 def paper_create(request):

@@ -1,15 +1,21 @@
 {% extends "gnosis_theme.html" %}
-
 {% block content %}
 
-<h2>Papers in our DB</h2>
-<ul>
-    {% for paper in papers %}
-    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
-        {% if user.is_authenticated %} || Connect with: <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> | <a href="{% url 'paper_update' paper.id %}">Edit</a>{% endif %}</li>
-    {% endfor %}
-</ul>
-<p>Number of papers {{ num_papers }}</p>
-<p><a href="{% url 'paper_find' %}">Search</a> | <a href="{% url 'home' %}">Home</a></p>
+<p class="text-right">Number of papers in Gnosis {{ num_papers }}</p>
+
+<p>
+<a href="{% url 'paper_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Papers
+</a>
+</p>
+
+{% for paper, authors in papers %}
+<div class="well well-sm">
+    <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
+    {{ authors }}
+    <h6 class="text-right">keywords: {{ paper.keywords }}</h6>
+    {{ paper.abstract|truncatewords:50 }}
+</div>
+{% endfor %}
 
 {% endblock %}

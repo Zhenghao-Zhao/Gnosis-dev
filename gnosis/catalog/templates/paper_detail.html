@@ -3,21 +3,31 @@
 {% block content %}
 
 <h3>{{ paper.title }}</h3>
-<p>Download <a href= {{ paper.download_link }}><span class="glyphicon glyphicon-link"></span></a></p>
 
-<h5 class="text-right"><small>keywords: {{ paper.keywords }}</small></h5>
+<h4>
+    <a href= {{ paper.download_link }}><span class="glyphicon glyphicon-cloud-download"></span></a>
+    {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}">
+        <span class="glyphicon glyphicon-edit"></span></a>
+    {% endif %}
+</h4>
+
+<h5 class="text-right">
+    <small>keywords: {{ paper.keywords }}</small>
+</h5>
 
 <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
 {% if venue %}
 <p><small><strong>Venue:</strong> {{ venue }}</small></p>
 {% endif%}
 
-{% if user.is_authenticated %}
-<p><a href="{% url 'comment_create' %}">+ Comment&nbsp&nbsp&nbsp</a></p>
+
+<h4 class="text-right">{% if user.is_authenticated %} Connect with: <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a>{% endif %}</h4>
+
+<p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info btn-md">
+    <span class="glyphicon glyphicon-plus"></span> Comment</a></p>
 {% else %}
 <p><a href="{% url 'login' %}?next={{request.path}}">Login</a> to comment</p>
 {% endif %}
-
 {% if num_comments > 0 %}
 <h3>{{ num_comments }} Comments</h3>
 {% for comment in comments %}
