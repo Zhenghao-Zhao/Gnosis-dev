@@ -4,11 +4,22 @@
 
 <h4 class="text-right">Number of people in Gnosis {{ num_people }}</h4>
 
+{% load el_pagination_tags %}
+
+{% paginate people %}
+
 {% for person in people %}
 <div class="well well-sm">
     <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name }}</a></p>
     {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
 </div>
 {% endfor %}
+
+{% get_pages %}
+Showing entries
+{{ pages.current_start_index }}-{{ pages.current_end_index }} of
+{{ pages.total_count }}.
+{# Just print pages to render the Digg-style pagination. #}
+{{ pages.get_rendered }}
 
 {% endblock %}
