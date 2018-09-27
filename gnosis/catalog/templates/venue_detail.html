@@ -3,15 +3,28 @@
 {% block content %}
 
 
-<h3>{{ venue.name}}</h3>
+<div class="well well-sm">
+<h3>
+    <p>{{ venue.name}}</p>
+    {% if user.is_authenticated %}
+        {% if user.is_superuser or user.id == venue.created_by %}
+        <p><small>
+            <a href="{% url 'venue_update' venue.id %}">
+            <span class="glyphicon glyphicon-edit"></span>
+            </a>
+        </small></p>
+        {% endif %}
+    {% endif %}
+</h3>
+</div>
 
 {% if venue.website %}
 <p>Website <a href= {{ venue.website }}><span class="glyphicon glyphicon-link"></span></a></p>
 {% endif %}
 
-<h4 class="text-right"><small>Publication Date: {{ venue.publication_date }}</small></h4>
+<p>Publication Date: {{ venue.publication_date }}</p>
 {% if venue.keywords %}
-<h4 class="text-right"><small>Keywords: {{ venue.keywords }}</small></h4>
+<p>Keywords: {{ venue.keywords }}</p>
 {% endif %}
 
 <p>Publisher: {{venue.publisher}}</p>
