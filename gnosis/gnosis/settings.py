@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_neomodel',
+    'el_pagination',
     'catalog.apps.CatalogConfig',
     'home.apps.HomeConfig',
 ]
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request', ## For EL-pagination
             ],
         },
     },
@@ -75,6 +77,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gnosis.wsgi.application'
 
+# Increase this number when in production.
+EL_PAGINATION_PER_PAGE = 3
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases

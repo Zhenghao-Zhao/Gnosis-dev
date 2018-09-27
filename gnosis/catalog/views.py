@@ -51,11 +51,12 @@ def papers(request):
     all_authors = [', '.join(get_paper_authors(paper)) for paper in all_papers]
     all_venues = [get_paper_venue(paper) for paper in all_papers]
 
-    papers = zip(all_papers, all_authors, all_venues)
+    papers = list(zip(all_papers, all_authors, all_venues))
 
     return render(request,
                   'papers.html',
                   {'papers': papers,
+                   'papers_only': all_papers,
                    'num_papers': len(Paper.nodes.all())})
 
 
