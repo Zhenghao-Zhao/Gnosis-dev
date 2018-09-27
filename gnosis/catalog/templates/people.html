@@ -2,14 +2,13 @@
 
 {% block content %}
 
-<h2>People in our DB</h2>
-<ul>
+<h4 class="text-right">Number of people in Gnosis {{ num_people }}</h4>
+
 {% for person in people %}
-    <li><a href="{{ person.get_absolute_url }}">{{ person.last_name }}</a>
-        {% if user.is_authenticated %}|| <a href="{% url 'person_update' person.id %}">Edit</a>{% endif %}</li>
+<div class="well well-sm">
+    <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name }}</a></p>
+    {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
+</div>
 {% endfor %}
-</ul>
-<p>Number of people {{ num_people }}</p>
-<p><a href="{% url 'home' %}">Home</a></p>
 
 {% endblock %}
