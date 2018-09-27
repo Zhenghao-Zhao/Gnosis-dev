@@ -379,7 +379,6 @@ def dataset_detail(request, id):
                   {'dataset': dataset})
 
 
-
 @login_required
 def dataset_create(request):
     user = request.user
@@ -447,7 +446,8 @@ def dataset_update(request, id):
 # Venue Views
 #
 def venues(request):
-    return render(request, 'venues.html', {'venues': Venue.nodes.all(), 'num_venues': len(Venue.nodes.all())})
+    all_venues = Venue.nodes.order_by('-publication_date')[: 10]
+    return render(request, 'venues.html', {'venues': all_venues})
 
 
 def venue_detail(request, id):

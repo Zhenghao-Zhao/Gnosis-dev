@@ -2,13 +2,12 @@
 
 {% block content %}
 
-<h2>Venues in our DB</h2>
-<ul>
+<p></p>
 {% for venue in venues %}
-    <li><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a>
-        {% if user.is_authenticated %}|| <a href="{% url 'venue_update' venue.id %}">Edit</a>{% endif %}</li>
+<div class="well well-sm">
+    <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
+    <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
+</div>
 {% endfor %}
-</ul>
-<p>Number of venues {{ num_venues }}</p>
 
 {% endblock %}
