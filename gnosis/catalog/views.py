@@ -349,7 +349,8 @@ def person_update(request, id):
 # Dataset Views
 #
 def datasets(request):
-    return render(request, 'datasets.html', {'datasets': Dataset.nodes.all(), 'num_datasets': len(Dataset.nodes.all())})
+    all_datasets = Dataset.nodes.order_by('-publication_date')[:10]
+    return render(request, 'datasets.html', {'datasets': all_datasets})
 
 
 def dataset_detail(request, id):
