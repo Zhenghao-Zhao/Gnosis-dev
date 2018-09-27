@@ -2,16 +2,27 @@
 
 {% block content %}
 
-<h3>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</h3>
+<div class="well well-sm">
+<h3>
+    <p>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</p>
+    {% if user.is_authenticated %}
+        {% if user.is_superuser or user.id == person.created_by %}
+        <p><a href="{% url 'person_update' person.id %}">
+            <span class="glyphicon glyphicon-edit"></span>
+        </a></p>
+        {% endif %}
+    {% endif %}
+</h3>
+</div>
 
 {% if person.website %}
-<p>Website <a href= {{ person.website }}><span class="glyphicon glyphicon-link"></span></a></p>
+<p>Website: <a href= {{ person.website }}><span class="glyphicon glyphicon-link"></span></a></p>
 {% endif %}
 
 {% if person.affiliation %}
-<h4 class="text-right"><small>Affiliation: {{ person.affiliation }}</small></h4>
+<p>Affiliation: {{ person.affiliation }}</p>
 {% else %}
-<h4 class="text-right"><small>Affiliation: Unknown</small></h4>
+<p>Affiliation: Unknown</p>
 {% endif %}
 
 {% endblock %}
