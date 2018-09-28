@@ -2,7 +2,12 @@
 
 {% block content %}
 
-<h4 class="text-right">Number of people in Gnosis {{ num_people }}</h4>
+<p></p>
+<p>
+<a href="{% url 'person_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search People
+</a>
+</p>
 
 {% load el_pagination_tags %}
 

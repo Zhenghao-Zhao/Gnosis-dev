@@ -36,6 +36,19 @@ class SearchPapersForm(Form):
     paper_title = forms.CharField(required=True)
 
 
+class SearchPeopleForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
+    def clean_person_name(self):
+        return self.cleaned_data['person_name']
+
+    person_name = forms.CharField(required=True)
+
+
 #
 # Model forms
 #

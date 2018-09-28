@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm, SearchPapersForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm, SearchPapersForm, SearchPeopleForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -253,6 +253,36 @@ def paper_create(request):
     return render(request, 'paper_form.html', {'form': form})
 
 
+def person_find(request):
+    """
+    Searching for a person in the DB.
+
+    :param request:
+    :return:
+    """
+    message = None
+    if request.method == 'POST':
+        form = SearchPeopleForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+            person_name = form.cleaned_data['person_name'].lower()
+            person_name_tokens = [w for w in person_name.split()]
+            query = "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } OR LOWER(p.first_name) IN { person_tokens } OR LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20"
+            results, meta = db.cypher_query(query, dict(person_tokens=person_name_tokens))
+            if len(results) > 0:
+                print("Found {} matching people".format(len(results)))
+                people = [Person.inflate(row[0]) for row in results]
+                return render(request, 'people.html', {'people': people})
+            else:
+                message = "No results found. Please try again!"
+
+    elif request.method == 'GET':
+        print("Received GET request")
+        form = SearchPeopleForm()
+
+    return render(request, 'person_find.html', {'form': form, 'message': message})
+
+
 #
 # Person Views
 #
@@ -475,6 +505,43 @@ def venue_detail(request, id):
     return render(request,
                   'venue_detail.html',
                   {'venue': venue})
+
+
+def venue_find(request):
+    """
+    Search for venue.
+    :param request:
+    :return:
+    """
+    if request.method == 'POST':
+        form = SearchVenuesForm(request.POST)
+        if form.is_valid():
+            # search the db for the venue
+            # if venue found, then link with paper and go back to paper view
+            # if not, ask the user to create a new venue
+            english_stopwords = stopwords.words('english')
+            venue_name = form.cleaned_data['venue_name'].lower()
+            venue_publication_year = form.cleaned_data['venue_publication_year']
+            # TO DO: should probably check that data is 4 digits...
+            venue_name_tokens = [w for w in venue_name.split(' ') if not w in english_stopwords]
+            venue_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in venue_name_tokens) + '+.*'
+            query = "MATCH (v:Venue) WHERE v.publication_date =~ '" + venue_publication_year[0:4] + \
+                    ".*' AND v.name =~ { venue_query } RETURN v"
+            results, meta = db.cypher_query(query, dict(venue_publication_year=venue_publication_year[0:4],
+                                                        venue_query=venue_query))
+            if len(results) > 0:
+                venues = [Venue.inflate(row[0]) for row in results]
+                print("Found {} venues that match".format(len(venues)))
+                return render(request, 'venues.html', {'venues': venues})
+            else:
+                # render new Venue form with the searched name as
+                message = 'No matching venues found'
+
+    if request.method == 'GET':
+        form = SearchVenuesForm()
+        message = None
+
+    return render(request, 'venue_find.html', {'form': form, 'message': message})
 
 
 @login_required

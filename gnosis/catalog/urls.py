@@ -24,6 +24,7 @@ urlpatterns += [
     path('person/create/', views.person_create, name='person_create'),
     path('person/<int:id>/', views.person_detail, name='person_detail'),
     path('person/<int:id>/update', views.person_update, name='person_update'),
+    path('person/find/', views.person_find, name='person_find'),
 ]
 
 # for updating/creating a new Dataset node
@@ -38,6 +39,7 @@ urlpatterns += [
 urlpatterns += [
     path('venues/', views.venues, name='venues_index'),
     path('venue/create/', views.venue_create, name='venue_create'),
+    path('venue/find/', views.venue_find, name='venue_find'),
     path('venue/<int:id>/', views.venue_detail, name='venue_detail'),
     path('venue/<int:id>/update', views.venue_update, name='venue_update'),
 ]
