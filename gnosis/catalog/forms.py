@@ -110,6 +110,23 @@ class PaperForm(ModelForm):
         fields = ['title', 'abstract', 'keywords', 'download_link']
 
 
+class PaperImportForm(Form):
+    """
+    A form for importing a paper from a website such as arXiv.org.
+    The form only present the user with a field to enter a url.
+    """
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
+    def clean_url(self):
+        return self.cleaned_data['url']
+
+    url = forms.CharField(label='Source URL, e.g., https://arxiv.org/abs/1607.00653', max_length=200)
+
+
 class PersonForm(ModelForm):
 
     def __init__(self, *args, **kwargs):

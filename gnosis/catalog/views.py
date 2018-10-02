@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, PaperImportForm
 from .forms import SearchVenuesForm, SearchPapersForm, SearchPeopleForm, SearchDatasetsForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -9,6 +9,9 @@ from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
 import pdb
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from bs4 import BeautifulSoup
 
 
 #
@@ -240,16 +243,137 @@ def paper_update(request, id):
 @login_required
 def paper_create(request):
     user = request.user
-
+    print("In paper_create() view.")
     if request.method == 'POST':
+        print("   POST")
         paper = Paper()
         paper.created_by = user.id
         form = PaperForm(instance=paper, data=request.POST)
         if form.is_valid():
             form.save()
+            request.session['from_arxiv'] = False  # reset
             return HttpResponseRedirect(reverse('papers_index'))
     else:  # GET
-        form = PaperForm()
+        print("   GET")
+        # check if this is a redirect from paper_create_from_arxiv
+        # if so, then pre-populate the form with the data from arXiv,
+        # otherwise start with an empty form.
+        if request.session['from_arxiv'] is True:
+            title = request.session['arxiv_title']
+            abstract = request.session['arxiv_abstract']
+            url = request.session['arxiv_url']
+
+            form = PaperForm(initial={'title': title,
+                                      'abstract': abstract,
+                                      'download_link': url})
+        else:
+            form = PaperForm()
+
+    return render(request, 'paper_form.html', {'form': form})
+
+
+def get_authors(bs4obj):
+    # authorList = bs4obj.findAll(tag=tag, attributes=attributes)
+    authorList = bs4obj.findAll("div", {"class": "authors"})
+    if authorList is not None:
+        for author in authorList:
+            author_str = author.get_text()
+            author_str_tokens = author_str.split('\n')[1:]
+            author_str_tokens = [a.split(',')[0] for a in author_str_tokens]
+            print("Author: {}".format(author.get_text()))
+            print("Author tokens {}".format(author_str_tokens))
+            return author_str_tokens
+    return None
+
+
+def get_title(bs4obj):
+    titleList = bs4obj.findAll("h1", {"class": "title"})
+    if titleList is not None:
+        if len(titleList) == 0:
+            return None
+        else:
+            if len(titleList) > 1:
+                print("WARNING: Found more than one title. Returning the first one.")
+            return " ".join(titleList[0].get_text().split()[1:])
+    return None
+
+
+def get_abstract(bs4obj):
+    abstract = bs4obj.find("blockquote", {"class": "abstract"})
+    if abstract is not None:
+        abstract = " ".join(abstract.get_text().split(' ')[1:])
+    return abstract
+
+
+def get_venue(bs4obj):
+    venue = bs4obj.find("td", {"class": "tablecell comments mathjax"})
+    if venue is not None:
+        venue = venue.get_text().split(';')[0]
+    return venue
+
+
+def get_paper_info(url):
+    try:
+        # html = urlopen("http://pythonscraping.com/pages/page1.html")
+        html = urlopen(url)
+    except HTTPError as e:
+        print(e)
+    except URLError as e:
+        print(e)
+        print("The server could not be found.")
+    else:
+        bs4obj = BeautifulSoup(html)
+        # Now, we can access individual element in the page
+        # print(bs4obj.h1)
+
+        authors = get_authors(bs4obj)
+        #print("Authors: {}".format(authors))
+
+        title = get_title(bs4obj)
+        #print("Title: {}".format(title))
+
+        abstract = get_abstract(bs4obj)
+        #print("Abstract: {}".format(abstract))
+
+        #venue = get_venue(bs4obj)
+        #print("Venue: {}".format(venue))
+
+        return title, authors, abstract
+
+    return None, None, None
+
+import requests
+
+
+@login_required
+def paper_create_from_arxiv(request):
+    user = request.user
+
+    if request.method == 'POST':
+        # create the paper from the extracted data and send to
+        # paper_form.html asking the user to verify
+        print("{}".format(request.POST['url']))
+        # get the data from arxiv
+        url = request.POST['url']
+        # check if url includes https, and if not added
+        if not url.startswith("https://"):
+            url = "https://"+url
+        # retrieve paper info. If the information cannot be retrieved from remote
+        # server, then it will return an error message.
+        title, authors, abstract = get_paper_info(url)
+        if title is None or authors is None or abstract is None:
+            form = PaperImportForm()
+            return render(request, 'paper_form.html', {'form': form, 'message': "Invalid source, please try again."})
+
+        request.session['from_arxiv'] = True
+        request.session['arxiv_title'] = title
+        request.session['arxiv_abstract'] = abstract
+        request.session['arxiv_url'] = url
+
+        return HttpResponseRedirect(reverse('paper_create'))
+    else:  # GET
+        request.session['from_arxiv'] = False
+        form = PaperImportForm()
 
     return render(request, 'paper_form.html', {'form': form})
 

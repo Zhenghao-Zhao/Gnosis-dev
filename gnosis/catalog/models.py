@@ -17,7 +17,7 @@ class Paper(DjangoNode):
     # These are always required
     title = StringProperty(required=True)
     abstract = StringProperty(required=True)
-    keywords = StringProperty(required=True)
+    keywords = StringProperty(required=False)
     download_link = StringProperty()
 
     # Links
