@@ -82,21 +82,52 @@
         <a href="{% url 'venues_index' %}" class="list-group-item">Venues</a>
         <a href="{% url 'datasets_index' %}" class="list-group-item">Datasets</a>
       </div>
-      {% if user.is_authenticated %}
-      <hr>
-      <p><a href="{% url 'paper_create' %}">+ Paper&nbsp&nbsp</a></p>
-      <p><a href="{% url 'person_create' %}">+ Person&nbsp</a></p>
-      <p><a href="{% url 'dataset_create' %}">+ Dataset</a></p>
-      <p><a href="{% url 'venue_create' %}">+ Venue&nbsp&nbsp&nbsp</a></p>
-      {% endif %}
     </div>
-    <div class="col-sm-8 text-left">
+
+      <div class="col-sm-8 text-left">
+        {% if user.is_authenticated %}
+        <p></p>
+        <div class="pull-right">
+        <div class="btn-group">
+            <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'paper_create' %}" class="btn btn-primary" role="button">+</a>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">from arXiv.org</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'person_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'venue_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+            <div class="btn-group">
+                <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+          </div>
+            </div>
+        {% endif %}
+
         {% block content %}
-      <h1>Welcome</h1>
-      <p></p>
-      <hr>
         {% endblock %}
     </div>
+
     <div class="col-sm-2 sidenav">
       <div class="well">
         <p>Data61 Logo</p>
