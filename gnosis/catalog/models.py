@@ -3,7 +3,7 @@ from datetime import datetime
 from django_neomodel import DjangoNode
 from django.urls import reverse
 from neomodel import StructuredNode, StringProperty, DateTimeProperty, DateProperty, UniqueIdProperty, \
-    IntegerProperty, Relationship, RelationshipTo
+    IntegerProperty, Relationship, RelationshipTo, ArrayProperty
 
 
 # Create your models here.
@@ -107,7 +107,7 @@ class Dataset(DjangoNode):
         ordering = ['name', 'type']
 
     def __str__(self):
-        return '{%s}'.format(self.name)
+        return '{}'.format(self.name)
 
     def get_absolute_url(self):
         return reverse('dataset_detail', args=[self.id])

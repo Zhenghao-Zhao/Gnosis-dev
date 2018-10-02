@@ -23,6 +23,31 @@ class SearchVenuesForm(Form):
     venue_publication_year = forms.CharField(required=True)
 
 
+class SearchDatasetsForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+
+        self.fields['name'].label = 'Name'
+        self.fields['keywords'].label = 'Keyword (single keyword, e.g. network, computer vision)'
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
+    def clean_name(self):
+        return self.cleaned_data['name']
+
+    def clean_keywords(self):
+        return self.cleaned_data['keywords']
+
+    # one of them is required but we are going to enforce this in the
+    # view code because we don't know at this stage which one of the
+    # two the user will specify and we want to give her the option to
+    # search by dataset name or keywords or both.
+    name = forms.CharField(required=False)
+    keywords = forms.CharField(required=False)
+
+
 class SearchPapersForm(Form):
 
     def __init__(self, *args, **kwargs):

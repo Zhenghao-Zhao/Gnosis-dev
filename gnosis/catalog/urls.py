@@ -31,6 +31,7 @@ urlpatterns += [
 urlpatterns += [
     path('datasets/', views.datasets, name='datasets_index'),
     path('dataset/create/', views.dataset_create, name='dataset_create'),
+    path('dataset/find/', views.dataset_find, name='dataset_find'),
     path('dataset/<int:id>/', views.dataset_detail, name='dataset_detail'),
     path('dataset/<int:id>/update', views.dataset_update, name='dataset_update'),
 ]

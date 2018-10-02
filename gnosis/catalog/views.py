@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
 from .models import Paper, Person, Dataset, Venue, Comment
-from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm, SearchVenuesForm, SearchPapersForm, SearchPeopleForm
+from .forms import PaperForm, PersonForm, DatasetForm, VenueForm, CommentForm
+from .forms import SearchVenuesForm, SearchPapersForm, SearchPeopleForm, SearchDatasetsForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -411,6 +412,58 @@ def dataset_detail(request, id):
                   {'dataset': dataset})
 
 
+def dataset_find(request):
+    """
+    Searching for a dataset in the DB.
+
+    :param request:
+    :return:
+    """
+    message = None
+    if request.method == 'POST':
+        form = SearchDatasetsForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+            dataset_name = form.cleaned_data['name'].lower()
+            dataset_keywords = form.cleaned_data['keywords'].lower()  # comma separated list
+            dataset_name_tokens = [w for w in dataset_name.split()]
+            dataset_keywords = [w for w in dataset_keywords.split()]
+
+            if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
+                keyword_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
+                name_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
+                query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
+                results, meta = db.cypher_query(query, dict(name_query=name_query, keyword_query=keyword_query))
+                if len(results) > 0:
+                    datasets = [Dataset.inflate(row[0]) for row in results]
+                    return render(request, 'datasets.html', {'datasets': datasets})
+                else:
+                    message = "No results found. Please try again!"
+            else:
+                if len(dataset_keywords) > 0:
+                    # only keywords given
+                    dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
+                    query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
+                else:
+                    # only name or nothing (will still return all datasets if name and
+                    # keywords fields are left empty and sumbit button is pressed.
+                    dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
+                    query = "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
+                    # results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
+
+                results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
+                if len(results) > 0:
+                    datasets = [Dataset.inflate(row[0]) for row in results]
+                    return render(request, 'datasets.html', {'datasets': datasets})
+                else:
+                    message = "No results found. Please try again!"
+    elif request.method == 'GET':
+        print("Received GET request")
+        form = SearchDatasetsForm()
+
+    return render(request, 'dataset_find.html', {'form': form, 'message': message})
+
+
 @login_required
 def dataset_create(request):
     user = request.user
@@ -500,7 +553,6 @@ def venue_detail(request, id):
     #
     # TO DO: Retrieve all papers published at this venue and list them
     #
-
     request.session['last-viewed-venue'] = id
     return render(request,
                   'venue_detail.html',
