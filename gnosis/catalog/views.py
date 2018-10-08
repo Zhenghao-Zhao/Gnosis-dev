@@ -240,6 +240,27 @@ def paper_update(request, id):
     return render(request, 'paper_update.html', {'form': form, 'paper': paper_inst})
 
 
+def find_paper(query_string):
+    """
+    Helper method to query the DB for a paper based on its title.
+    :param query_string: The query string, e.g., title of paper to search for
+    :return: <list> List of papers that match the query or empty list if none match.
+    """
+    papers = []
+    # Check if paper already exists in DB and only add it if it does not.
+    english_stopwords = stopwords.words('english')
+    paper_title = query_string.lower()
+    paper_title_tokens = [w for w in paper_title.split(' ') if not w in english_stopwords]
+    paper_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in paper_title_tokens) + '+.*'
+    query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
+    print("Cypher query string {}".format(query))
+    results, meta = db.cypher_query(query, dict(paper_query=paper_query))
+    if len(results) > 0:
+        papers = [Paper.inflate(row[0]) for row in results]
+
+    return papers
+
+
 @login_required
 def paper_create(request):
     user = request.user
@@ -251,18 +272,10 @@ def paper_create(request):
         paper.created_by = user.id
         form = PaperForm(instance=paper, data=request.POST)
         if form.is_valid():
-            # Check if paper already exists in DB and only add it if it does not.
-            english_stopwords = stopwords.words('english')
-            paper_title = form.cleaned_data['title'].lower()
-            paper_title_tokens = [w for w in paper_title.split(' ') if not w in english_stopwords]
-            paper_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in paper_title_tokens) + '+.*'
-            query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
-            print("Cypher query string {}".format(query))
-            results, meta = db.cypher_query(query, dict( paper_query=paper_query))
-            if len(results) > 0:
+            matching_papers = find_paper(form.cleaned_data['title'])
+            if len(matching_papers) > 0:
                 message = "Paper already exists in Gnosis!"
-                papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, 'paper_results.html', {'papers': papers, 'message': message})
+                return render(request, 'paper_results.html', {'papers': matching_papers, 'message': message})
             else:
                 form.save()
                 request.session['from_arxiv'] = False  # reset
