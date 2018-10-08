@@ -13,4 +13,9 @@
     <div class="col-md-6">
         <h4 class="bg-warning">{{ message }}</h4>
     </div>
+
+{% if message %}
+<p class="bg-info">{{ message }}</p>
+{% endif %}
+
 {% endblock %}

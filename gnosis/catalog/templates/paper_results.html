@@ -8,6 +8,9 @@
     <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
 {% endfor %}
 </ul>
-<p><a href="{% url 'home' %}">Home</a> | <a href="{% url 'papers_index' %}">Papers</a> | <a href="{% url 'venues_index' %}">Venues</a></p>
+
+{% if message %}
+<p class="bg-info">{{ message }}</p>
+{% endif %}
 
 {% endblock %}

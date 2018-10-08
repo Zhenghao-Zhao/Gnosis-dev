@@ -244,15 +244,29 @@ def paper_update(request, id):
 def paper_create(request):
     user = request.user
     print("In paper_create() view.")
+    message = ''
     if request.method == 'POST':
         print("   POST")
         paper = Paper()
         paper.created_by = user.id
         form = PaperForm(instance=paper, data=request.POST)
         if form.is_valid():
-            form.save()
-            request.session['from_arxiv'] = False  # reset
-            return HttpResponseRedirect(reverse('papers_index'))
+            # Check if paper already exists in DB and only add it if it does not.
+            english_stopwords = stopwords.words('english')
+            paper_title = form.cleaned_data['title'].lower()
+            paper_title_tokens = [w for w in paper_title.split(' ') if not w in english_stopwords]
+            paper_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in paper_title_tokens) + '+.*'
+            query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
+            print("Cypher query string {}".format(query))
+            results, meta = db.cypher_query(query, dict( paper_query=paper_query))
+            if len(results) > 0:
+                message = "Paper already exists in Gnosis!"
+                papers = [Paper.inflate(row[0]) for row in results]
+                return render(request, 'paper_results.html', {'papers': papers, 'message': message})
+            else:
+                form.save()
+                request.session['from_arxiv'] = False  # reset
+                return HttpResponseRedirect(reverse('papers_index'))
     else:  # GET
         print("   GET")
         # check if this is a redirect from paper_create_from_arxiv
@@ -269,7 +283,7 @@ def paper_create(request):
         else:
             form = PaperForm()
 
-    return render(request, 'paper_form.html', {'form': form})
+    return render(request, 'paper_form.html', {'form': form, 'message': message})
 
 
 def get_authors(bs4obj):
@@ -324,25 +338,13 @@ def get_paper_info(url):
     else:
         bs4obj = BeautifulSoup(html)
         # Now, we can access individual element in the page
-        # print(bs4obj.h1)
-
         authors = get_authors(bs4obj)
-        #print("Authors: {}".format(authors))
-
         title = get_title(bs4obj)
-        #print("Title: {}".format(title))
-
         abstract = get_abstract(bs4obj)
-        #print("Abstract: {}".format(abstract))
-
-        #venue = get_venue(bs4obj)
-        #print("Venue: {}".format(venue))
-
+        # venue = get_venue(bs4obj)
         return title, authors, abstract
 
     return None, None, None
-
-import requests
 
 
 @login_required
