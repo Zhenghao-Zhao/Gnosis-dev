@@ -387,7 +387,12 @@ def get_title(bs4obj):
         else:
             if len(titleList) > 1:
                 print("WARNING: Found more than one title. Returning the first one.")
-            return " ".join(titleList[0].get_text().split()[1:])
+            #return " ".join(titleList[0].get_text().split()[1:])
+            title_text = titleList[0].get_text()
+            if title_text.startswith('Title:'):
+                return title_text[6:]
+            else:
+                return title_text
     return None
 
 
