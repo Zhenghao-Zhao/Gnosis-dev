@@ -1,0 +1,25 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+<h2>Find a person</h2>
+
+{% if message %}
+<p class="bg-danger">{{ message }}</p>
+{% endif %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% if people %}
+<h4>These are the people that matched your query</h4>
+<ul>
+{% for person in people %}
+    <li><a href="{{ person.get_absolute_url }}">{{ person.last_name }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

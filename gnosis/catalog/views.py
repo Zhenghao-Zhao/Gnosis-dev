@@ -196,6 +196,68 @@ def paper_connect_venue(request, id):
 
 
 @login_required
+def paper_connect_author(request, id):
+
+    if request.method == 'POST':
+        form = SearchPeopleForm(request.POST)
+        if form.is_valid():
+            # search the db for the person
+            # if the person is found, then link with paper and go back to paper view
+            # if not, ask the user to create a new person
+            name = form.cleaned_data['person_name']
+            people_found = _person_find(name)
+
+            if people_found is not None:
+                print("Found {} people that match".format(len(people_found)))
+                for person in people_found:
+                    print("\t{} {} {}".format(person.first_name, person.middle_name, person.last_name))
+
+                if len(people_found) > 1:
+                    # ask the user to select one of them
+                    return render(request, 'paper_connect_author.html', {'form': form,
+                                                                        'people': people_found,
+                                                                        'message': 'Found more than one matching people. Please narrow your search'})
+                else:
+                    person = people_found[0]  # one person found
+                    print('Selected person: {} {} {}'.format(person.first_name, person.middle_name, person.last_name))
+
+                # retrieve the paper
+                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                results, meta = db.cypher_query(query, dict(id=id))
+                if len(results) > 0:
+                    all_papers = [Paper.inflate(row[0]) for row in results]
+                    paper = all_papers[0]
+                    print("Found paper: {}".format(paper.title))
+                    # check if the paper is connect with a venue; if yes, the remove link to
+                    # venue before adding link to the new venue
+                    query = 'MATCH (p:Paper)<-[r:authors]-(p:Person) where id(p)={id} return p'
+                    results, meta = db.cypher_query(query, dict(id=id))
+                    if len(results) == 0:
+                        # person is not linked with paper so add the edge
+                        person.authors.connect(paper)
+                        # people = [Person.inflate(row[0]) for row in results]
+                        # for p in people:
+                        #     print("Disconnecting from: {}".format(p))
+                        #     paper.was_published_at.disconnect(p)
+                        #     paper.save()
+                else:
+                    print("Could not find paper!")
+                    # should not get here since we started from the actual paper...but what if we do end up here?
+                    pass  # Should raise an exception but for now just pass
+                # we have a venue and a paper, so connect them.
+                return HttpResponseRedirect(reverse('papers_index'))
+            else:
+                # render new Venue form with the searched name as
+                message = 'No matching people found'
+
+    if request.method == 'GET':
+        form = SearchPeopleForm()
+        message = None
+
+    return render(request, 'paper_connect_author.html', {'form': form, 'people': None, 'message': message})
+
+
+@login_required
 def paper_update(request, id):
     # retrieve paper by ID
     # https://github.com/neo4j-contrib/neomodel/issues/199

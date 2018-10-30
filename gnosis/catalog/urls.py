@@ -14,6 +14,7 @@ urlpatterns = [
 urlpatterns += [
     path('paper/<int:id>/update', views.paper_update, name='paper_update'),
     path('paper/<int:id>/connect/venue', views.paper_connect_venue, name='paper_connect_venue'),
+    path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/create/', views.paper_create, name='paper_create'),
     path('paper/import/', views.paper_create_from_arxiv, name='paper_create_from_arxiv'),
     path('paper/find/', views.paper_find, name='paper_find'),
