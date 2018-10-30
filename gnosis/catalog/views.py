@@ -240,7 +240,7 @@ def paper_update(request, id):
     return render(request, 'paper_update.html', {'form': form, 'paper': paper_inst})
 
 
-def find_paper(query_string):
+def _find_paper(query_string):
     """
     Helper method to query the DB for a paper based on its title.
     :param query_string: The query string, e.g., title of paper to search for
@@ -261,6 +261,48 @@ def find_paper(query_string):
     return papers
 
 
+def _add_author(author, paper=None):
+    """
+    Adds author to the DB if author does not already exist and links to paper
+    as author if paper is not None
+    :param author:
+    :param paper:
+    """
+    link_with_paper =False
+    p = None
+    people_found = _person_find(author, exact_match=True)
+    author_name = author.strip().split(' ')
+    if people_found is None:  # not in DB
+        print("Author {} not in DB".format(author))
+        p = Person()
+        p.first_name = author_name[0]
+        if len(author_name) > 2:  # has middle name(s)
+            p.middle_name = author_name[1:-1]
+        else:
+            p.middle_name = None
+        p.last_name = author_name[-1]
+        p.save()  # save to DB
+        link_with_paper = True
+    elif len(people_found) == 1:
+        # Exactly one person found. Check if name is an exact match.
+        p = people_found[0]
+        # NOTE: The problem with this simple check is that if two people have
+        # the same name then the wrong person will be linked to the paper.
+        if p.first_name == author_name[0] and p.last_name == author_name[-1]:
+            if len(author_name) > 2:
+                if p.middle_name == author_name[1:-1]:
+                    link_with_paper = True
+            else:
+                link_with_paper = True
+    else:
+        print("Person with similar but not exactly the same name is already in DB.")
+
+    if link_with_paper and paper is not None:
+        print("Adding authors link to paper {}".format(paper.title[:50]))
+        # link author with paper
+        p.authors.connect(paper)
+
+
 @login_required
 def paper_create(request):
     user = request.user
@@ -272,13 +314,24 @@ def paper_create(request):
         paper.created_by = user.id
         form = PaperForm(instance=paper, data=request.POST)
         if form.is_valid():
-            matching_papers = find_paper(form.cleaned_data['title'])
-            if len(matching_papers) > 0:
+            # Check if the paper already exists in DB
+            matching_papers = _find_paper(form.cleaned_data['title'])
+            if len(matching_papers) > 0:  # paper in DB already
                 message = "Paper already exists in Gnosis!"
                 return render(request, 'paper_results.html', {'papers': matching_papers, 'message': message})
-            else:
-                form.save()
+            else:  # the paper is not in DB yet.
+                form.save()  # store
+                # Now, add the authors and link each author to the paper with an "authors"
+                # type edge.
+                if request.session['from_arxiv']:
+                    paper_authors = request.session['arxiv_authors']
+                    for paper_author in paper_authors.split(','):
+                        print("Adding author {}".format(paper_author))
+                        _add_author(paper_author, paper)
+
                 request.session['from_arxiv'] = False  # reset
+                # go back to paper index page.
+                # Should this redirect to the page of the new paper just added?
                 return HttpResponseRedirect(reverse('papers_index'))
     else:  # GET
         print("   GET")
@@ -300,20 +353,33 @@ def paper_create(request):
 
 
 def get_authors(bs4obj):
-    # authorList = bs4obj.findAll(tag=tag, attributes=attributes)
+    """
+    Extract authors from arXiv.org paper page
+    :param bs4obj:
+    :return: None or a string with comma separated author names from first to last name
+    """
     authorList = bs4obj.findAll("div", {"class": "authors"})
     if authorList is not None:
-        for author in authorList:
-            author_str = author.get_text()
-            author_str_tokens = author_str.split('\n')[1:]
-            author_str_tokens = [a.split(',')[0] for a in author_str_tokens]
-            print("Author: {}".format(author.get_text()))
-            print("Author tokens {}".format(author_str_tokens))
-            return author_str_tokens
+        if len(authorList) > 1:
+            # there should be just one but let's just take the first one
+            authorList = authorList[0]
+
+        # for author in authorList:
+        # print("type of author {}".format(type(author)))
+        author_str = authorList[0].get_text()
+        if author_str.startswith("Authors:"):
+            author_str = author_str[8:]
+        return author_str
+    # authorList is None so return None
     return None
 
 
 def get_title(bs4obj):
+    """
+    Extract paper title from arXiv.org paper page.
+    :param bs4obj:
+    :return:
+    """
     titleList = bs4obj.findAll("h1", {"class": "title"})
     if titleList is not None:
         if len(titleList) == 0:
@@ -326,6 +392,11 @@ def get_title(bs4obj):
 
 
 def get_abstract(bs4obj):
+    """
+    Extract paper abstract from arXiv.org paper page.
+    :param bs4obj:
+    :return:
+    """
     abstract = bs4obj.find("blockquote", {"class": "abstract"})
     if abstract is not None:
         abstract = " ".join(abstract.get_text().split(' ')[1:])
@@ -333,6 +404,11 @@ def get_abstract(bs4obj):
 
 
 def get_venue(bs4obj):
+    """
+    Extract publication venue from arXiv.org paper page.
+    :param bs4obj:
+    :return:
+    """
     venue = bs4obj.find("td", {"class": "tablecell comments mathjax"})
     if venue is not None:
         venue = venue.get_text().split(';')[0]
@@ -340,6 +416,12 @@ def get_venue(bs4obj):
 
 
 def get_paper_info(url):
+    """
+    Extract paper information, title, abstract, and authors, from arXiv.org
+    paper page.
+    :param url:
+    :return:
+    """
     try:
         # html = urlopen("http://pythonscraping.com/pages/page1.html")
         html = urlopen(url)
@@ -370,11 +452,11 @@ def paper_create_from_arxiv(request):
         print("{}".format(request.POST['url']))
         # get the data from arxiv
         url = request.POST['url']
-        # check if url includes https, and if not added
+        # check if url includes https, and if not add it
         if not url.startswith("https://"):
             url = "https://"+url
         # retrieve paper info. If the information cannot be retrieved from remote
-        # server, then it will return an error message.
+        # server, then we will return an error message and redirect to paper_form.html.
         title, authors, abstract = get_paper_info(url)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
@@ -384,6 +466,9 @@ def paper_create_from_arxiv(request):
         request.session['arxiv_title'] = title
         request.session['arxiv_abstract'] = abstract
         request.session['arxiv_url'] = url
+        request.session['arxiv_authors'] = authors  # comma separate list of author names, first to last name
+
+        print("Authors: {}".format(authors))
 
         return HttpResponseRedirect(reverse('paper_create'))
     else:  # GET
@@ -391,6 +476,32 @@ def paper_create_from_arxiv(request):
         form = PaperImportForm()
 
     return render(request, 'paper_form.html', {'form': form})
+
+
+def _person_find(person_name, exact_match=False):
+    """
+    Searches the DB for a person whose name matches the given name
+    :param person_name:
+    :return:
+    """
+    person_name = person_name.lower()
+    person_name_tokens = [w for w in person_name.split()]
+    if exact_match:
+        if len(person_name_tokens) > 2:
+            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } AND LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20")
+        else:
+            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } RETURN p LIMIT 20")
+    else:
+        query = "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } OR LOWER(p.first_name) IN { person_tokens } OR LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20"
+
+    results, meta = db.cypher_query(query, dict(person_tokens=person_name_tokens))
+
+    if len(results) > 0:
+        print("Found {} matching people".format(len(results)))
+        people = [Person.inflate(row[0]) for row in results]
+        return people
+    else:
+        return None
 
 
 def person_find(request):
@@ -405,13 +516,9 @@ def person_find(request):
         form = SearchPeopleForm(request.POST)
         print("Received POST request")
         if form.is_valid():
-            person_name = form.cleaned_data['person_name'].lower()
-            person_name_tokens = [w for w in person_name.split()]
-            query = "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } OR LOWER(p.first_name) IN { person_tokens } OR LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20"
-            results, meta = db.cypher_query(query, dict(person_tokens=person_name_tokens))
-            if len(results) > 0:
-                print("Found {} matching people".format(len(results)))
-                people = [Person.inflate(row[0]) for row in results]
+
+            people = _person_find(form.cleaned_data['person_name'])
+            if people is not None:
                 return render(request, 'people.html', {'people': people})
             else:
                 message = "No results found. Please try again!"

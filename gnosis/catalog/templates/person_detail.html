@@ -4,7 +4,11 @@
 
 <div class="well well-sm">
 <h3>
-    <p>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</p>
+    {% if person.middle_name %}
+        <p>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</p>
+    {% else %}
+        <p>{{ person.first_name}} {{person.last_name}}</p>
+    {% endif %}
     {% if user.is_authenticated %}
         {% if user.is_superuser or user.id == person.created_by %}
         <p><a href="{% url 'person_update' person.id %}">
