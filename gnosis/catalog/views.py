@@ -258,6 +258,64 @@ def paper_connect_author(request, id):
 
 
 @login_required
+def paper_connect_paper(request, id):
+    """
+    View function for connecting a paper with another paper.
+
+    :param request:
+    :param id:
+    :return:
+    """
+    if request.method == 'POST':
+        form = SearchPapersForm(request.POST)
+        if form.is_valid():
+            # search the db for the person
+            # if the person is found, then link with paper and go back to paper view
+            # if not, ask the user to create a new person
+            paper_title_query = form.cleaned_data['paper_title']
+            papers_found = _find_paper(paper_title_query)
+
+            if len(papers_found) > 0:  # found more than one matching papers
+                print("Found {} papers that match".format(len(papers_found)))
+                for paper in papers_found:
+                    print("\t{}".format(paper.title))
+
+                if len(papers_found) > 1:
+                    return render(request, 'paper_connect_paper.html', {'form': form,
+                                                                        'papers': papers_found,
+                                                                        'message': 'Found more than one matching papers. Please narrow your search'})
+                else:
+                    paper_target = papers_found[0]  # one person found
+                    print('Selected paper: {}'.format(paper.title))
+
+                # retrieve the paper
+                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                results, meta = db.cypher_query(query, dict(id=id))
+                if len(results) > 0:
+                    all_papers = [Paper.inflate(row[0]) for row in results]
+                    paper_source = all_papers[0]  # since we search by id only one paper should have been returned.
+                    print("Found paper: {}".format(paper.title))
+                    # check if the papers are already connected with a cites link; if yes, then
+                    # do nothing. Otherwise, add the link.
+                    query = 'MATCH (p:Paper)<-[r:cites]-(p:Paper) where id(p)={id} return p'
+                    results, meta = db.cypher_query(query, dict(id=id))
+                    if len(results) == 0:
+                        # person is not linked with paper so add the edge
+                        paper_source.cites.connect(paper_target)
+                else:
+                    print("Could not find paper!")
+                return redirect('paper_detail', id=id)
+            else:
+                message = 'No matching people found'
+
+    if request.method == 'GET':
+        form = SearchPapersForm()
+        message = None
+
+    return render(request, 'paper_connect_paper.html', {'form': form, 'papers': None, 'message': message})
+
+
+@login_required
 def paper_update(request, id):
     # retrieve paper by ID
     # https://github.com/neo4j-contrib/neomodel/issues/199
@@ -305,8 +363,8 @@ def _find_paper(query_string):
     :param query_string: The query string, e.g., title of paper to search for
     :return: <list> List of papers that match the query or empty list if none match.
     """
-    papers = []
-    # Check if paper already exists in DB and only add it if it does not.
+    papers_found = []
+
     english_stopwords = stopwords.words('english')
     paper_title = query_string.lower()
     paper_title_tokens = [w for w in paper_title.split(' ') if not w in english_stopwords]
@@ -314,10 +372,11 @@ def _find_paper(query_string):
     query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
     print("Cypher query string {}".format(query))
     results, meta = db.cypher_query(query, dict(paper_query=paper_query))
-    if len(results) > 0:
-        papers = [Paper.inflate(row[0]) for row in results]
 
-    return papers
+    if len(results) > 0:
+        papers_found = [Paper.inflate(row[0]) for row in results]
+
+    return papers_found
 
 
 def _add_author(author, paper=None):

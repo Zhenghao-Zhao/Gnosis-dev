@@ -1,7 +1,7 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h2>Find a Venue</h2>
+<h2>Find a Paper</h2>
 
 {% if message %}
 <p class="bg-danger">{{ message }}</p>
@@ -15,13 +15,11 @@
 </form>
 
 
-<p><a href="{% url 'venue_create' %}">+ Venue</a></p>
-
-{% if venues %}
-<h4>These are the venues that matched your query</h4>
+{% if papers %}
+<h4>These are the papers that matched your query</h4>
 <ul>
-{% for venue in venues %}
-    <li><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></li>
+{% for paper in papers %}
+    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
