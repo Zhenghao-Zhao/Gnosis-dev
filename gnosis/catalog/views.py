@@ -183,10 +183,7 @@ def paper_connect_venue(request, id):
                     pass  # Should raise an exception but for now just pass
                 # we have a venue and a paper, so connect them.
                 paper.was_published_at.connect(venue)
-                paper.save()
-                return render(request, 'papers.html',
-                              {'papers': Paper.nodes.all(), 'num_papers': len(Paper.nodes.all())})
-
+                return HttpResponseRedirect(reverse('papers_index'))
             else:
                 # render new Venue form with the searched name as
                 message = 'No matching venues found'
