@@ -80,17 +80,7 @@
 
 <div class="container-fluid text-center">
     <div class="row content">
-        <div class="col-sm-2 sidenav">
-            <h4>Catalog</h4>
-            <div class="list-group">
-                <a href="{% url 'papers_index' %}" class="list-group-item">Papers</a>
-                <a href="{% url 'persons_index' %}" class="list-group-item">People</a>
-                <a href="{% url 'venues_index' %}" class="list-group-item">Venues</a>
-                <a href="{% url 'datasets_index' %}" class="list-group-item">Datasets</a>
-            </div>
-        </div>
-
-        <div class="col-sm-8 text-left">
+        <div class="col-sm-10 text-left">
             <div class="row">
             {% if user.is_authenticated %}
             <p></p>
@@ -138,14 +128,8 @@
         </div>
 
         <div class="col-sm-2 sidenav">
-            <div class="row">
                 {% load static %}
-                <img src="{% static "catalog/data61-logo.png" %}" alt="Data61 Logo">
-            </div>
-            <div class="row top-buffer-sidenav">
-                {% load static %}
-                <img src="{% static "catalog/csiro-logo-black.png" %}" alt="CSIRO Logo">
-            </div>
+                <img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">
         </div>
     </div>
 </div>
