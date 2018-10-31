@@ -294,7 +294,7 @@ def paper_connect_paper(request, id):
                 if len(results) > 0:
                     all_papers = [Paper.inflate(row[0]) for row in results]
                     paper_source = all_papers[0]  # since we search by id only one paper should have been returned.
-                    print("Found paper: {}".format(paper.title))
+                    print("Found paper: {}".format(paper_source.title))
                     # check if the papers are already connected with a cites link; if yes, then
                     # do nothing. Otherwise, add the link.
                     query = 'MATCH (p:Paper)<-[r:cites]-(p:Paper) where id(p)={id} return p'
@@ -313,6 +313,65 @@ def paper_connect_paper(request, id):
         message = None
 
     return render(request, 'paper_connect_paper.html', {'form': form, 'papers': None, 'message': message})
+
+
+@login_required
+def paper_connect_dataset(request, id):
+    """
+    View function for connecting a paper with a dataset.
+
+    :param request:
+    :param id:
+    :return:
+    """
+    if request.method == 'POST':
+        form = SearchDatasetsForm(request.POST)
+        if form.is_valid():
+            # search the db for the dataset
+            # if the dataset is found, then link with paper and go back to paper view
+            # if not, ask the user to create a new dataset
+            dataset_query_name = form.cleaned_data['name']
+            dataset_query_keywords = form.cleaned_data['keywords']
+            datasets_found = _dataset_find(dataset_query_name, dataset_query_keywords)
+
+            if len(datasets_found) > 0:  # found more than one matching dataset
+                print("Found {} datasets that match".format(len(datasets_found)))
+                for dataset in datasets_found:
+                    print("\t{}".format(dataset.name))
+
+                if len(datasets_found) > 1:
+                    return render(request, 'paper_connect_dataset.html', {'form': form,
+                                                                          'datasets': datasets_found,
+                                                                          'message': 'Found more than one matching datasets. Please narrow your search'})
+                else:
+                    dataset_target = datasets_found[0]  # one person found
+                    print('Selected dataset: {}'.format(dataset_target.name))
+
+                # retrieve the paper
+                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                results, meta = db.cypher_query(query, dict(id=id))
+                if len(results) > 0:
+                    all_papers = [Paper.inflate(row[0]) for row in results]
+                    paper_source = all_papers[0]  # since we search by id only one paper should have been returned.
+                    print("Found paper: {}".format(paper_source.title))
+                    # check if the papers are already connected with a cites link; if yes, then
+                    # do nothing. Otherwise, add the link.
+                    query = 'MATCH (p:Paper)<-[r:evaluates_on]-(d:Dataset) where id(p)={id} return p'
+                    results, meta = db.cypher_query(query, dict(id=id))
+                    if len(results) == 0:
+                        # person is not linked with paper so add the edge
+                        paper_source.evaluates_on.connect(dataset_target)
+                else:
+                    print("Could not find paper!")
+                return redirect('paper_detail', id=id)
+            else:
+                message = 'No matching datasets found'
+
+    if request.method == 'GET':
+        form = SearchDatasetsForm()
+        message = None
+
+    return render(request, 'paper_connect_dataset.html', {'form': form, 'datasets': None, 'message': message})
 
 
 @login_required
@@ -781,6 +840,46 @@ def dataset_detail(request, id):
                   {'dataset': dataset})
 
 
+def _dataset_find(name, keywords):
+    """
+    Helper method for searching Neo4J DB for a dataset.
+
+    :param name: Dataset name search query
+    :param keywords: Dataset keywords search query
+    :return:
+    """
+    dataset_name_tokens = [w for w in name.split()]
+    dataset_keywords = [w for w in keywords.split()]
+    datasets = []
+    if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
+        # Search using both the name and the keywords
+        keyword_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
+        name_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
+        query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
+        results, meta = db.cypher_query(query, dict(name_query=name_query, keyword_query=keyword_query))
+        if len(results) > 0:
+            datasets = [Dataset.inflate(row[0]) for row in results]
+            return datasets
+    else:
+        if len(dataset_keywords) > 0:
+            # only keywords given
+            dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
+            query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
+        else:
+            # only name or nothing (will still return all datasets if name and
+            # keywords fields are left empty and sumbit button is pressed.
+            dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
+            query = "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
+            # results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
+
+        results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
+        if len(results) > 0:
+            datasets = [Dataset.inflate(row[0]) for row in results]
+            return datasets
+
+    return datasets  # empty list
+
+
 def dataset_find(request):
     """
     Searching for a dataset in the DB.
@@ -795,37 +894,13 @@ def dataset_find(request):
         if form.is_valid():
             dataset_name = form.cleaned_data['name'].lower()
             dataset_keywords = form.cleaned_data['keywords'].lower()  # comma separated list
-            dataset_name_tokens = [w for w in dataset_name.split()]
-            dataset_keywords = [w for w in dataset_keywords.split()]
 
-            if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
-                keyword_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
-                name_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
-                query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
-                results, meta = db.cypher_query(query, dict(name_query=name_query, keyword_query=keyword_query))
-                if len(results) > 0:
-                    datasets = [Dataset.inflate(row[0]) for row in results]
-                    return render(request, 'datasets.html', {'datasets': datasets})
-                else:
-                    message = "No results found. Please try again!"
+            datasets = _dataset_find(dataset_name, dataset_keywords)
+
+            if len(datasets) > 0:
+                return render(request, 'datasets.html', {'datasets': datasets})
             else:
-                if len(dataset_keywords) > 0:
-                    # only keywords given
-                    dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_keywords) + '+.*'
-                    query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
-                else:
-                    # only name or nothing (will still return all datasets if name and
-                    # keywords fields are left empty and sumbit button is pressed.
-                    dataset_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in dataset_name_tokens) + '+.*'
-                    query = "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
-                    # results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
-
-                results, meta = db.cypher_query(query, dict(dataset_query=dataset_query))
-                if len(results) > 0:
-                    datasets = [Dataset.inflate(row[0]) for row in results]
-                    return render(request, 'datasets.html', {'datasets': datasets})
-                else:
-                    message = "No results found. Please try again!"
+                message = "No results found. Please try again!"
     elif request.method == 'GET':
         print("Received GET request")
         form = SearchDatasetsForm()

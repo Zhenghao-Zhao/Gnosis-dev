@@ -16,10 +16,10 @@ urlpatterns += [
     path('paper/<int:id>/connect/venue', views.paper_connect_venue, name='paper_connect_venue'),
     path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/<int:id>/connect/paper', views.paper_connect_paper, name='paper_connect_paper'),
+    path('paper/<int:id>/connect/dataset', views.paper_connect_dataset, name='paper_connect_dataset'),
     path('paper/create/', views.paper_create, name='paper_create'),
     path('paper/import/', views.paper_create_from_arxiv, name='paper_create_from_arxiv'),
     path('paper/find/', views.paper_find, name='paper_find'),
-    # path('paper/results/', views.paper_result, name='paper_results'),
 ]
 
 # for updating/creating a new Person node
