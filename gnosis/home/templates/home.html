@@ -9,7 +9,7 @@
 {% if user.is_authenticated %}
 <h3> Hi {{ user.get_username }} (<a href="{% url 'logout' %}?next={{request.path}}">Logout</a>)</h3>
 {% else %}
-<h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of Gnosis.</h3>
+<h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of &gamma;&nu;&#974;&sigma;&iota;&sigmaf;.</h3>
 {% endif %}
 
 <p><a href="{% url 'papers_index' %}">View</a> our catalog.</p>
