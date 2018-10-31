@@ -37,6 +37,9 @@
     /* Adds a small buffer between the two rows in the right column. */
     .top-buffer-sidenav { margin-top:5px; }
 
+    /* Adds margins around the main content colum */
+    .main-column-left-right-buffer { margin-left:10px; margin-right:10px }
+
     /* On small screens, set height to 'auto' for sidenav and grid */
     @media screen and (max-width: 767px) {
       .sidenav {
@@ -57,7 +60,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">Logo</a>
+      <a class="navbar-brand">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
         {% block left-navbar %}
@@ -81,7 +84,7 @@
 <div class="container-fluid text-center">
     <div class="row content">
         <div class="col-sm-10 text-left">
-            <div class="row">
+            <div class="row main-column-left-right-buffer">
             {% if user.is_authenticated %}
             <p></p>
             <div class="pull-right">
@@ -121,7 +124,7 @@
             </div>
             {% endif %}
             </div>
-            <div class="row top-buffer">
+            <div class="row top-buffer main-column-left-right-buffer">
             {% block content %}
             {% endblock %}
             </div>
