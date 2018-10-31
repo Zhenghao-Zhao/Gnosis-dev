@@ -34,6 +34,9 @@
     /* Adds a small buffer between the two rows in the middle column. */
     .top-buffer { margin-top:10px; }
 
+    /* Adds a small buffer between the two rows in the right column. */
+    .top-buffer-sidenav { margin-top:5px; }
+
     /* On small screens, set height to 'auto' for sidenav and grid */
     @media screen and (max-width: 767px) {
       .sidenav {
@@ -135,11 +138,13 @@
         </div>
 
         <div class="col-sm-2 sidenav">
-            <div class="well">
-                <p>Data61 Logo</p>
+            <div class="row">
+                {% load static %}
+                <img src="{% static "catalog/data61-logo.png" %}" alt="Data61 Logo">
             </div>
-            <div class="well">
-                <p>CSIRO Logo</p>
+            <div class="row top-buffer-sidenav">
+                {% load static %}
+                <img src="{% static "catalog/csiro-logo-black.png" %}" alt="CSIRO Logo">
             </div>
         </div>
     </div>
