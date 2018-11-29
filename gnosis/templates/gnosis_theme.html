@@ -122,6 +122,26 @@
                     </div>
                 </div>
             </div>
+                {% else %}
+            <p></p>
+            <div class="pull-right">
+                <div class="btn-group">
+                    <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+                </div>
+            </div>
+
             {% endif %}
             </div>
             <div class="row top-buffer main-column-left-right-buffer">
