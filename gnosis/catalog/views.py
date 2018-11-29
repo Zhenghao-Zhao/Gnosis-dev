@@ -500,7 +500,7 @@ def paper_create(request):
                 form.save()  # store
                 # Now, add the authors and link each author to the paper with an "authors"
                 # type edge.
-                if request.session['from_arxiv']:
+                if request.session.get('from_arxiv',False):
                     paper_authors = request.session['arxiv_authors']
                     for paper_author in paper_authors.split(','):
                         print("Adding author {}".format(paper_author))
@@ -515,7 +515,7 @@ def paper_create(request):
         # check if this is a redirect from paper_create_from_arxiv
         # if so, then pre-populate the form with the data from arXiv,
         # otherwise start with an empty form.
-        if request.session['from_arxiv'] is True:
+        if request.session.get('from_arxiv', False) is True:
             title = request.session['arxiv_title']
             abstract = request.session['arxiv_abstract']
             url = request.session['arxiv_url']
