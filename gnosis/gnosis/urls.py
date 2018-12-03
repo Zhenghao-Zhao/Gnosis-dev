@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.views.generic import RedirectView
 from django.conf.urls.static import static
-from django.conf.urls import include
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.conf import settings
 from django.urls import path
@@ -31,6 +31,7 @@ urlpatterns = [
 
 # for user authentication
 urlpatterns += [
+    url(r'^accounts/', include('django_registration.backends.one_step.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 

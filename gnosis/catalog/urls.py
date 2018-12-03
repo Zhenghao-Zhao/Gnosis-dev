@@ -9,7 +9,6 @@ urlpatterns = [
     path('build', views.build, name='build_db'),
 ]
 
-
 # for updating/creating a new Paper node
 urlpatterns += [
     path('paper/<int:id>/update', views.paper_update, name='paper_update'),
