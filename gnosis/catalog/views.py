@@ -46,11 +46,11 @@ def get_paper_venue(paper):
 
 def papers(request):
     # Retrieve the papers ordered by newest addition to DB first.
-    # limit to maximum 10 papers until we get pagination to work.
+    # limit to maximum 50 papers until we get pagination to work.
     # However, even with pagination, we are going to want to limit
     # the number of papers retrieved for speed, especially when the
     # the DB grows large.
-    all_papers = Paper.nodes.order_by('-created')[:10]
+    all_papers = Paper.nodes.order_by('-created')[:50]
     # Retrieve all comments about this paper.
     all_authors = [', '.join(get_paper_authors(paper)) for paper in all_papers]
     all_venues = [get_paper_venue(paper) for paper in all_papers]
@@ -809,7 +809,7 @@ def person_update(request, id):
 # Dataset Views
 #
 def datasets(request):
-    all_datasets = Dataset.nodes.order_by('-publication_date')[:10]
+    all_datasets = Dataset.nodes.order_by('-publication_date')[:50]
     return render(request, 'datasets.html', {'datasets': all_datasets})
 
 
@@ -975,7 +975,7 @@ def dataset_update(request, id):
 # Venue Views
 #
 def venues(request):
-    all_venues = Venue.nodes.order_by('-publication_date')[: 10]
+    all_venues = Venue.nodes.order_by('-publication_date')[:50]
     return render(request, 'venues.html', {'venues': all_venues})
 
 
