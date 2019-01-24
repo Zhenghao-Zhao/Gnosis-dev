@@ -18,7 +18,7 @@ class Paper(DjangoNode):
     title = StringProperty(required=True)
     abstract = StringProperty(required=True)
     keywords = StringProperty(required=False)
-    download_link = StringProperty()
+    download_link = StringProperty(required=True)
 
     # Links
     cites = RelationshipTo("Paper", "cites")
@@ -86,7 +86,7 @@ class Dataset(DjangoNode):
     # A brief description of the dataset
     description = StringProperty(required=True)
     # The date of publication.
-    publication_date = DateProperty(required=True)
+    publication_date = DateProperty(required=False)
 
     # data_types = {'N': 'Network', 'I': 'Image(s)', 'V': 'Video(s)', 'M': 'Mix'}
     data_types = (('N', 'Network'),

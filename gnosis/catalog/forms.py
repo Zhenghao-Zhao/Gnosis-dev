@@ -84,11 +84,10 @@ class PaperForm(ModelForm):
 
         self.fields['abstract'].widget = forms.Textarea()
         self.fields['abstract'].widget.attrs.update({'rows': '8'})
-
-        self.fields['title'].label = 'Title'
-        self.fields['abstract'].label = 'Abstract'
+        self.fields['title'].label = 'Title*'
+        self.fields['abstract'].label = 'Abstract*'
         self.fields['keywords'].label = 'Keywords'
-        self.fields['download_link'].label = 'Download Link'
+        self.fields['download_link'].label = 'Download Link*'
 
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
@@ -124,7 +123,7 @@ class PaperImportForm(Form):
     def clean_url(self):
         return self.cleaned_data['url']
 
-    url = forms.CharField(label='Source URL, e.g., https://arxiv.org/abs/1607.00653', max_length=200)
+    url = forms.CharField(label='Source URL, e.g., https://arxiv.org/abs/1607.00653*', max_length=200)
 
 
 class PersonForm(ModelForm):
@@ -132,9 +131,9 @@ class PersonForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
 
-        self.fields['first_name'].label = 'First Name'
+        self.fields['first_name'].label = 'First Name*'
         self.fields['middle_name'].label = 'Middle Name'
-        self.fields['last_name'].label = 'Last Name'
+        self.fields['last_name'].label = 'Last Name*'
         self.fields['affiliation'].label = 'Affiliation'
         self.fields['website'].label = 'Website'
 
@@ -172,11 +171,11 @@ class DatasetForm(ModelForm):
         self.fields['description'].widget = forms.Textarea()
         self.fields['description'].widget.attrs.update({'rows': '5'})
 
-        self.fields['name'].label = 'Name'
-        self.fields['keywords'].label = 'Keywords'
-        self.fields['description'].label = 'Description'
-        self.fields['source_type'].label = 'Type'
-        self.fields['publication_date'].label = 'Publication Date'
+        self.fields['name'].label = 'Name*'
+        self.fields['keywords'].label = 'Keywords*'
+        self.fields['description'].label = 'Description*'
+        self.fields['source_type'].label = 'Type*'
+        self.fields['publication_date'].label = 'Publication Date (yyyy-mm-dd)'
         self.fields['website'].label = 'Website'
 
         for visible in self.visible_fields():
@@ -214,20 +213,19 @@ class VenueForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
 
-        self.fields['name'].label = 'Name'
-        self.fields['publisher'].label = 'Publisher'
-        self.fields['publication_date'].label = 'Publication Date'
-        self.fields['type'].label = 'Type'
-        self.fields['peer_reviewed'].label = 'Peer Reviewed'
-        self.fields['keywords'].label = 'Keywords'
+        self.fields['name'].label = 'Name*'
+        self.fields['publisher'].label = 'Publisher*'
+        # self.fields['publication_date'].help_text = 'YYYY-MM-DD'
+        self.fields['publication_date'].label = 'Publication Date (yyyy-mm-dd)*'
+        self.fields['type'].label = 'Type*'
+        self.fields['peer_reviewed'].label = 'Peer Reviewed*'
+        self.fields['keywords'].label = 'Keywords*'
         self.fields['website'].label = 'Website'
 
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             visible.field.widget.attrs.update({'style': 'width:25em'})
             print(visible.field.widget.attrs.items())
-
-
 
     def clean_name(self):
         return self.cleaned_data['name']

@@ -12,6 +12,7 @@ import pdb
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
+from django.contrib import messages
 
 
 #
@@ -266,6 +267,7 @@ def paper_connect_paper(request, id):
     :param id:
     :return:
     """
+    message = None
     if request.method == 'POST':
         form = SearchPapersForm(request.POST)
         if form.is_valid():
@@ -297,20 +299,25 @@ def paper_connect_paper(request, id):
                     print("Found paper: {}".format(paper_source.title))
                     # check if the papers are already connected with a cites link; if yes, then
                     # do nothing. Otherwise, add the link.
-                    query = 'MATCH (p:Paper)<-[r:cites]-(p:Paper) where id(p)={id} return p'
-                    results, meta = db.cypher_query(query, dict(id=id))
+                    query = 'MATCH (q:Paper)<-[r:cites]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p'
+                    results, meta = db.cypher_query(query, dict(source_id=paper_source.id, target_id=paper_target.id))
                     if len(results) == 0:
-                        # person is not linked with paper so add the edge
+                        # papers are not linked so add the edge
+                        print("Citation link not found, adding it!")
                         paper_source.cites.connect(paper_target)
+                        messages.add_message(request, messages.INFO, "Citation Added!")
+                    else:
+                        print("Citation link found not adding it!")
+                        messages.add_message(request, messages.INFO, "Citation Already Exists!")
                 else:
                     print("Could not find paper!")
+                    messages.add_message(request, messages.INFO, "Could not find paper!")
                 return redirect('paper_detail', id=id)
             else:
-                message = 'No matching people found'
+                message = 'No matching papers found'
 
     if request.method == 'GET':
         form = SearchPapersForm()
-        message = None
 
     return render(request, 'paper_connect_paper.html', {'form': form, 'papers': None, 'message': message})
 
@@ -364,6 +371,7 @@ def paper_connect_dataset(request, id):
                 else:
                     print("Could not find paper!")
                 return redirect('paper_detail', id=id)
+
             else:
                 message = 'No matching datasets found'
 

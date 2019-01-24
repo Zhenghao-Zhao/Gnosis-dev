@@ -1,7 +1,7 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h2>Add a new person</h2>
+<h2>New Person/Author</h2>
 
 <form action="" method="post">
     {% csrf_token %}
@@ -11,4 +11,6 @@
     <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
 
 </form>
+<h5><br/>*required</h5>
+<br/>
 {% endblock %}

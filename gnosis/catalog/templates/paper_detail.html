@@ -20,6 +20,11 @@
 <p><small><strong>Venue:</strong> {{ venue }}</small></p>
 {% endif%}
 
+{% if messages %}
+    {% for message in messages %}
+        <p class="bg-success">{{ message }}</p>
+    {% endfor %}
+{% endif %}
 
 <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a href="{% url 'paper_connect_paper' paper.id %}">Paper</a> || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> || <a href="{% url 'paper_connect_author' paper.id %}">Author</a> || <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a>{% endif %}</h4>
 
