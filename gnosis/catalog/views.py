@@ -183,8 +183,10 @@ def paper_connect_venue(request, id):
                     # should not get here since we started from the actual paper...but what if we do end up here?
                     pass  # Should raise an exception but for now just pass
                 # we have a venue and a paper, so connect them.
+                print("Citation link not found, adding it!")
+                messages.add_message(request, messages.INFO, "Link to venue added!")
                 paper.was_published_at.connect(venue)
-                return HttpResponseRedirect(reverse('papers_index'))
+                return redirect('paper_detail', id=paper.id)
             else:
                 # render new Venue form with the searched name as
                 message = 'No matching venues found'
@@ -229,26 +231,27 @@ def paper_connect_author(request, id):
                     all_papers = [Paper.inflate(row[0]) for row in results]
                     paper = all_papers[0]
                     print("Found paper: {}".format(paper.title))
-                    # check if the paper is connect with a venue; if yes, the remove link to
-                    # venue before adding link to the new venue
-                    query = 'MATCH (p:Paper)<-[r:authors]-(p:Person) where id(p)={id} return p'
-                    results, meta = db.cypher_query(query, dict(id=id))
+                    # check if the paper is connect with the author; if yes, then do nothing,
+                    # otherwise add the link between paper and author
+                    query = 'MATCH (p:Paper)<-[r:authors]-(a:Person) where id(p)={id} and id(a)={author_id} return p'
+                    results, meta = db.cypher_query(query, dict(id=paper.id, author_id=person.id))
                     if len(results) == 0:
                         # person is not linked with paper so add the edge
                         person.authors.connect(paper)
+                        messages.add_message(request, messages.INFO, "Linked with author!")
                         # people = [Person.inflate(row[0]) for row in results]
                         # for p in people:
                         #     print("Disconnecting from: {}".format(p))
                         #     paper.was_published_at.disconnect(p)
                         #     paper.save()
+                    else:
+                        messages.add_message(request, messages.INFO, "Link to author already exists!")
                 else:
                     print("Could not find paper!")
                     # should not get here since we started from the actual paper...but what if we do end up here?
                     pass  # Should raise an exception but for now just pass
-                # we have a venue and a paper, so connect them.
-                return HttpResponseRedirect(reverse('papers_index'))
+                return redirect('paper_detail', id=paper.id)
             else:
-                # render new Venue form with the searched name as
                 message = 'No matching people found'
 
     if request.method == 'GET':
@@ -363,11 +366,14 @@ def paper_connect_dataset(request, id):
                     print("Found paper: {}".format(paper_source.title))
                     # check if the papers are already connected with a cites link; if yes, then
                     # do nothing. Otherwise, add the link.
-                    query = 'MATCH (p:Paper)<-[r:evaluates_on]-(d:Dataset) where id(p)={id} return p'
-                    results, meta = db.cypher_query(query, dict(id=id))
+                    query = 'MATCH (d:Dataset)<-[r:evaluates_on]-(p:Paper) where id(p)={id} and id(d)={dataset_id} return p'
+                    results, meta = db.cypher_query(query, dict(id=id, dataset_id=dataset_target.id))
                     if len(results) == 0:
-                        # person is not linked with paper so add the edge
+                        # dataset is not linked with paper so add the edge
                         paper_source.evaluates_on.connect(dataset_target)
+                        messages.add_message(request, messages.INFO, "Link to dataset added!")
+                    else:
+                        messages.add_message(request, messages.INFO, "Link to dataset already exists!")
                 else:
                     print("Could not find paper!")
                 return redirect('paper_detail', id=id)
