@@ -116,18 +116,18 @@ def _get_node_ego_network(id, paper_title):
     '''
     query = "MATCH (s:Paper {title: {paper_title}})-->(t:Paper) RETURN t"
     results, meta = db.cypher_query(query, dict(paper_title=paper_title))
-    target_papers = []
+    ego_json = ''
     if len(results) > 0:
         target_papers = [Paper.inflate(row[0]) for row in results]
         print("Paper cites {} other papers.".format(len(target_papers)))
+        ego_json = "{{data : {{id: {}, title: '{}' }} }}".format(id, paper_title)
+        for tp in target_papers:
+            ego_json += ", {{data : {{id: {}, title: '{}' }} }}".format(tp.id, tp.title)
+        for tp in target_papers:
+            ego_json += ",{{data: {{ id: {}{}, label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites', id,                                                                                                tp.id)
     else:
         print("No cited papers found!")
 
-    ego_json = "{{data : {{id: {}, title: '{}' }} }}".format(id, paper_title)
-    for tp in target_papers:
-        ego_json += ", {{data : {{id: {}, title: '{}' }} }}".format(tp.id, tp.title)
-    for tp in target_papers:
-        ego_json += ",{{data: {{ id: {}{}, label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites', id, tp.id )
 
     return '['+ego_json+']'
 
