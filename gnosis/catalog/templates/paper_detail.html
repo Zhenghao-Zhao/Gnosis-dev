@@ -28,6 +28,8 @@
 
 <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a href="{% url 'paper_connect_paper' paper.id %}">Paper</a> || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> || <a href="{% url 'paper_connect_author' paper.id %}">Author</a> || <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a>{% endif %}</h4>
 
+<div id="cy"></div>
+
 <p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info btn-md">
     <span class="glyphicon glyphicon-plus"></span> Comment</a></p>
 {% else %}
@@ -46,5 +48,41 @@
 </div>
 {% endfor %}
 {% endif %}
+
+<script type="text/javascript">
+var cy = cytoscape({
+  container: document.getElementById('cy'), // container to render in
+
+  elements: {{ ego_network|safe }},
+
+  style: [ // the stylesheet for the graph
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#666',
+        'label': 'data(title)',
+        'text-wrap': 'ellipsis',
+        'text-max-width': '200'
+      }
+    },
+
+    {
+      selector: 'edge',
+      style: {
+        'width': 3,
+        'label': 'data(label)',
+        'line-color': '#ccc',
+        'target-arrow-color': '#ccc',
+        'target-arrow-shape': 'triangle'
+      }
+    }
+  ],
+
+  layout: {
+    name: 'circle',
+    rows: 1
+  }
+});
+</script>
 
 {% endblock %}
