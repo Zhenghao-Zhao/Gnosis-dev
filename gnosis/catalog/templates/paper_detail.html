@@ -83,6 +83,16 @@ var cy = cytoscape({
     rows: 1
   }
 });
+
+cy.on('tap', 'node', function(evt){
+  var node = evt.target;
+  console.log( 'tapped ' + node.data('href') );
+  try {
+    window.open( node.data('href'), '_self' );
+  } catch(e){
+    window.location.href = node.data('href');
+  }
+});
 </script>
 
 {% endblock %}

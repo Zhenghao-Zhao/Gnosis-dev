@@ -120,11 +120,15 @@ def _get_node_ego_network(id, paper_title):
     if len(results) > 0:
         target_papers = [Paper.inflate(row[0]) for row in results]
         print("Paper cites {} other papers.".format(len(target_papers)))
-        ego_json = "{{data : {{id: {}, title: '{}' }} }}".format(id, paper_title)
+        ego_json = "{{data : {{id: {}, title: '{}', href: '{}' }} }}".format(id,
+                                                                           paper_title,
+                                                                           reverse('paper_detail', kwargs={'id': id}))
         for tp in target_papers:
-            ego_json += ", {{data : {{id: {}, title: '{}' }} }}".format(tp.id, tp.title)
+            ego_json += ", {{data : {{id: {}, title: '{}', href: '{}' }} }}".format(tp.id,
+                                                                                  tp.title,
+                                                                                  reverse('paper_detail', kwargs={'id': tp.id}))
         for tp in target_papers:
-            ego_json += ",{{data: {{ id: {}{}, label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites', id,                                                                                                tp.id)
+            ego_json += ",{{data: {{ id: {}{}, label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites', id, tp.id)
     else:
         print("No cited papers found!")
 
