@@ -128,7 +128,6 @@ def _get_node_ego_network(id, paper_title):
     else:
         print("No cited papers found!")
 
-
     return '['+ego_json+']'
 
 
