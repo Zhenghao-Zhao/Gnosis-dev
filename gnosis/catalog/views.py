@@ -8,7 +8,6 @@ from django.http import HttpResponseRedirect
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
-import pdb
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup

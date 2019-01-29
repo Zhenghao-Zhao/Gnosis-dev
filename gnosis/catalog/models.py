@@ -1,9 +1,8 @@
-from django.db import models
 from datetime import datetime
 from django_neomodel import DjangoNode
 from django.urls import reverse
-from neomodel import StructuredNode, StringProperty, DateTimeProperty, DateProperty, UniqueIdProperty, \
-    IntegerProperty, Relationship, RelationshipTo, ArrayProperty
+from neomodel import StringProperty, DateTimeProperty, DateProperty, UniqueIdProperty, \
+    IntegerProperty, RelationshipTo
 
 
 # Create your models here.
