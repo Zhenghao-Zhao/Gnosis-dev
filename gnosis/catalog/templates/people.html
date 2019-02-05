@@ -4,9 +4,9 @@
 
 <p></p>
 <p>
-<a href="{% url 'person_find' %}" class="btn btn-info">
-    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search People
-</a>
+    <a href="{% url 'person_find' %}" class="btn btn-info">
+        <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search People
+    </a>
 </p>
 
 {% load el_pagination_tags %}
@@ -16,9 +16,10 @@
 {% for person in people %}
 <div class="well well-sm">
     {% if person.middel_name %}
-        <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name }}</a></p>
+    <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name }}</a>
+    </p>
     {% else %}
-        <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
+    <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
     {% endif %}
     {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
 </div>

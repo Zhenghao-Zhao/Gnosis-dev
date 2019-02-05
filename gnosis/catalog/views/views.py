@@ -81,7 +81,7 @@ def paper_authors(request, id):
     print("Found {} authors for paper with id {}".format(len(authors), id))
 
     # for rid in relationship_ids:
-    delete_urls = [ reverse('paper_remove_author', kwargs={'id': id, 'rid': rid}) for rid in relationship_ids]
+    delete_urls = [reverse('paper_remove_author', kwargs={'id': id, 'rid': rid}) for rid in relationship_ids]
     print("author remove urls")
     print(delete_urls)
 
@@ -126,6 +126,11 @@ def paper_detail(request, id):
     else:  # go back to the paper index page
         return render(request, 'papers.html', {'papers': Paper.nodes.all(), 'num_papers': len(Paper.nodes.all())})
 
+    # Retrieve the paper's authors
+    authors = get_paper_authors(paper)
+    # authors is a list of strings so just concatenate the strings.
+    authors = ", ".join(authors)
+
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
@@ -154,6 +159,7 @@ def paper_detail(request, id):
                   'paper_detail.html',
                   {'paper': paper,
                    'venue': venue,
+                   'authors': authors,
                    'comments': comments,
                    'num_comments': num_comments,
                    'ego_network': ego_network_json})
@@ -172,18 +178,21 @@ def _get_node_ego_network(id, paper_title):
         target_papers = [Paper.inflate(row[0]) for row in results]
         print("Paper cites {} other papers.".format(len(target_papers)))
         ego_json = "{{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(id,
-                                                                           paper_title,
-                                                                           reverse('paper_detail', kwargs={'id': id}))
+                                                                               paper_title,
+                                                                               reverse('paper_detail',
+                                                                                       kwargs={'id': id}))
         for tp in target_papers:
             ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(tp.id,
-                                                                                  tp.title,
-                                                                                  reverse('paper_detail', kwargs={'id': tp.id}))
+                                                                                      tp.title,
+                                                                                      reverse('paper_detail',
+                                                                                              kwargs={'id': tp.id}))
         for tp in target_papers:
-            ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites', id, tp.id)
+            ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(id, tp.id, 'cites',
+                                                                                                  id, tp.id)
     else:
         print("No cited papers found!")
 
-    return '['+ego_json+']'
+    return '[' + ego_json + ']'
 
 
 def paper_find(request):
@@ -198,7 +207,7 @@ def paper_find(request):
             paper_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in paper_title_tokens) + '+.*'
             query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
             print("Cypher query string {}".format(query))
-            results, meta = db.cypher_query(query, dict( paper_query=paper_query))
+            results, meta = db.cypher_query(query, dict(paper_query=paper_query))
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
@@ -215,7 +224,6 @@ def paper_find(request):
 
 @login_required
 def paper_connect_venue(request, id):
-
     if request.method == 'POST':
         form = SearchVenuesForm(request.POST)
         if form.is_valid():
@@ -286,7 +294,6 @@ def paper_connect_venue(request, id):
 
 @login_required
 def paper_connect_author(request, id):
-
     if request.method == 'POST':
         form = SearchPeopleForm(request.POST)
         if form.is_valid():
@@ -304,8 +311,8 @@ def paper_connect_author(request, id):
                 if len(people_found) > 1:
                     # ask the user to select one of them
                     return render(request, 'paper_connect_author.html', {'form': form,
-                                                                        'people': people_found,
-                                                                        'message': 'Found more than one matching people. Please narrow your search'})
+                                                                         'people': people_found,
+                                                                         'message': 'Found more than one matching people. Please narrow your search'})
                 else:
                     person = people_found[0]  # one person found
                     print('Selected person: {} {} {}'.format(person.first_name, person.middle_name, person.last_name))
@@ -545,7 +552,7 @@ def _add_author(author, paper=None):
     :param author:
     :param paper:
     """
-    link_with_paper =False
+    link_with_paper = False
     p = None
     people_found = _person_find(author, exact_match=True)
     author_name = author.strip().split(' ')
@@ -600,7 +607,7 @@ def paper_create(request):
                 form.save()  # store
                 # Now, add the authors and link each author to the paper with an "authors"
                 # type edge.
-                if request.session.get('from_arxiv',False):
+                if request.session.get('from_arxiv', False):
                     paper_authors = request.session['arxiv_authors']
                     for paper_author in paper_authors.split(','):
                         print("Adding author {}".format(paper_author))
@@ -664,7 +671,7 @@ def get_title(bs4obj):
         else:
             if len(titleList) > 1:
                 print("WARNING: Found more than one title. Returning the first one.")
-            #return " ".join(titleList[0].get_text().split()[1:])
+            # return " ".join(titleList[0].get_text().split()[1:])
             title_text = titleList[0].get_text()
             if title_text.startswith('Title:'):
                 return title_text[6:]
@@ -736,7 +743,7 @@ def paper_create_from_arxiv(request):
         url = request.POST['url']
         # check if url includes https, and if not add it
         if not url.startswith("https://"):
-            url = "https://"+url
+            url = "https://" + url
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
         title, authors, abstract = get_paper_info(url)
@@ -770,9 +777,11 @@ def _person_find(person_name, exact_match=False):
     person_name_tokens = [w for w in person_name.split()]
     if exact_match:
         if len(person_name_tokens) > 2:
-            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } AND LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20")
+            query = (
+                "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } AND LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20")
         else:
-            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } RETURN p LIMIT 20")
+            query = (
+                "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } RETURN p LIMIT 20")
     else:
         query = "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } OR LOWER(p.first_name) IN { person_tokens } OR LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20"
 
@@ -1099,7 +1108,8 @@ def comments(request):
     """
     # Only superusers can view all the comments
     if request.user.is_superuser:
-        return render(request, 'comments.html', {'comments': Comment.nodes.all(), 'num_comments': len(Comment.nodes.all())})
+        return render(request, 'comments.html',
+                      {'comments': Comment.nodes.all(), 'num_comments': len(Comment.nodes.all())})
     else:
         # other users are sent back to the paper index
         return HttpResponseRedirect(reverse('papers_index'))
@@ -1199,7 +1209,6 @@ def comment_update(request, id):
 #
 @login_required
 def build(request):
-
     try:
         d1 = Dataset()
         d1.name = 'Yelp'
@@ -1225,7 +1234,6 @@ def build(request):
         v2.peer_reviewed = 'Y'
         v2.website = 'https://icml.cc/2016/'
         v2.save()
-
 
         p1 = Paper()
         p1.title = 'The best paper in the world.'
@@ -1301,5 +1309,3 @@ def build(request):
     num_people = len(Person.nodes.all())
 
     return render(request, 'build.html', {'num_papers': num_papers, 'num_people': num_people})
-
-
