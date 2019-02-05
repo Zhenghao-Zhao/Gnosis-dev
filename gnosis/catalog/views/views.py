@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect
 from catalog.models import Paper, Person, Dataset, Venue, Comment
 from catalog.forms import PaperForm, DatasetForm, VenueForm, CommentForm, PaperImportForm
@@ -62,6 +63,57 @@ def papers(request):
                   {'papers': papers,
                    'papers_only': all_papers,
                    'num_papers': len(Paper.nodes.all())})
+
+
+def paper_authors(request, id):
+    """Displays the list of authors associated with this paper"""
+    paper = _get_paper_by_id(id)
+    print("Retrieved paper with title {}".format(paper.title))
+
+    query = "MATCH (p:Paper)<-[r]-(a:Person) WHERE ID(p)={id} RETURN a, ID(r)"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        authors = [Person.inflate(row[0]) for row in results]
+        relationship_ids = [row[1] for row in results]
+    else:
+        authors = []
+    print("paper author link ids {}".format(relationship_ids))
+    print("Found {} authors for paper with id {}".format(len(authors), id))
+
+    # for rid in relationship_ids:
+    delete_urls = [ reverse('paper_remove_author', kwargs={'id': id, 'rid': rid}) for rid in relationship_ids]
+    print("author remove urls")
+    print(delete_urls)
+
+    authors = zip(authors, delete_urls)
+
+    return render(request,
+                  'paper_authors.html',
+                  {'authors': authors,
+                   'paper': paper, })
+
+
+# should limit access to admin users only!!
+@staff_member_required
+def paper_remove_author(request, id, rid):
+    print("Paper id {} and edge id {}".format(id, rid))
+
+    # Cypher query to delete edge of type authors with id equal to rid
+    query = "MATCH ()-[r:authors]-() WHERE ID(r)={id} DELETE r"
+    results, meta = db.cypher_query(query, dict(id=rid))
+
+    return HttpResponseRedirect(reverse("paper_authors", kwargs={'id': id}))
+
+
+def _get_paper_by_id(id):
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    paper = None
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    return paper
 
 
 def paper_detail(request, id):
