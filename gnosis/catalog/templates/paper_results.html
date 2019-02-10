@@ -3,11 +3,13 @@
 {% block content %}
 
 <h4>Papers that match your query</h4>
-<ul>
+
 {% for paper in papers %}
-    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
+<div class="well well-sm">
+    <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+</div>
 {% endfor %}
-</ul>
+
 
 {% if message %}
 <p class="bg-info">{{ message }}</p>

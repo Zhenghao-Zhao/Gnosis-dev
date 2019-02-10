@@ -7,11 +7,13 @@
 {% load el_pagination_tags %}
 
 {% paginate people %}
-<div class="well well-sm">
+
 {% for person in people %}
+<div class="well well-sm">
     <a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.middle_name }} {{ person.last_name }}</a>
-{% endfor %}
 </div>
+{% endfor %}
+
 
 {% get_pages %}
 Showing entries
