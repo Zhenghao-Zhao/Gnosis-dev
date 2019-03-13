@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Find a person</h2>
 
+<div class="row">
 {% if message %}
 <p class="bg-danger">{{ message }}</p>
 {% endif %}
@@ -13,14 +14,22 @@
     <p></p>
     <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
 </form>
+</div>
 
 {% if people %}
-<h4>These are the people that matched your query</h4>
-<ul>
-{% for person in people %}
-    <li><a href="{{ person.get_absolute_url }}">{{ person.last_name }}</a></li>
-{% endfor %}
-</ul>
+<div class="row">
+    <h4>These are the people that matched your query</h4>
+        <ul class="list-group">
+            {% for person, person_connect_url in people %}
+            <li class="list-group-item clearfix">
+                <a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.last_name }}</a>
+                {% if user.is_authenticated and user.is_superuser %}
+                <a class="btn btn-warning pull-right" href={{ person_connect_url }}>Connect</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+</div>
 {% endif %}
 
 {% endblock %}

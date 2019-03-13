@@ -293,6 +293,19 @@ def paper_connect_venue(request, id):
 
 
 @login_required
+def paper_connect_author_selected(request, id, aid):
+
+    query = "MATCH (p:Paper), (a:Person) WHERE ID(p)={id} AND ID(a)={aid} MERGE (a)-[r:authors]->(p) RETURN r"
+    results, meta = db.cypher_query(query, dict(id=id, aid=aid))
+
+    if len(results) > 0:
+        messages.add_message(request, messages.INFO, "Linked with author.")
+    else:
+        messages.add_message(request, messages.INFO, "Link to author failed!")
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
+
+@login_required
 def paper_connect_author(request, id):
     if request.method == 'POST':
         form = SearchPeopleForm(request.POST)
@@ -308,42 +321,44 @@ def paper_connect_author(request, id):
                 for person in people_found:
                     print("\t{} {} {}".format(person.first_name, person.middle_name, person.last_name))
 
-                if len(people_found) > 1:
+                if len(people_found) > 0:
+                    # for rid in relationship_ids:
+                    author_connect_urls = [reverse('paper_connect_author_selected', kwargs={'id': id, 'aid': person.id}) for person in people_found]
+                    print("author remove urls")
+                    print(author_connect_urls)
+
+                    authors = zip(people_found, author_connect_urls)
+
                     # ask the user to select one of them
                     return render(request, 'paper_connect_author.html', {'form': form,
-                                                                         'people': people_found,
-                                                                         'message': 'Found more than one matching people. Please narrow your search'})
-                else:
-                    person = people_found[0]  # one person found
-                    print('Selected person: {} {} {}'.format(person.first_name, person.middle_name, person.last_name))
-
-                # retrieve the paper
-                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
-                results, meta = db.cypher_query(query, dict(id=id))
-                if len(results) > 0:
-                    all_papers = [Paper.inflate(row[0]) for row in results]
-                    paper = all_papers[0]
-                    print("Found paper: {}".format(paper.title))
-                    # check if the paper is connect with the author; if yes, then do nothing,
-                    # otherwise add the link between paper and author
-                    query = 'MATCH (p:Paper)<-[r:authors]-(a:Person) where id(p)={id} and id(a)={author_id} return p'
-                    results, meta = db.cypher_query(query, dict(id=paper.id, author_id=person.id))
-                    if len(results) == 0:
-                        # person is not linked with paper so add the edge
-                        person.authors.connect(paper)
-                        messages.add_message(request, messages.INFO, "Linked with author!")
-                        # people = [Person.inflate(row[0]) for row in results]
-                        # for p in people:
-                        #     print("Disconnecting from: {}".format(p))
-                        #     paper.was_published_at.disconnect(p)
-                        #     paper.save()
-                    else:
-                        messages.add_message(request, messages.INFO, "Link to author already exists!")
-                else:
-                    print("Could not find paper!")
-                    # should not get here since we started from the actual paper...but what if we do end up here?
-                    pass  # Should raise an exception but for now just pass
-                return redirect('paper_detail', id=paper.id)
+                                                                         'people': authors,
+                                                                         'message': ''})
+                # else:
+                #     person = people_found[0]  # one person found
+                #     print('Selected person: {} {} {}'.format(person.first_name, person.middle_name, person.last_name))
+                #
+                # # retrieve the paper
+                # query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                # results, meta = db.cypher_query(query, dict(id=id))
+                # if len(results) > 0:
+                #     all_papers = [Paper.inflate(row[0]) for row in results]
+                #     paper = all_papers[0]
+                #     print("Found paper: {}".format(paper.title))
+                #     # check if the paper is connect with the author; if yes, then do nothing,
+                #     # otherwise add the link between paper and author
+                #     query = 'MATCH (p:Paper)<-[r:authors]-(a:Person) where id(p)={id} and id(a)={author_id} return p'
+                #     results, meta = db.cypher_query(query, dict(id=paper.id, author_id=person.id))
+                #     if len(results) == 0:
+                #         # person is not linked with paper so add the edge
+                #         person.authors.connect(paper)
+                #         messages.add_message(request, messages.INFO, "Linked with author!")
+                #     else:
+                #         messages.add_message(request, messages.INFO, "Link to author already exists!")
+                # else:
+                #     print("Could not find paper!")
+                #     # should not get here since we started from the actual paper...but what if we do end up here?
+                #     pass  # Should raise an exception but for now just pass
+                # return redirect('paper_detail', id=paper.id)
             else:
                 message = 'No matching people found'
 
