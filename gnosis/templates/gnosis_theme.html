@@ -129,6 +129,14 @@
                             <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
                         </div>
                     </div>
+
+                    <div class="btn-group">
+                        <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+                        <div class="btn-group">
+                            <a href="{% url 'code_create' %}" class="btn btn-primary" role="button">+</a>
+                        </div>
+                    </div>
+
                 </div>
                 {% else %}
                 <p></p>
@@ -148,6 +156,11 @@
                     <div class="btn-group">
                         <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
                     </div>
+
+                    <div class="btn-group">
+                        <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+                    </div>
+
                 </div>
 
                 {% endif %}

@@ -57,3 +57,12 @@ urlpatterns += [
     path('comment/<int:id>/', views.comment_detail, name='comment_detail'),
     path('comment/<int:id>/update', views.comment_update, name='comment_update'),
 ]
+
+# for updating/creating a new Code node
+urlpatterns += [
+    path('codes/', views.codes, name='codes_index'),
+    path('code/create/', views.code_create, name='code_create'),
+    path('code/find/', views.code_find, name='code_find'),
+    path('code/<int:id>/', views.code_detail, name='code_detail'),
+    path('code/<int:id>/update', views.code_update, name='code_update'),
+]

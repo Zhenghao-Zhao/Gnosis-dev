@@ -172,3 +172,26 @@ class Comment(DjangoNode):
 
     def get_absolute_url(self):
         return reverse('comment_detail', args=[self.id])
+
+
+class Code(DjangoNode):
+
+    uid = UniqueIdProperty()
+    created = DateTimeProperty(default=datetime.now())
+    created_by = IntegerProperty()  # The uid of the user who created this node
+
+    description = StringProperty(required=True)
+    website = StringProperty(required=True)
+    keywords = StringProperty(required=True)
+
+    implements = RelationshipTo("Paper", "implements")
+
+    class Meta:
+        app_label = 'catalog'
+        ordering = ['website', 'description', 'keywords']
+
+    def __str__(self):
+        return '{}'.format(self.website)
+
+    def get_absolute_url(self):
+        return reverse('code_detail', args=[self.id])
