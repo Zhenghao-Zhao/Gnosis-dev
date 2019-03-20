@@ -27,7 +27,7 @@
 
     /* Set black background color, white text and some padding */
     footer {
-      background-color: #555;
+      background-color: #ffffff;
       color: white;
       padding: 15px;
     }
@@ -91,7 +91,7 @@
 
 <div class="container-fluid text-center">
     <div class="row content">
-        <div class="col-sm-10 text-left">
+        <div class="col-sm-12 text-left">
             <div class="row main-column-left-right-buffer">
                 {% if user.is_authenticated %}
                 <p></p>
@@ -171,16 +171,18 @@
             </div>
         </div>
 
-        <div class="col-sm-2 sidenav">
-            {% load static %}
-            <img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">
-        </div>
+        <!--<div class="col-sm-2 sidenav">-->
+            <!--{% load static %}-->
+            <!--<img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">-->
+        <!--</div>-->
     </div>
 </div>
 
 <footer class="container-fluid text-center">
+    <hr>
     {% block footer %}
-    <p></p>
+    {% load static %}
+    <img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">
     {% endblock %}
 </footer>
 
