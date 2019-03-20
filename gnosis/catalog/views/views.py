@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect
 from catalog.models import Paper, Person, Dataset, Venue, Comment
 from catalog.forms import PaperForm, DatasetForm, VenueForm, CommentForm, PaperImportForm
-from catalog.forms import SearchVenuesForm, SearchPapersForm, SearchPeopleForm, SearchDatasetsForm
+from catalog.forms import SearchVenuesForm, SearchPapersForm, SearchPeopleForm, SearchDatasetsForm, SearchCodesForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -13,6 +13,8 @@ from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
+
+from catalog.views.views_codes import _code_find
 
 
 #
@@ -468,6 +470,63 @@ def paper_connect_dataset(request, id):
         message = None
 
     return render(request, 'paper_connect_dataset.html', {'form': form, 'datasets': None, 'message': message})
+
+@login_required
+def paper_connect_code_selected(request, id, cid):
+
+    query = "MATCH (p:Paper), (c:Code) WHERE ID(p)={id} AND ID(c)={cid} MERGE (c)-[r:implements]->(p) RETURN r"
+    results, meta = db.cypher_query(query, dict(id=id, cid=cid))
+
+    if len(results) > 0:
+        messages.add_message(request, messages.INFO, "Linked with code repo.")
+    else:
+        messages.add_message(request, messages.INFO, "Link to code repo failed!")
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
+
+
+@login_required
+def paper_connect_code(request, id):
+    """
+    View function for connecting a paper with a dataset.
+
+    :param request:
+    :param id:
+    :return:
+    """
+    if request.method == 'POST':
+        form = SearchCodesForm(request.POST)
+        if form.is_valid():
+            # search the db for the person
+            # if the person is found, then link with paper and go back to paper view
+            # if not, ask the user to create a new person
+            keywords = form.cleaned_data['keywords']
+            codes_found = _code_find(keywords)
+
+            if codes_found is not None:
+                print("Found {} codes that match".format(len(codes_found)))
+                for code in codes_found:
+                    print("\t{} {}".format(code.website, code.keywords))
+
+                if len(codes_found) > 0:
+                    # for rid in relationship_ids:
+                    codes_connect_urls = [reverse('paper_connect_code_selected', kwargs={'id': id, 'cid': code.id}) for code in codes_found]
+                    print(codes_connect_urls)
+
+                    codes = zip(codes_found, codes_connect_urls)
+
+                    # ask the user to select one of them
+                    return render(request, 'paper_connect_code.html', {'form': form,
+                                                                        'codes': codes,
+                                                                        'message': ''})
+            else:
+                message = 'No matching codes found'
+
+    if request.method == 'GET':
+        form = SearchCodesForm()
+        message = None
+
+    return render(request, 'paper_connect_code.html', {'form': form, 'codes': None, 'message': message})
 
 
 @login_required

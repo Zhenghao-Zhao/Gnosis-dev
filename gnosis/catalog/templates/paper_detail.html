@@ -34,9 +34,10 @@
 {% endif %}
 
 <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
-    || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> || <a
-            href="{% url 'paper_connect_author' paper.id %}">Author</a> || <a
-            href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a>{% endif %}</h4>
+    || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
+    <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
+    <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
+    <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
 
 <div id="cy"></div>
 
