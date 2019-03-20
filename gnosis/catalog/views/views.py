@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect
-from catalog.models import Paper, Person, Dataset, Venue, Comment
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.forms import PaperForm, DatasetForm, VenueForm, CommentForm, PaperImportForm
 from catalog.forms import SearchVenuesForm, SearchPapersForm, SearchPeopleForm, SearchDatasetsForm, SearchCodesForm
 from django.urls import reverse
@@ -31,6 +31,19 @@ def get_paper_authors(paper):
     authors = ['{}. {}'.format(author.first_name[0], author.last_name) for author in authors]
 
     return authors
+
+
+def _get_paper_codes(paper):
+    query = "MATCH (:Paper {title: {paper_title}})<--(c:Code) RETURN c"
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    if len(results) > 0:
+        codes = [Code.inflate(row[0]) for row in results]
+    else:
+        codes = []
+    # pdb.set_trace()
+    #authors = ['{}. {}'.format(author.first_name[0], author.last_name) for author in authors]
+
+    return codes
 
 
 def get_paper_venue(paper):
@@ -143,6 +156,9 @@ def paper_detail(request, id):
         comments = []
         num_comments = 0
 
+    # Retrieve the code repos that implement the algorithm(s) in this paper
+    codes = _get_paper_codes(paper)
+
     # Retrieve venue where paper was published.
     query = "MATCH (:Paper {title: {paper_title}})-->(v:Venue) RETURN v"
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
@@ -163,6 +179,7 @@ def paper_detail(request, id):
                    'venue': venue,
                    'authors': authors,
                    'comments': comments,
+                   'codes': codes,
                    'num_comments': num_comments,
                    'ego_network': ego_network_json})
 
@@ -494,6 +511,7 @@ def paper_connect_code(request, id):
     :param id:
     :return:
     """
+    message = ''
     if request.method == 'POST':
         form = SearchCodesForm(request.POST)
         if form.is_valid():
@@ -503,7 +521,7 @@ def paper_connect_code(request, id):
             keywords = form.cleaned_data['keywords']
             codes_found = _code_find(keywords)
 
-            if codes_found is not None:
+            if len(codes_found) > 0:
                 print("Found {} codes that match".format(len(codes_found)))
                 for code in codes_found:
                     print("\t{} {}".format(code.website, code.keywords))
