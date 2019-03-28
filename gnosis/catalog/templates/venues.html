@@ -1,0 +1,36 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<p></p>
+<p>
+<a href="{% url 'venue_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Venues
+</a>
+</p>
+
+{% load el_pagination_tags %}
+
+{% paginate venues %}
+
+{% for venue in venues %}
+<div class="well well-sm">
+    <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
+    <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
+</div>
+{% endfor %}
+
+{% get_pages %}
+Showing entries
+{{ pages.current_start_index }}-{{ pages.current_end_index }} of
+{{ pages.total_count }}.
+{# Just print pages to render the Digg-style pagination. #}
+{{ pages.get_rendered }}
+
+{% comment %}
+{{ pages.previous }} {{ pages.next }}
+{% show_pages %}
+{% endcomment %}
+
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<p></p>
+<p>
+<a href="{% url 'code_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Codes
+</a>
+</p>
+
+{% load el_pagination_tags %}
+
+{% paginate codes %}
+
+{% for code in codes %}
+<div class="well well-sm">
+    <p><a href="{{ code.get_absolute_url }}">{{ code.website }}</a></p>
+    <p>{{ code.description|truncatewords:25 }}</p>
+    <p class="text-right"><small>Keywords: {{ code.keywords }}</small></p>
+</div>
+{% endfor %}
+
+{% get_pages %}
+Showing entries
+{{ pages.current_start_index }}-{{ pages.current_end_index }} of
+{{ pages.total_count }}.
+{# Just print pages to render the Digg-style pagination. #}
+{{ pages.get_rendered }}
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "gnosis_theme.html" %}
+{% block content %}
+<p></p>
+<p>
+<a href="{% url 'paper_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Papers
+</a>
+</p>
+
+{% load el_pagination_tags %}
+
+{% paginate papers %}
+{% for paper, authors, venue in papers %}
+<div class="well well-sm">
+    <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
+    <p>{{ authors }}</p>
+    <p>{{ venue }}</p>
+    {{ paper.abstract|truncatewords:50 }}
+</div>
+{% endfor %}
+
+{% get_pages %}
+Showing entries
+{{ pages.current_start_index }}-{{ pages.current_end_index }} of
+{{ pages.total_count }}.
+{# Just print pages to render the Digg-style pagination. #}
+{{ pages.get_rendered }}
+
+{% endblock %}

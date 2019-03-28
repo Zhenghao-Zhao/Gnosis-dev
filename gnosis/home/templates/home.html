@@ -1,0 +1,34 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<h1>&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</h1>
+
+<h2>A knowledge management system for technical documents.</h2>
+
+{% if user.is_authenticated %}
+<h3> Hi {{ user.get_username }} (<a href="{% url 'logout' %}?next={{request.path}}">Logout</a>)</h3>
+{% else %}
+<h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of &gamma;&nu;&#974;&sigma;&iota;&sigmaf;.</h3>
+<h4>If you are new here then why not <a href="{% url 'django_registration_register' %}">register a new account!</a></h4>
+{% endif %}
+
+<p class="text-right">Statistics: We have {{ num_papers }} papers and {{ num_people }} people in our DB</p>
+
+<h4>Recently added papers</h4>
+<hr>
+{% for paper, authors in papers %}
+<ul class="list-group">
+    <li class="list-group-item">
+        <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
+        <p>{{ authors }}</p>
+        <p>{{ paper.abstract|truncatewords:50 }}</p>
+    </li>
+</ul>
+{% endfor %}
+
+{% if user.is_superuser %}
+<p><p><a href="{% url 'build_db' %}">Populate test DB</a></p>
+{% endif %}
+
+{% endblock %}

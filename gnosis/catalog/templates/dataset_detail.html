@@ -1,0 +1,33 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+
+<div class="well well-sm">
+    <h3>
+        <p>{{ dataset.name}}</p>
+        {% if dataset.website %}
+        <small>
+            <a href= {{ dataset.website }}><span class="glyphicon glyphicon-cloud-download"></span></a>
+        </small>
+        {% endif %}
+        {% if user.is_authenticated %}
+            {% if user.is_superuser or user.id == dataset.created_by %}
+            <small>
+                <a href="{% url 'dataset_update' dataset.id %}">
+                <span class="glyphicon glyphicon-edit"></span>
+                </a>
+            </small>
+            {% endif %}
+        {% endif %}
+    </h3>
+</div>
+
+<h4 class="text-right"><small>Keywords: {{ dataset.keywords }}</small></h4>
+<h4 class="text-right"><small>Publication Date: {{ dataset.publication_date }}</small></h4>
+
+<p><strong>Description:</strong> {{ dataset.description }}</p>
+
+<p>Type: {{dataset.source_type}}</p>
+
+{% endblock %}

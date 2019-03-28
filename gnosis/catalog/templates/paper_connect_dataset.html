@@ -1,0 +1,26 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+<h2>Find a dataset</h2>
+
+{% if message %}
+<p class="bg-danger">{{ message }}</p>
+{% endif %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p></p>
+    <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
+</form>
+
+{% if people %}
+<h4>These are the datasets that matched your query</h4>
+<ul>
+{% for dataset in datasets %}
+    <li><a href="{{ dataset.get_absolute_url }}">{{ dataset.name }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

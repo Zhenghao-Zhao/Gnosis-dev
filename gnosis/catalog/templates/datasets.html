@@ -1,0 +1,30 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<p></p>
+<p>
+<a href="{% url 'dataset_find' %}" class="btn btn-info">
+    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Datasets
+</a>
+</p>
+
+{% load el_pagination_tags %}
+
+{% paginate datasets %}
+
+{% for dataset in datasets %}
+<div class="well well-sm">
+    <p><a href="{{ dataset.get_absolute_url }}">{{ dataset.name }}</a></p>
+    <p>{{ dataset.description|truncatewords:25 }}</p>
+</div>
+{% endfor %}
+
+{% get_pages %}
+Showing entries
+{{ pages.current_start_index }}-{{ pages.current_end_index }} of
+{{ pages.total_count }}.
+{# Just print pages to render the Digg-style pagination. #}
+{{ pages.get_rendered }}
+
+{% endblock %}

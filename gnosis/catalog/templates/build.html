@@ -1,0 +1,9 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+DataBase build with {{ num_people }} people and {{ num_papers }} papers.
+
+<p><a href="{% url 'papers_index' %}">View Catalog.</a></p>
+
+{% endblock %}

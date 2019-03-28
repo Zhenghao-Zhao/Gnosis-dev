@@ -1,0 +1,34 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+
+<div class="well well-sm">
+<h3>
+    <p>{{ venue.name}}</p>
+    {% if user.is_authenticated %}
+        {% if user.is_superuser or user.id == venue.created_by %}
+        <p><small>
+            <a href="{% url 'venue_update' venue.id %}">
+            <span class="glyphicon glyphicon-edit"></span>
+            </a>
+        </small></p>
+        {% endif %}
+    {% endif %}
+</h3>
+</div>
+
+{% if venue.website %}
+<p>Website <a href= {{ venue.website }}><span class="glyphicon glyphicon-link"></span></a></p>
+{% endif %}
+
+<p>Publication Date: {{ venue.publication_date }}</p>
+{% if venue.keywords %}
+<p>Keywords: {{ venue.keywords }}</p>
+{% endif %}
+
+<p>Publisher: {{venue.publisher}}</p>
+<p>Type: {{venue.type}}</p>
+<p></p>
+
+{% endblock %}

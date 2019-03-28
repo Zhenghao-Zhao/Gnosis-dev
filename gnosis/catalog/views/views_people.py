@@ -1,0 +1,154 @@
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from catalog.models import Person
+from catalog.forms import PersonForm
+from catalog.forms import SearchPeopleForm
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from neomodel import db
+
+
+def _person_find(person_name, exact_match=False):
+    """
+    Searches the DB for a person whose name matches the given name
+    :param person_name:
+    :return:
+    """
+    person_name = person_name.lower()
+    person_name_tokens = [w for w in person_name.split()]
+    if exact_match:
+        if len(person_name_tokens) > 2:
+            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } AND LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20")
+        else:
+            query = ("MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } AND LOWER(p.first_name) IN { person_tokens } RETURN p LIMIT 20")
+    else:
+        query = "MATCH (p:Person) WHERE  LOWER(p.last_name) IN { person_tokens } OR LOWER(p.first_name) IN { person_tokens } OR LOWER(p.middle_name) IN { person_tokens } RETURN p LIMIT 20"
+
+    results, meta = db.cypher_query(query, dict(person_tokens=person_name_tokens))
+
+    if len(results) > 0:
+        print("Found {} matching people".format(len(results)))
+        people = [Person.inflate(row[0]) for row in results]
+        return people
+    else:
+        return None
+
+
+def person_find(request):
+    """
+    Searching for a person in the DB.
+
+    :param request:
+    :return:
+    """
+    message = None
+    if request.method == 'POST':
+        form = SearchPeopleForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+
+            people = _person_find(form.cleaned_data['person_name'])
+            if people is not None:
+                return render(request, 'people.html', {'people': people})
+            else:
+                message = "No results found. Please try again!"
+
+    elif request.method == 'GET':
+        print("Received GET request")
+        form = SearchPeopleForm()
+
+    return render(request, 'person_find.html', {'form': form, 'message': message})
+
+
+#
+# Person Views
+#
+def persons(request):
+    return render(request, 'people.html', {'people': Person.nodes.all(), 'num_people': len(Person.nodes.all())})
+
+
+def person_detail(request, id):
+    # Retrieve the paper from the database
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        # There should be only one results because ID should be unique. Here we check that at
+        # least one result has been returned and take the first result as the correct match.
+        # Now, it should not happen that len(results) > 1 since IDs are meant to be unique.
+        # For the MVP we are going to ignore the latter case and just continue but ultimately,
+        # we should be checking for > 1 and failing gracefully.
+        all_people = [Person.inflate(row[0]) for row in results]
+        person = all_people[0]
+    else:  # go back to the paper index page
+        return render(request, 'people.html', {'people': Person.nodes.all(), 'num_people': len(Person.nodes.all())})
+
+    #
+    # TO DO: Retrieve all papers co-authored by this person and list them; same for
+    # co-authors and advisees.
+    #
+    request.session['last-viewed-person'] = id
+    return render(request,
+                  'person_detail.html',
+                  {'person': person})
+
+
+@login_required
+def person_create(request):
+    user = request.user
+
+    if request.method == 'POST':
+        person = Person()
+        person.created_by = user.id
+        form = PersonForm(instance=person, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('persons_index'))
+    else:  # GET
+        form = PersonForm()
+
+    return render(request, 'person_form.html', {'form': form})
+
+
+@login_required
+def person_update(request, id):
+    # retrieve paper by ID
+    # https://github.com/neo4j-contrib/neomodel/issues/199
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_people = [Person.inflate(row[0]) for row in results]
+        person_inst = all_people[0]
+    else:
+        person_inst = Person()
+
+    # if this is POST request then process the Form data
+    if request.method == 'POST':
+        form = PersonForm(request.POST)
+        if form.is_valid():
+            person_inst.first_name = form.cleaned_data['first_name']
+            person_inst.middle_name = form.cleaned_data['middle_name']
+            person_inst.last_name = form.cleaned_data['last_name']
+            person_inst.affiliation = form.cleaned_data['affiliation']
+            person_inst.website = form.cleaned_data['website']
+            person_inst.save()
+
+            return HttpResponseRedirect(reverse('persons_index'))
+    # GET request
+    else:
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=id))
+        if len(results) > 0:
+            all_people = [Person.inflate(row[0]) for row in results]
+            person_inst = all_people[0]
+        else:
+            person_inst = Person()
+        form = PersonForm(initial={'first_name': person_inst.first_name,
+                                   'middle_name': person_inst.middle_name,
+                                   'last_name': person_inst.last_name,
+                                   'affiliation': person_inst.affiliation,
+                                   'website': person_inst.website,
+                                   }
+                          )
+
+    return render(request, 'person_update.html', {'form': form, 'person': person_inst})
+
