@@ -12,8 +12,31 @@ from neomodel import db
 # Code Views
 #
 def codes(request):
-    all_codes = Code.nodes.all()
-    return render(request, 'codes.html', {'codes': all_codes})
+    # all_codes = Code.nodes.all()
+    all_codes = Code.nodes.order_by("-created")[:50]
+
+    message = None
+    if request.method == "POST":
+        form = SearchCodesForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+            keywords = form.cleaned_data["keywords"].lower()  # comma separated list
+
+            codes = _code_find(keywords)
+
+            if len(codes) > 0:
+                return render(
+                    request, "codes.html", {"codes": codes, "form": form, "message": ""}
+                )
+            else:
+                message = "No results found. Please try again!"
+    elif request.method == "GET":
+        print("Received GET request")
+        form = SearchCodesForm()
+
+    return render(
+        request, "codes.html", {"codes": all_codes, "form": form, "message": message}
+    )
 
 
 def code_detail(request, id):
@@ -29,18 +52,19 @@ def code_detail(request, id):
         all_codes = [Code.inflate(row[0]) for row in results]
         code = all_codes[0]
     else:  # go back to the paper index page
-        return render(request, 'codes.html',
-                      {'codes': Code.nodes.all(), 'num_codes': len(Code.nodes.all())})
+        return render(
+            request,
+            "codes.html",
+            {"codes": Code.nodes.all(), "num_codes": len(Code.nodes.all())},
+        )
 
     #
     # TO DO: Retrieve and list all papers that evaluate on this dataset.
     #
 
-    request.session['last-viewed-code'] = id
+    request.session["last-viewed-code"] = id
 
-    return render(request,
-                  'code_detail.html',
-                  {'code': code})
+    return render(request, "code_detail.html", {"code": code})
 
 
 def _code_find(keywords):
@@ -54,7 +78,9 @@ def _code_find(keywords):
     codes = []
     if len(code_keywords) > 0:
         # Search using the keywords
-        keyword_query = '(?i).*' + '+.*'.join('(' + w + ')' for w in code_keywords) + '+.*'
+        keyword_query = (
+            "(?i).*" + "+.*".join("(" + w + ")" for w in code_keywords) + "+.*"
+        )
         query = "MATCH (d:Code) WHERE d.keywords =~ { keyword_query} RETURN d LIMIT 25"
         results, meta = db.cypher_query(query, dict(keyword_query=keyword_query))
         if len(results) > 0:
@@ -70,40 +96,40 @@ def code_find(request):
     :param request:
     """
     message = None
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SearchCodesForm(request.POST)
         print("Received POST request")
         if form.is_valid():
-            keywords = form.cleaned_data['keywords'].lower()  # comma separated list
+            keywords = form.cleaned_data["keywords"].lower()  # comma separated list
 
             codes = _code_find(keywords)
 
             if len(codes) > 0:
-                return render(request, 'codes.html', {'codes': codes})
+                return render(request, "codes.html", {"codes": codes})
             else:
                 message = "No results found. Please try again!"
-    elif request.method == 'GET':
+    elif request.method == "GET":
         print("Received GET request")
         form = SearchCodesForm()
 
-    return render(request, 'dataset_find.html', {'form': form, 'message': message})
+    return render(request, "dataset_find.html", {"form": form, "message": message})
 
 
 @login_required
 def code_create(request):
     user = request.user
 
-    if request.method == 'POST':
+    if request.method == "POST":
         code = Code()
         code.created_by = user.id
         form = CodeForm(instance=code, data=request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('codes_index'))
+            return HttpResponseRedirect(reverse("codes_index"))
     else:  # GET
         form = CodeForm()
 
-    return render(request, 'code_form.html', {'form': form})
+    return render(request, "code_form.html", {"form": form})
 
 
 @login_required
@@ -119,15 +145,15 @@ def code_update(request, id):
         code = Code()
 
     # if this is POST request then process the Form data
-    if request.method == 'POST':
+    if request.method == "POST":
         form = CodeForm(request.POST)
         if form.is_valid():
-            code.keywords = form.cleaned_data['keywords']
-            code.description = form.cleaned_data['description']
-            code.website = form.cleaned_data['website']
+            code.keywords = form.cleaned_data["keywords"]
+            code.description = form.cleaned_data["description"]
+            code.website = form.cleaned_data["website"]
             code.save()
 
-            return HttpResponseRedirect(reverse('codes_index'))
+            return HttpResponseRedirect(reverse("codes_index"))
     # GET request
     else:
         query = "MATCH (a) WHERE ID(a)={id} RETURN a"
@@ -138,10 +164,12 @@ def code_update(request, id):
         else:
             code = Code()
 
-        form = CodeForm(initial={'keywords': code.keywords,
-                                 'description': code.description,
-                                 'website': code.website,
-                                 }
-                        )
+        form = CodeForm(
+            initial={
+                "keywords": code.keywords,
+                "description": code.description,
+                "website": code.website,
+            }
+        )
 
-    return render(request, 'code_update.html', {'form': form, 'code': code})
+    return render(request, "code_update.html", {"form": form, "code": code})

@@ -2,15 +2,25 @@
 
 {% block content %}
 
-<p></p>
-<p>
-<a href="{% url 'code_find' %}" class="btn btn-info">
-    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Codes
-</a>
-</p>
-
 {% load el_pagination_tags %}
 
+<div class="text-center">
+{% if message %}
+<p class="bg-info">{{ message }}</p>
+{% endif %}
+<br>
+<form action="" method="post">
+    {% csrf_token %}
+    {% for field in form  %}
+        {{ field }}
+    {% endfor %}
+    <br>
+    <input type="submit" class="btn btn-primary btn-lg" value="Search Codes" />
+</form>
+</div>
+<br>
+
+{% if codes %}
 {% paginate codes %}
 
 {% for code in codes %}
@@ -27,5 +37,5 @@ Showing entries
 {{ pages.total_count }}.
 {# Just print pages to render the Digg-style pagination. #}
 {{ pages.get_rendered }}
-
+{% endif %}
 {% endblock %}
