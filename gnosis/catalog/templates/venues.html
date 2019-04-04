@@ -1,16 +1,25 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-
-<p></p>
-<p>
-<a href="{% url 'venue_find' %}" class="btn btn-info">
-    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Venues
-</a>
-</p>
-
 {% load el_pagination_tags %}
 
+<div class="text-center">
+{% if message %}
+<p class="bg-info">{{ message }}</p>
+{% endif %}
+<br>
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="form-group form-inline">
+    {{ form }}
+    </div>
+    <br>
+    <input type="submit" class="btn btn-primary btn-lg" value="Search Venues" />
+</form>
+</div>
+<br>
+
+{% if venues %}
 {% paginate venues %}
 
 {% for venue in venues %}
@@ -31,6 +40,6 @@ Showing entries
 {{ pages.previous }} {{ pages.next }}
 {% show_pages %}
 {% endcomment %}
-
+{% endif %}
 
 {% endblock %}

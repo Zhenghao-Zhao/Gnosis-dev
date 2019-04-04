@@ -1247,7 +1247,49 @@ def dataset_update(request, id):
 #
 def venues(request):
     all_venues = Venue.nodes.order_by("-publication_date")[:50]
-    return render(request, "venues.html", {"venues": all_venues})
+
+    message = None
+    if request.method == "POST":
+        form = SearchVenuesForm(request.POST)
+        if form.is_valid():
+            # search the db for the venue
+            # if venue found, then link with paper and go back to paper view
+            # if not, ask the user to create a new venue
+            english_stopwords = stopwords.words("english")
+            venue_name = form.cleaned_data["venue_name"].lower()
+            venue_publication_year = form.cleaned_data["venue_publication_year"]
+            # TO DO: should probably check that data is 4 digits...
+            venue_name_tokens = [
+                w for w in venue_name.split(" ") if not w in english_stopwords
+            ]
+            venue_query = (
+                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+            )
+            query = (
+                "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                + venue_publication_year[0:4]
+                + ".*' AND v.name =~ { venue_query } RETURN v"
+            )
+            results, meta = db.cypher_query(
+                query,
+                dict(
+                    venue_publication_year=venue_publication_year[0:4],
+                    venue_query=venue_query,
+                ),
+            )
+            if len(results) > 0:
+                venues = [Venue.inflate(row[0]) for row in results]
+                print("Found {} venues that match".format(len(venues)))
+                return render(request, "venues.html", {"venues": venues, 'form': form, "message": message})
+            else:
+                # render new Venue form with the searched name as
+                message = "No matching venues found"
+
+    if request.method == "GET":
+        form = SearchVenuesForm()
+        message = None
+
+    return render(request, "venues.html", {"venues": all_venues, "form": form, "message": message})
 
 
 def venue_detail(request, id):
