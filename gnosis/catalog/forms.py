@@ -58,7 +58,7 @@ class SearchPapersForm(Form):
     def clean_paper_title(self):
         return self.cleaned_data['paper_title']
 
-    paper_title = forms.CharField(required=True)
+    paper_title = forms.CharField(required=True, widget=forms.TextInput(attrs={'size': 60}))
 
 
 class SearchPeopleForm(Form):
