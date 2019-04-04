@@ -1033,7 +1033,36 @@ def _person_find(person_name, exact_match=False):
 #
 def datasets(request):
     all_datasets = Dataset.nodes.order_by("-publication_date")[:50]
-    return render(request, "datasets.html", {"datasets": all_datasets})
+
+    message = None
+    if request.method == "POST":
+        form = SearchDatasetsForm(request.POST)
+        print("Received POST request")
+        if form.is_valid():
+            dataset_name = form.cleaned_data["name"].lower()
+            dataset_keywords = form.cleaned_data[
+                "keywords"
+            ].lower()  # comma separated list
+
+            datasets = _dataset_find(dataset_name, dataset_keywords)
+
+            if len(datasets) > 0:
+                return render(
+                    request,
+                    "datasets.html",
+                    {"datasets": datasets, "form": form, "message": ""},
+                )
+            else:
+                message = "No results found. Please try again!"
+    elif request.method == "GET":
+        print("Received GET request")
+        form = SearchDatasetsForm()
+
+    return render(
+        request,
+        "datasets.html",
+        {"datasets": all_datasets, "form": form, "message": message},
+    )
 
 
 def dataset_detail(request, id):

@@ -44,8 +44,8 @@ class SearchDatasetsForm(Form):
     # view code because we don't know at this stage which one of the
     # two the user will specify and we want to give her the option to
     # search by dataset name or keywords or both.
-    name = forms.CharField(required=False)
-    keywords = forms.CharField(required=False)
+    name = forms.CharField(required=False, widget=forms.TextInput(attrs={'size': 20}))
+    keywords = forms.CharField(required=False, widget=forms.TextInput(attrs={'size': 40}))
 
 
 class SearchPapersForm(Form):
