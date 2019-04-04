@@ -4,6 +4,7 @@ from neomodel import db
 from catalog.forms import SearchPapersForm
 from nltk.corpus import stopwords
 
+
 def home(request):
     num_papers = len(Paper.nodes.all())
     num_people = len(Person.nodes.all())

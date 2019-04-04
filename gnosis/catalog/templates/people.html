@@ -1,16 +1,25 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-
-<p></p>
-<p>
-    <a href="{% url 'person_find' %}" class="btn btn-info">
-        <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search People
-    </a>
-</p>
-
 {% load el_pagination_tags %}
 
+<div class="text-center">
+{% if message %}
+<p class="bg-info">{{ message }}</p>
+{% endif %}
+<br>
+<form action="" method="post">
+    {% csrf_token %}
+    {% for field in form  %}
+        {{ field }}
+    {% endfor %}
+    <br>
+    <input type="submit" class="btn btn-primary btn-lg" value="Search People" />
+</form>
+</div>
+<br>
+
+{% if people %}
 {% paginate people %}
 
 {% for person in people %}
@@ -31,5 +40,5 @@ Showing entries
 {{ pages.total_count }}.
 {# Just print pages to render the Digg-style pagination. #}
 {{ pages.get_rendered }}
-
+{% endif %}
 {% endblock %}
