@@ -1,7 +1,8 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<div class="container p-none">
+<div class="mt-5">
+
     {% if next %}
     {% if user.is_authenticated %}
     <h3>Your account doesn't have access to this page. To proceed,
@@ -10,13 +11,10 @@
     <h3>Log in to your account.</h3>
     {% endif %}
     {% endif %}
-</div>
-
-<div id="content-container" class="container p-none">
-    <div class="lgn-container col-sm-4">
+    <div class="mt-5">
         <form id="login-form" method="post" action="{% url 'login' %}">
             {% csrf_token %}
-            <table class="table">
+            <table class="w-75">
                 <tr>
                     <td><label for="id_username">Username</label></td>
                     <td><input id="id_username" name="username"
@@ -36,13 +34,14 @@
             {% endif %}
 
             <input type="submit" value="Login"
-                   class="btn btn-primary pull-right" />
-            <input type="hidden" name="next" value="{{ next }}" />
+                   class="btn btn-primary btn-lg float-right"/>
+            <input type="hidden" name="next" value="{{ next }}"/>
         </form>
     </div>
+    <div class="mt-5">
+        {# Assumes you setup the password_reset view in your URLconf #}
+        <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+        <p><a href="{% url 'django_registration_register' %}">New User? Register a new account!</a></p>
+    </div>
 </div>
-
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-<p><a href="{% url 'django_registration_register' %}">New User? Register a new account!</a></p>
 {% endblock %}

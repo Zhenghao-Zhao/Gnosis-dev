@@ -7,43 +7,46 @@
 <h2>A knowledge management system for technical documents.</h2>
 
 {% if not user.is_authenticated %}
-<h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of &gamma;&nu;&#974;&sigma;&iota;&sigmaf;.</h3>
+<h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of &gamma;&nu;&#974;&sigma;&iota;&sigmaf;.
+</h3>
 <h4>If you are new here then why not <a href="{% url 'django_registration_register' %}">register a new account!</a></h4>
 {% endif %}
 
 <p class="text-right">Statistics: We have {{ num_papers }} papers and {{ num_people }} people in our DB</p>
 
 <div class="text-center">
-{% if message %}
-<p class="bg-info">{{ message }}</p>
-{% endif %}
-<br>
-<form action="" method="post">
-    {% csrf_token %}
-    {% for field in form  %}
-    <span class="rounded-lg">
+    {% if message %}
+    <p class="bg-info">{{ message }}</p>
+    {% endif %}
+    <br>
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <span class="rounded-lg">
         {{ field }}
         </span>
-    {% endfor %}
-    <br>
-    <input type="submit" class="btn btn-primary btn-lg" value="Search Papers" />
-</form>
+        {% endfor %}
+        <br>
+        <input type="submit" class="btn btn-primary btn-lg" value="Search Papers"/>
+    </form>
 </div>
 
-<h4>Recently added papers</h4>
-<hr>
-{% for paper, authors in papers %}
-<ul class="list-group">
-    <li class="list-group-item">
-        <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
-        <p>{{ authors }}</p>
-        <p>{{ paper.abstract|truncatewords:50 }}</p>
-    </li>
-</ul>
-{% endfor %}
+<div class="mt-5">
+    <h4>Recently added papers</h4>
+    <hr>
+    {% for paper, authors in papers %}
+    <ul class="list-group">
+        <li class="list-group-item mt-1">
+            <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
+            <p>{{ authors }}</p>
+            <p>{{ paper.abstract|truncatewords:50 }}</p>
+        </li>
+    </ul>
+    {% endfor %}
 
-{% if user.is_superuser %}
-<p><p><a href="{% url 'build_db' %}">Populate test DB</a></p>
-{% endif %}
-
+    {% if user.is_superuser %}
+    <p>
+    <p><a href="{% url 'build_db' %}">Populate test DB</a></p>
+    {% endif %}
+</div>
 {% endblock %}

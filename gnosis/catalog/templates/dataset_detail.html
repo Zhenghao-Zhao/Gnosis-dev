@@ -2,24 +2,22 @@
 
 {% block content %}
 
-
-<div class="well well-sm">
+<div class="mt-5">
     <h3>
-        <p>{{ dataset.name}}</p>
         {% if dataset.website %}
-        <small>
-            <a href= {{ dataset.website }}><span class="glyphicon glyphicon-cloud-download"></span></a>
-        </small>
+            <a href= {{ dataset.website }}>{{ dataset.name }}</a>
+        {% else %}
+        <p>{{ dataset.name}}</p>
         {% endif %}
+        <p>
         {% if user.is_authenticated %}
             {% if user.is_superuser or user.id == dataset.created_by %}
-            <small>
-                <a href="{% url 'dataset_update' dataset.id %}">
-                <span class="glyphicon glyphicon-edit"></span>
+                <a href="{% url 'dataset_update' dataset.id %}"  class="btn btn-danger btn-sm" role="button">
+                Edit
                 </a>
-            </small>
             {% endif %}
         {% endif %}
+        </p>
     </h3>
 </div>
 

@@ -3,43 +3,47 @@
 {% block content %}
 {% load el_pagination_tags %}
 
-<div class="text-center">
-{% if message %}
-<p class="bg-info">{{ message }}</p>
-{% endif %}
-<br>
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="form-group form-inline">
-    {{ form }}
+<div class="mt-5">
+    <div class="text-center">
+        {% if message %}
+        <p class="bg-info">{{ message }}</p>
+        {% endif %}
+
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="form-group form-inline justify-content-center">
+                {{ form }}
+            </div>
+            <br>
+            <input type="submit" class="btn btn-primary btn-lg" value="Search Venues"/>
+        </form>
     </div>
     <br>
-    <input type="submit" class="btn btn-primary btn-lg" value="Search Venues" />
-</form>
+
+    {% if venues %}
+    {% paginate venues %}
+
+    {% for venue in venues %}
+    <ul class="list-group">
+        <li class="list-group-item mt-1">
+            <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
+            <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
+        </li>
+    </ul>
+    {% endfor %}
+
+    {% get_pages %}
+    Showing entries
+    {{ pages.current_start_index }}-{{ pages.current_end_index }} of
+    {{ pages.total_count }}.
+    {# Just print pages to render the Digg-style pagination. #}
+    {{ pages.get_rendered }}
+
+    {% comment %}
+    {{ pages.previous }} {{ pages.next }}
+    {% show_pages %}
+    {% endcomment %}
 </div>
-<br>
-
-{% if venues %}
-{% paginate venues %}
-
-{% for venue in venues %}
-<div class="well well-sm">
-    <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
-    <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
-</div>
-{% endfor %}
-
-{% get_pages %}
-Showing entries
-{{ pages.current_start_index }}-{{ pages.current_end_index }} of
-{{ pages.total_count }}.
-{# Just print pages to render the Digg-style pagination. #}
-{{ pages.get_rendered }}
-
-{% comment %}
-{{ pages.previous }} {{ pages.next }}
-{% show_pages %}
-{% endcomment %}
 {% endif %}
 
 {% endblock %}

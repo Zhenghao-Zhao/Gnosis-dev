@@ -4,18 +4,18 @@
 {% load el_pagination_tags %}
 
 <div class="text-center">
-{% if message %}
-<p class="bg-info">{{ message }}</p>
-{% endif %}
-<br>
-<form action="" method="post">
-    {% csrf_token %}
-    {% for field in form  %}
-        {{ field }}
-    {% endfor %}
+    {% if message %}
+    <p class="bg-info">{{ message }}</p>
+    {% endif %}
     <br>
-    <input type="submit" class="btn btn-primary btn-lg" value="Search People" />
-</form>
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        {{ field }}
+        {% endfor %}
+        <br>
+        <input type="submit" class="btn btn-primary btn-lg" value="Search People"/>
+    </form>
 </div>
 <br>
 
@@ -23,15 +23,18 @@
 {% paginate people %}
 
 {% for person in people %}
-<div class="well well-sm">
-    {% if person.middel_name %}
-    <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name }}</a>
-    </p>
-    {% else %}
-    <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
-    {% endif %}
-    {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
-</div>
+<ul class="list-group">
+    <li class="list-group-item mt-1">
+        {% if person.middel_name %}
+        <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{ person.last_name
+            }}</a>
+        </p>
+        {% else %}
+        <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
+        {% endif %}
+        {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
+    </li>
+</ul>
 {% endfor %}
 
 {% get_pages %}

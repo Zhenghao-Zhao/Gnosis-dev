@@ -1,16 +1,18 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h4>Find Code</h4>
+<div class="mt-5">
+    <h4>Find Code</h4>
 
-{% if message %}
-<p class="bg-info">{{ message }}</p>
-{% endif %}
+    {% if message %}
+    <p class="bg-info">{{ message }}</p>
+    {% endif %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <p></p>
-    <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
-</form>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <p></p>
+        <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit"/>
+    </form>
+</div>
 {% endblock %}

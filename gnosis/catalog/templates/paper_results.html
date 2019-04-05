@@ -2,17 +2,23 @@
 
 {% block content %}
 
-<h4>Papers that match your query</h4>
+<div class="mt-5">
+    <h4>Papers that match your query</h4>
 
-{% for paper in papers %}
-<div class="well well-sm">
-    <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+    {% if papers %}
+    {% for paper in papers %}
+    <ul class="list-group">
+        <li class="list-group-item mt-1">
+            <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+        </li>
+    </ul>
+    {% endfor %}
+    {% endif %}
+
+    {% if message %}
+    <div class="mt-5">
+        <p class="bg-info">{{ message }}</p>
+    </div>
+    {% endif %}
 </div>
-{% endfor %}
-
-
-{% if message %}
-<p class="bg-info">{{ message }}</p>
-{% endif %}
-
 {% endblock %}

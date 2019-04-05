@@ -1374,6 +1374,7 @@ def venue_create(request):
     if request.method == "POST":
         venue = Venue()
         venue.created_by = user.id
+        venue.created_by = user.id
         form = VenueForm(instance=venue, data=request.POST)
         if form.is_valid():
             form.save()

@@ -50,7 +50,7 @@ def person_find(request):
 
             people = _person_find(form.cleaned_data["person_name"])
             if people is not None:
-                return render(request, "people.html", {"people": people})
+                return render(request, "people.html", {"people": people, "form": form, "message": message})
             else:
                 message = "No results found. Please try again!"
 

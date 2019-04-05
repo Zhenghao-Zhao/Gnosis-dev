@@ -105,14 +105,18 @@ def code_find(request):
             codes = _code_find(keywords)
 
             if len(codes) > 0:
-                return render(request, "codes.html", {"codes": codes})
+                return render(
+                    request,
+                    "codes.html",
+                    {"codes": codes, "form": form, "message": message},
+                )
             else:
                 message = "No results found. Please try again!"
     elif request.method == "GET":
         print("Received GET request")
         form = SearchCodesForm()
 
-    return render(request, "dataset_find.html", {"form": form, "message": message})
+    return render(request, "code_find.html", {"form": form, "message": message})
 
 
 @login_required
