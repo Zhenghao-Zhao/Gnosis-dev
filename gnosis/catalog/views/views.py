@@ -169,6 +169,18 @@ def paper_remove_author(request, id, rid):
     return HttpResponseRedirect(reverse("paper_authors", kwargs={"id": id}))
 
 
+# should limit access to admin users only!!
+@staff_member_required
+def paper_delete(request, id):
+    print("WARNING: Deleting paper id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (p:Paper) WHERE ID(p)={id} DETACH DELETE p"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("papers_index"))
+
+
 def _get_paper_by_id(id):
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"

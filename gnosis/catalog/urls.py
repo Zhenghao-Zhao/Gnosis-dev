@@ -12,6 +12,7 @@ urlpatterns = [
 # for updating/creating a new Paper node
 urlpatterns += [
     path('paper/<int:id>/update', views.paper_update, name='paper_update'),
+    path('paper/<int:id>/delete', views.paper_delete, name='paper_delete'),
     path('paper/<int:id>/connect/venue', views.paper_connect_venue, name='paper_connect_venue'),
     path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/<int:id>/connect/author/<int:aid>', views.paper_connect_author_selected, name='paper_connect_author_selected'),
