@@ -2,23 +2,43 @@
 
 {% block content %}
 
-<div class="mt-5">
-    <h4>Papers that match your query</h4>
-
-    {% if papers %}
-    {% for paper in papers %}
-    <ul class="list-group">
-        <li class="list-group-item mt-1">
-            <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
-        </li>
-    </ul>
-    {% endfor %}
-    {% endif %}
-
-    {% if message %}
-    <div class="mt-5">
+<div class="card shadow-sm text-center mt-3">
+    <div class="card-body">
+        {% if message %}
         <p class="bg-info">{{ message }}</p>
+        {% endif %}
+
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            {{ field }}
+            {% endfor %}
+            <br>
+            <input type="submit" class="btn btn-primary btn-lg" value="Search Papers"/>
+        </form>
     </div>
-    {% endif %}
+</div>
+
+<div class=" card shadow-sm mt-3">
+    <div class="card-header">
+        <h4>Papers that match your query</h4>
+    </div>
+    <div class="card-body">
+        {% if papers %}
+        {% for paper in papers %}
+        <ul class="list-group">
+            <li class="list-group-item mt-1">
+                <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+            </li>
+        </ul>
+        {% endfor %}
+        {% endif %}
+
+        {% if message %}
+        <div class="mt-5">
+            <p class="bg-info">{{ message }}</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

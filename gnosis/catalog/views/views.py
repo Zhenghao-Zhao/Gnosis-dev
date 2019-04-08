@@ -108,7 +108,7 @@ def papers(request):
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, "paper_results.html", {"papers": papers})
+                return render(request, "paper_results.html", {"papers": papers, "form": form, "message": ""})
             else:
                 message = "No results found. Please try again!"
 
@@ -307,7 +307,7 @@ def paper_find(request):
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, "paper_results.html", {"papers": papers})
+                return render(request, "papers_index.html", {"papers": papers, "form": form, "message": message})
             else:
                 message = "No results found. Please try again!"
 
@@ -315,7 +315,7 @@ def paper_find(request):
         print("Received GET request")
         form = SearchPapersForm()
 
-    return render(request, "paper_find.html", {"form": form, "message": message})
+    return render(request, "papers_index.html", {"form": form, "message": message})
 
 
 @login_required
