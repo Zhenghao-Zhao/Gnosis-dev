@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from catalog.models import Person
 from catalog.forms import PersonForm
@@ -6,7 +7,7 @@ from catalog.forms import SearchPeopleForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 
 
 def _person_find(person_name, exact_match=False):
@@ -180,3 +181,14 @@ def person_update(request, id):
         )
 
     return render(request, "person_update.html", {"form": form, "person": person_inst})
+
+# should limit access to admin users only!!
+@staff_member_required
+def person_delete(request, id):
+    print("WARNING: Deleting person id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (p:Person) WHERE ID(p)={id} DETACH DELETE p"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("persons_index"))

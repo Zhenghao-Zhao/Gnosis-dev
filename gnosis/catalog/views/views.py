@@ -166,6 +166,9 @@ def paper_remove_author(request, id, rid):
     query = "MATCH ()-[r:authors]-() WHERE ID(r)={id} DELETE r"
     results, meta = db.cypher_query(query, dict(id=rid))
 
+    # TO DO
+    # What does this return? How can I make certain that the paper was deleted?
+
     return HttpResponseRedirect(reverse("paper_authors", kwargs={"id": id}))
 
 

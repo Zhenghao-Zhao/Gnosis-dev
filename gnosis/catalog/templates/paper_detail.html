@@ -3,10 +3,7 @@
 {% block content %}
 
 <div class="mt-5">
-    <h3>{{ paper.title }}
-        {% if user.is_authenticated and user.is_superuser %}<a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete</a>
-        {% endif %}
-    </h3>
+    <h3>{{ paper.title }}</h3>
 
     <h4>
         <a href={{ paper.download_link }} class="btn btn-primary" role="button">Download</a>
@@ -46,6 +43,14 @@
         <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
         <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
 </div>
+{% if user.is_authenticated and user.is_superuser %}
+<div class="card text-left shadow-sm mb-5 mt-3">
+    <div class="card-header"><strong>Admin functions</strong></div>
+    <div class="card-body">
+        <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
+    </div>
+</div>
+{% endif %}
 {% if codes %}
 <h4>Code</h4>
 <ul class="list-group">
@@ -86,11 +91,7 @@
     var cy = cytoscape({
         container: document.getElementById('cy'), // container to render in
 
-        elements: {
-    {
-        ego_network | safe
-    }
-    },
+        elements: {{ ego_network | safe }},
 
     style: [ // the stylesheet for the graph
         {
