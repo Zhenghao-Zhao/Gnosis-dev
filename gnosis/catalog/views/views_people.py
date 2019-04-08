@@ -182,6 +182,7 @@ def person_update(request, id):
 
     return render(request, "person_update.html", {"form": form, "person": person_inst})
 
+
 # should limit access to admin users only!!
 @staff_member_required
 def person_delete(request, id):

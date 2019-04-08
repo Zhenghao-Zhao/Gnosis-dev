@@ -3,31 +3,43 @@
 {% block content %}
 
 <div class="mt-5">
-<h3>
-    {% if venue.website %}
-    <p><a href= {{ venue.website }}>{{ venue.name}}</a></p>
-    {% else %}
-    <p>{{ venue.name}}</p>
-    {% endif %}
-    {% if user.is_authenticated %}
-        {% if user.is_superuser or user.id == venue.created_by %}
-        <p><small>
-            <a href="{% url 'venue_update' venue.id %}" class="btn btn-danger btn-sm" role="button">
-            Edit
-            </a>
-        </small></p>
+    <h3>
+        {% if venue.website %}
+        <p><a href={{ venue.website }}>{{ venue.name}}</a></p>
+        {% else %}
+        <p>{{ venue.name}}</p>
         {% endif %}
-    {% endif %}
-</h3>
+        {% if user.is_authenticated %}
+        {% if user.is_superuser or user.id == venue.created_by %}
+        <p>
+            <small>
+                <a href="{% url 'venue_update' venue.id %}" class="btn btn-danger btn-sm" role="button">
+                    Edit
+                </a>
+            </small>
+        </p>
+        {% endif %}
+        {% endif %}
+    </h3>
 </div>
 
-<p>Publication Date: {{ venue.publication_date }}</p>
-{% if venue.keywords %}
-<p>Keywords: {{ venue.keywords }}</p>
-{% endif %}
+<div class="mt-5">
+    <p>Publication Date: {{ venue.publication_date }}</p>
+    {% if venue.keywords %}
+    <p>Keywords: {{ venue.keywords }}</p>
+    {% endif %}
 
-<p>Publisher: {{venue.publisher}}</p>
-<p>Type: {{venue.type}}</p>
-<p></p>
+    <p>Publisher: {{venue.publisher}}</p>
+    <p>Type: {{venue.type}}</p>
+</div>
+
+{% if user.is_authenticated and user.is_superuser %}
+<div class="card text-left shadow-sm mb-5 mt-3">
+    <div class="card-header"><strong>Admin functions</strong></div>
+    <div class="card-body">
+        <a href="{% url 'venue_delete' venue.id %}" class="btn btn-danger btn-sm" role="button">Delete Venue</a>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

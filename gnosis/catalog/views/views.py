@@ -1400,6 +1400,18 @@ def venue_create(request):
     return render(request, "venue_form.html", {"form": form})
 
 
+# should limit access to admin users only!!
+@staff_member_required
+def venue_delete(request, id):
+    print("WARNING: Deleting venue id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (v:Venue) WHERE ID(v)={id} DETACH DELETE v"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("venues_index"))
+
+
 @login_required
 def venue_update(request, id):
     # retrieve paper by ID
