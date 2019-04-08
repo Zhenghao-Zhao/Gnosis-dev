@@ -2,28 +2,28 @@
 
 {% block content %}
 
-<div class="mt-5">
-    <h3>
-        {% if venue.website %}
-        <p><a href={{ venue.website }}>{{ venue.name}}</a></p>
-        {% else %}
-        <p>{{ venue.name}}</p>
-        {% endif %}
-        {% if user.is_authenticated %}
-        {% if user.is_superuser or user.id == venue.created_by %}
-        <p>
-            <small>
-                <a href="{% url 'venue_update' venue.id %}" class="btn btn-danger btn-sm" role="button">
-                    Edit
-                </a>
-            </small>
-        </p>
-        {% endif %}
-        {% endif %}
-    </h3>
-</div>
-
-<div class="mt-5">
+<div class="card shadow-sm mt-5 mb-5">
+    <div class="card-header">
+        <h3>
+            {% if venue.website %}
+            <p><a href={{ venue.website }}>{{ venue.name}}</a></p>
+            {% else %}
+            <p>{{ venue.name}}</p>
+            {% endif %}
+            {% if user.is_authenticated %}
+            {% if user.is_superuser or user.id == venue.created_by %}
+            <p>
+                <small>
+                    <a href="{% url 'venue_update' venue.id %}" class="btn btn-danger btn-sm" role="button">
+                        Edit
+                    </a>
+                </small>
+            </p>
+            {% endif %}
+            {% endif %}
+        </h3>
+    </div>
+    <div class="card-body">
     <p>Publication Date: {{ venue.publication_date }}</p>
     {% if venue.keywords %}
     <p>Keywords: {{ venue.keywords }}</p>
@@ -31,6 +31,7 @@
 
     <p>Publisher: {{venue.publisher}}</p>
     <p>Type: {{venue.type}}</p>
+    </div>
 </div>
 
 {% if user.is_authenticated and user.is_superuser %}
