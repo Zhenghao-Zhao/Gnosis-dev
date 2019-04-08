@@ -30,7 +30,7 @@ def home(request):
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, 'paper_results.html', {'papers': papers})
+                return render(request, 'paper_results.html', {'papers': papers, 'form': form, 'message': message})
             else:
                 message = "No results found. Please try again!"
 
