@@ -2,34 +2,47 @@
 
 {% block content %}
 
-<div class="mt-5">
-    <h3>
-        {% if person.website %}
-        {% if person.middle_name %}
-        <p><a href={{ person.website }}>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</a></p>
+<div class="card shadow-sm mt-5 mb-5">
+    <div class="card-header">
+        <h3>
+            {% if person.website %}
+            {% if person.middle_name %}
+            <p><a href={{ person.website }}>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</a></p>
+            {% else %}
+            <p><a href={{ person.website }}>{{ person.first_name}} {{person.last_name}}</a></p>
+            {% endif %}
+            {% else %}
+            {% if person.middle_name %}
+            <p>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</p>
+            {% else %}
+            <p>{{ person.first_name}} {{person.last_name}}</p>
+            {% endif %}
+            {% endif %}
+            {% if user.is_authenticated %}
+            {% if user.is_superuser or user.id == person.created_by %}
+            <p><a href="{% url 'person_update' person.id %}" class="btn btn-sm btn-danger" role="button">Edit
+            </a></p>
+            {% endif %}
+            {% endif %}
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if person.affiliation %}
+        <p>Affiliation: {{ person.affiliation }}</p>
         {% else %}
-        <p><a href={{ person.website }}>{{ person.first_name}} {{person.last_name}}</a></p>
+        <p>Affiliation: Unknown</p>
         {% endif %}
-        {% else %}
-        {% if person.middle_name %}
-        <p>{{ person.first_name}} {{person.middle_name}} {{person.last_name}}</p>
-        {% else %}
-        <p>{{ person.first_name}} {{person.last_name}}</p>
-        {% endif %}
-        {% endif %}
-        {% if user.is_authenticated %}
-        {% if user.is_superuser or user.id == person.created_by %}
-        <p><a href="{% url 'person_update' person.id %}" class="btn btn-danger" role="button">Edit
-        </a></p>
-        {% endif %}
-        {% endif %}
-    </h3>
+    </div>
 </div>
 
-{% if person.affiliation %}
-<p>Affiliation: {{ person.affiliation }}</p>
-{% else %}
-<p>Affiliation: Unknown</p>
+{% if user.is_authenticated and user.is_superuser %}
+<div class="card text-left shadow-sm mb-5 mt-3">
+    <div class="card-header"><strong>Admin functions</strong></div>
+    <div class="card-body">
+        <a href="{% url 'person_delete' person.id %}" class="btn btn-danger btn-sm" role="button">Delete Person</a>
+    </div>
+</div>
 {% endif %}
+
 
 {% endblock %}

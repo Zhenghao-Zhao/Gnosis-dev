@@ -2,24 +2,37 @@
 
 {% block content %}
 
-<div class="mt-5">
-    <h3>
-        <a href={{ code.website }} target="_blank">{{ code.website }}</a>
-        {% if user.is_authenticated %}
-        {% if user.is_superuser or user.id == code.created_by %}
-        <p>
-            <a href="{% url 'code_update' code.id %}" class="btn btn-danger btn-sm" role="" button>
-                Edit
-            </a>
+<div class="card shadow-sm mt-5">
+    <div class="card-header">
+        <h3>
+            <a href={{ code.website }} target="_blank">{{ code.website }}</a>
+            {% if user.is_authenticated %}
+            {% if user.is_superuser or user.id == code.created_by %}
+            <p>
+                <a href="{% url 'code_update' code.id %}" class="btn btn-danger btn-sm" role="" button>
+                    Edit
+                </a>
+            </p>
+            {% endif %}
+            {% endif %}
+        </h3>
+    </div>
+    <div class="card-body">
+        <p>{{ code.description }}</p>
+        <p class="text-right">
+            <small>Keywords: {{ code.keywords }}</small>
         </p>
-        {% endif %}
-        {% endif %}
-    </h3>
-    <p></p>
-    <p>{{ code.description }}</p>
-    <p class="text-right">
-        <small>Keywords: {{ code.keywords }}</small>
-    </p>
+    </div>
 </div>
+
+{% if user.is_authenticated and user.is_superuser %}
+<div class="card text-left shadow-sm mb-5 mt-3">
+    <div class="card-header"><strong>Admin functions</strong></div>
+    <div class="card-body">
+        <a href="{% url 'code_delete' code.id %}" class="btn btn-danger btn-sm" role="button">Delete Code</a>
+    </div>
+</div>
+{% endif %}
+
 
 {% endblock %}

@@ -12,6 +12,7 @@ urlpatterns = [
 # for updating/creating a new Paper node
 urlpatterns += [
     path('paper/<int:id>/update', views.paper_update, name='paper_update'),
+    path('paper/<int:id>/delete', views.paper_delete, name='paper_delete'),
     path('paper/<int:id>/connect/venue', views.paper_connect_venue, name='paper_connect_venue'),
     path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/<int:id>/connect/author/<int:aid>', views.paper_connect_author_selected, name='paper_connect_author_selected'),
@@ -31,6 +32,7 @@ urlpatterns += [
     path('person/create/', views.person_create, name='person_create'),
     path('person/<int:id>/', views.person_detail, name='person_detail'),
     path('person/<int:id>/update', views.person_update, name='person_update'),
+    path('person/<int:id>/delete', views.person_delete, name='person_delete'),
     path('person/find/', views.person_find, name='person_find'),
 ]
 
@@ -41,6 +43,7 @@ urlpatterns += [
     path('dataset/find/', views.dataset_find, name='dataset_find'),
     path('dataset/<int:id>/', views.dataset_detail, name='dataset_detail'),
     path('dataset/<int:id>/update', views.dataset_update, name='dataset_update'),
+    path('dataset/<int:id>/delete', views.dataset_delete, name='dataset_delete'),
 ]
 
 # for updating/creating a new Venue node
@@ -50,6 +53,7 @@ urlpatterns += [
     path('venue/find/', views.venue_find, name='venue_find'),
     path('venue/<int:id>/', views.venue_detail, name='venue_detail'),
     path('venue/<int:id>/update', views.venue_update, name='venue_update'),
+    path('venue/<int:id>/delete', views.venue_delete, name='venue_delete'),
 ]
 
 # for updating/creating a new Comment node
@@ -67,4 +71,5 @@ urlpatterns += [
     path('code/find/', views.code_find, name='code_find'),
     path('code/<int:id>/', views.code_detail, name='code_detail'),
     path('code/<int:id>/update', views.code_update, name='code_update'),
+    path('code/<int:id>/delete', views.code_delete, name='code_delete'),
 ]

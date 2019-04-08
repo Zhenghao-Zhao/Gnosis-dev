@@ -108,7 +108,7 @@ def papers(request):
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, "paper_results.html", {"papers": papers})
+                return render(request, "paper_results.html", {"papers": papers, "form": form, "message": ""})
             else:
                 message = "No results found. Please try again!"
 
@@ -166,7 +166,22 @@ def paper_remove_author(request, id, rid):
     query = "MATCH ()-[r:authors]-() WHERE ID(r)={id} DELETE r"
     results, meta = db.cypher_query(query, dict(id=rid))
 
+    # TO DO
+    # What does this return? How can I make certain that the paper was deleted?
+
     return HttpResponseRedirect(reverse("paper_authors", kwargs={"id": id}))
+
+
+# should limit access to admin users only!!
+@staff_member_required
+def paper_delete(request, id):
+    print("WARNING: Deleting paper id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (p:Paper) WHERE ID(p)={id} DETACH DELETE p"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("papers_index"))
 
 
 def _get_paper_by_id(id):
@@ -292,7 +307,7 @@ def paper_find(request):
             if len(results) > 0:
                 print("Found {} matching papers".format(len(results)))
                 papers = [Paper.inflate(row[0]) for row in results]
-                return render(request, "paper_results.html", {"papers": papers})
+                return render(request, "papers_index.html", {"papers": papers, "form": form, "message": message})
             else:
                 message = "No results found. Please try again!"
 
@@ -300,7 +315,7 @@ def paper_find(request):
         print("Received GET request")
         form = SearchPapersForm()
 
-    return render(request, "paper_find.html", {"form": form, "message": message})
+    return render(request, "papers_index.html", {"form": form, "message": message})
 
 
 @login_required
@@ -1194,6 +1209,18 @@ def dataset_create(request):
     return render(request, "dataset_form.html", {"form": form})
 
 
+# should limit access to admin users only!!
+@staff_member_required
+def dataset_delete(request, id):
+    print("WARNING: Deleting dataset id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (d:Dataset) WHERE ID(d)={id} DETACH DELETE d"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("datasets_index"))
+
+
 @login_required
 def dataset_update(request, id):
     # retrieve paper by ID
@@ -1383,6 +1410,18 @@ def venue_create(request):
         form = VenueForm()
 
     return render(request, "venue_form.html", {"form": form})
+
+
+# should limit access to admin users only!!
+@staff_member_required
+def venue_delete(request, id):
+    print("WARNING: Deleting venue id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (v:Venue) WHERE ID(v)={id} DETACH DELETE v"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("venues_index"))
 
 
 @login_required

@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from catalog.models import Code
 from catalog.forms import CodeForm
@@ -177,3 +178,15 @@ def code_update(request, id):
         )
 
     return render(request, "code_update.html", {"form": form, "code": code})
+
+
+# should limit access to admin users only!!
+@staff_member_required
+def code_delete(request, id):
+    print("WARNING: Deleting code repo id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (c:Code) WHERE ID(c)={id} DETACH DELETE c"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("codes_index"))
