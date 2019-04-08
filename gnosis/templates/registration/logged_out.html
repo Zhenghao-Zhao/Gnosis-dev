@@ -1,9 +1,11 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<div class="mt-5">
-<p>Logged out!</p>
-
-<a href="{% url 'login'%}">Click here to login again.</a>
+<div class="card shadow-sm mt-3">
+    <div class="card-body">
+        <p>Logged out!</p>
+        <a href="{% url 'login'%}">Click here to login again.</a>
+    </div>
+    <meta http-equiv="REFRESH" content="1;url=../../../home/">
 </div>
 {% endblock %}
