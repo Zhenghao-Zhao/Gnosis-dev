@@ -43,6 +43,7 @@ urlpatterns += [
     path('dataset/find/', views.dataset_find, name='dataset_find'),
     path('dataset/<int:id>/', views.dataset_detail, name='dataset_detail'),
     path('dataset/<int:id>/update', views.dataset_update, name='dataset_update'),
+    path('dataset/<int:id>/delete', views.dataset_delete, name='dataset_delete'),
 ]
 
 # for updating/creating a new Venue node

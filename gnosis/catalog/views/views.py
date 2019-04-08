@@ -1209,6 +1209,18 @@ def dataset_create(request):
     return render(request, "dataset_form.html", {"form": form})
 
 
+# should limit access to admin users only!!
+@staff_member_required
+def dataset_delete(request, id):
+    print("WARNING: Deleting dataset id {} and all related edges".format(id))
+
+    # Cypher query to delete the paper node
+    query = "MATCH (d:Dataset) WHERE ID(d)={id} DETACH DELETE d"
+    results, meta = db.cypher_query(query, dict(id=id))
+
+    return HttpResponseRedirect(reverse("datasets_index"))
+
+
 @login_required
 def dataset_update(request, id):
     # retrieve paper by ID
