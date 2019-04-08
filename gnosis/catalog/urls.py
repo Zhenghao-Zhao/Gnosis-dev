@@ -71,4 +71,5 @@ urlpatterns += [
     path('code/find/', views.code_find, name='code_find'),
     path('code/<int:id>/', views.code_detail, name='code_detail'),
     path('code/<int:id>/update', views.code_update, name='code_update'),
+    path('code/<int:id>/delete', views.code_delete, name='code_delete'),
 ]
