@@ -1,35 +1,35 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h2>Find a person</h2>
+<div class="mt-5">
+    <h2>Find a person</h2>
 
-<div class="row">
-{% if message %}
-<p class="bg-danger">{{ message }}</p>
-{% endif %}
+    {% if message %}
+    <p class="bg-danger">{{ message }}</p>
+    {% endif %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <p></p>
-    <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
-</form>
-</div>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <br>
+        <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit"/>
+    </form>
 
-{% if people %}
-<div class="row">
-    <h4>These are the people that matched your query</h4>
+    {% if people %}
+    <div class="mt-5">
+        <h4>These are the people that matched your query</h4>
         <ul class="list-group">
             {% for person, person_connect_url in people %}
-            <li class="list-group-item clearfix">
+            <li class="list-group-item clearfix mt-1">
                 <a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.last_name }}</a>
                 {% if user.is_authenticated and user.is_superuser %}
-                <a class="btn btn-warning pull-right" href={{ person_connect_url }}>Connect</a>
+                <a class="btn btn-warning float-right" href={{ person_connect_url }}>Connect</a>
                 {% endif %}
             </li>
             {% endfor %}
         </ul>
-</div>
-{% endif %}
 
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
