@@ -4,52 +4,56 @@
     <title>Gnosis Research Paper Management</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.3.3/cytoscape.min.js"></script>
     <style>
-    /* Remove the navbar's default margin-bottom and rounded borders */
-    .navbar {
-      margin-bottom: 0;
-      border-radius: 0;
-    }
+        /*
+            !* Remove the navbar's default margin-bottom and rounded borders *!
+            .navbar {
+              margin-bottom: 0;
+              border-radius: 0;
+            }
 
-    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-    .row.content {height: 450px}
+            !* Set height of the grid so .sidenav can be 100% (adjust as needed) *!
+            .row.content {height: 450px}
 
-    /* Set gray background color and 100% height  #f1f1f1*/
-    .sidenav {
-      padding-top: 20px;
-      background-color: #ffffff;
-      height: 100%;
-    }
+            !* Set gray background color and 100% height  #f1f1f1*!
+            .sidenav {
+              padding-top: 20px;
+              background-color: #ffffff;
+              height: 100%;
+            }
 
-    /* Set black background color, white text and some padding */
-    footer {
-      background-color: #ffffff;
-      color: white;
-      padding: 15px;
-    }
+            !* Set black background color, white text and some padding *!
+            footer {
+              background-color: #ffffff;
+              color: white;
+              padding: 15px;
+            }
 
-    /* Adds a small buffer between the two rows in the middle column. */
-    .top-buffer { margin-top:10px; }
+            !* Adds a small buffer between the two rows in the middle column. *!
+            .top-buffer { margin-top:10px; }
 
-    /* Adds a small buffer between the two rows in the right column. */
-    .top-buffer-sidenav { margin-top:5px; }
+            !* Adds a small buffer between the two rows in the right column. *!
+            .top-buffer-sidenav { margin-top:5px; }
 
-    /* Adds margins around the main content colum */
-    .main-column-left-right-buffer { margin-left:10px; margin-right:10px }
+            !* Adds margins around the main content colum *!
+            .main-column-left-right-buffer { margin-left:10px; margin-right:10px }
 
-    /* On small screens, set height to 'auto' for sidenav and grid */
-    @media screen and (max-width: 767px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height:auto;}
-    }
-  </style>
+            !* On small screens, set height to 'auto' for sidenav and grid *!
+            @media screen and (max-width: 767px) {
+              .sidenav {
+                height: auto;
+                padding: 15px;
+              }
+              .row.content {height:auto;}
+            }
+        */
+    </style>
     <style>
         #cy {
             width: auto;
@@ -60,131 +64,121 @@
 </head>
 <body>
 
-<nav class="navbar navbar-inverse">
+<nav class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">
     <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
-        </div>
+        <a class="navbar-brand" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
         <div class="collapse navbar-collapse" id="myNavbar">
-            {% block left-navbar %}
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Contact</a></li>
+            <ul class="nav navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
             </ul>
-            {% endblock %}
-            <ul class="nav navbar-nav navbar-right">
+
+            <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}?next={{request.path}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
                 {% else %}
-                <li><a href="{% url 'login' %}?next={{request.path}}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container-fluid text-center">
-    <div class="row content">
-        <div class="col-sm-12 text-left">
-            <div class="row main-column-left-right-buffer">
-                {% if user.is_authenticated %}
-                <p></p>
-                <div class="pull-right">
-                    <div class="btn-group">
-                        <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
-                        <div class="btn-group">
-                            <a href="{% url 'paper_create' %}" class="btn btn-primary" role="button">+</a>
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="{% url 'paper_create_from_arxiv' %}">from arXiv.org</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
-                        <div class="btn-group">
-                            <a href="{% url 'person_create' %}" class="btn btn-primary" role="button">+</a>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
-                        <div class="btn-group">
-                            <a href="{% url 'venue_create' %}" class="btn btn-primary" role="button">+</a>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
-                        <div class="btn-group">
-                            <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
-                        <div class="btn-group">
-                            <a href="{% url 'code_create' %}" class="btn btn-primary" role="button">+</a>
-                        </div>
-                    </div>
-
-                </div>
-                {% else %}
-                <p></p>
-                <div class="pull-right">
-                    <div class="btn-group">
-                        <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
-                    </div>
-
-                    <div class="btn-group">
-                        <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
-                    </div>
-
-                </div>
-
-                {% endif %}
-            </div>
-            <div class="row top-buffer main-column-left-right-buffer">
-                {% block content %}
-                {% endblock %}
+<div class="container-fluid" style="margin-top:30px ">
+    <div class="row float-right" style="margin-right:10px">
+        {% if user.is_authenticated %}
+        <div class="btn-group">
+            <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'paper_create' %}" class="btn btn-primary" role="button">+</a>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="{% url 'paper_create_from_arxiv' %}">from arXiv.org</a></li>
+                </ul>
             </div>
         </div>
 
-        <!--<div class="col-sm-2 sidenav">-->
-            <!--{% load static %}-->
-            <!--<img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">-->
-        <!--</div>-->
+        <div class="btn-group ml-1">
+            <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'person_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+            <div class="btn-group">
+                <a href="{% url 'venue_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+            <div class="btn-group">
+                <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+            <div class="btn-group">
+                <a href="{% url 'code_create' %}" class="btn btn-primary" role="button">+</a>
+            </div>
+        </div>
+
+        <!--                </div>-->
+        {% else %}
+        <div class="btn-group">
+            <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+        </div>
+
+        <div class="btn-group ml-1">
+            <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+        </div>
+        {% endif %}
     </div>
+
+    <div class="row float-left w-100 mb-3">
+        <div class="col-sm-12">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!--<div class="col-sm-2 sidenav">-->
+    <!--{% load static %}-->
+    <!--<img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">-->
+    <!--</div>-->
+    <!--    </div>-->
 </div>
 
-<footer class="container-fluid text-center">
-    <hr>
+<div class="container-fluid">
     {% block footer %}
     {% load static %}
-    <img src="{% static "catalog/csiro-data61-logos.png" %}" alt="CSIRO and Data61 Logos">
+    <img src="{% static 'catalog/csiro-data61-logos.png' %}" class="mx-auto d-block"
+         alt="CSIRO and Data61 Logos">
     {% endblock %}
-</footer>
+
+</div>
 
 </body>
 </html>

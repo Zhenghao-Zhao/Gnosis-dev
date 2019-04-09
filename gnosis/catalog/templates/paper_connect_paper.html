@@ -1,27 +1,29 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h2>Find a Paper</h2>
+<div class="mt-5">
+    <h2>Find a Paper</h2>
 
-{% if message %}
-<p class="bg-danger">{{ message }}</p>
-{% endif %}
+    {% if message %}
+    <p class="bg-danger">{{ message }}</p>
+    {% endif %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <p></p>
-    <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
-</form>
-
-
-{% if papers %}
-<h4>These are the papers that matched your query</h4>
-<ul>
-{% for paper in papers %}
-    <li><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
-{% endfor %}
-</ul>
-{% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <p></p>
+        <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit"/>
+    </form>
+    <div class="mt-5">
+        {% if papers %}
+        <h4>These are the papers that matched your query</h4>
+        <ul class="list-group">
+            {% for paper in papers %}
+            <li class="list-group-item mt-1"><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}

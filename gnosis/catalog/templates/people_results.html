@@ -1,25 +1,30 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
+<div class="mt-5">
 
-<h4>People that match your query</h4>
+    <h4>People that match your query</h4>
 
-{% load el_pagination_tags %}
+    {% load el_pagination_tags %}
 
-{% paginate people %}
+    {% if people %}
+    {% paginate people %}
 
-{% for person in people %}
-<div class="well well-sm">
-    <a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.middle_name }} {{ person.last_name }}</a>
+    <ul class="list-group">
+        {% for person in people %}
+        <li class="list-item-group mt-1">
+            <a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.middle_name }} {{ person.last_name
+                }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% get_pages %}
+    Showing entries
+    {{ pages.current_start_index }}-{{ pages.current_end_index }} of
+    {{ pages.total_count }}.
+    {# Just print pages to render the Digg-style pagination. #}
+    {{ pages.get_rendered }}
+    {% endif %}
 </div>
-{% endfor %}
-
-
-{% get_pages %}
-Showing entries
-{{ pages.current_start_index }}-{{ pages.current_end_index }} of
-{{ pages.total_count }}.
-{# Just print pages to render the Digg-style pagination. #}
-{{ pages.get_rendered }}
-
 {% endblock %}
