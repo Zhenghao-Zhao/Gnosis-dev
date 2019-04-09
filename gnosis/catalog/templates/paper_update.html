@@ -2,15 +2,21 @@
 
 {% block content %}
 
- <h2>{{ paper.title }}</h2>
+<div class="mt-5">
+    <h3>Updating paper</h3>
+    <h5>Original title: {{ paper.title }}</h5>
+    <div class="mt-5">
 
+        <form action="" method="post">
+            {% csrf_token %}
+            <table class="w-75">
+            {{ form }}
+                </table>
+            <br/>
+            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
 
- <form action="" method="post">
-     {% csrf_token %}
-     {{ form }}
-     <div class="btn-toolbar">
-     <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
-     </div>
- </form>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

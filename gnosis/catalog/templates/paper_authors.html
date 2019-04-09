@@ -2,26 +2,30 @@
 
 {% block content %}
 
-<p></p>
+<div class="mt-5">
 
-<h3>{{ paper.title }}</h3>
+    <h3>{{ paper.title }}</h3>
+    <div class="mt-5">
 
-{% for author, author_url in authors %}
-<ul class="list-group">
-    <li class="list-group-item">
-        {% if author.middle_name %}
-        <h4><a href="{{ author.get_absolute_url }}">{{ author.first_name }} {{ author.middle_name }} {{ author.last_name }}</a></h4>
-        {% else %}
-        <h4><a href="{{ author.get_absolute_url }}">{{ author.first_name }} {{ author.last_name }}</a></h4>
+        {% if authors %}
+        {% for author, author_url in authors %}
+        <ul class="list-group">
+            <li class="list-group-item mt-1">
+                {% if author.middle_name %}
+                <h4><a href="{{ author.get_absolute_url }}">{{ author.first_name }} {{ author.middle_name }} {{ author.last_name }}</a></h4>
+                {% else %}
+                <h4><a href="{{ author.get_absolute_url }}">{{ author.first_name }} {{ author.last_name }}</a></h4>
+                {% endif %}
+                {% if author.affiliation %}
+                <p>Affiliation: {{ author.affiliation }}</p>
+                {% endif %}
+                {% if user.is_authenticated and user.is_superuser %}
+                <a class="btn btn-danger float-right" href={{ author_url }}>Remove author</a>
+                {% endif %}
+            </li>
+        </ul>
+        {% endfor %}
         {% endif %}
-        {% if author.affiliation %}
-        <p>Affiliation: {{ author.affiliation }}</p>
-        {% endif %}
-        {% if user.is_authenticated and user.is_superuser %}
-        <a class="btn btn-danger" href={{ author_url }}>Remove author</a>
-        {% endif %}
-    </li>
-</ul>
-{% endfor %}
-
+    </div>
+</div>
 {% endblock %}

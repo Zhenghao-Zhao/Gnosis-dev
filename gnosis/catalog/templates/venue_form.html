@@ -1,15 +1,18 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<h2>New Venue</h2>
-
-<form action="" method="post">
-    {% csrf_token %}
-    <table>
-    {{ form.as_table }}
-    </table>
-    <input type="submit" class="btn btn-primary btn-lg pull-right" value="Submit" />
-
-</form>
-<h5>*required</h5>
+<div class="mt-5">
+    <h2>New Venue</h2>
+    <div class="mt-3">
+        <form action="" method="post">
+            {% csrf_token %}
+            <table class="w-75">
+                {{ form.as_table }}
+            </table>
+            <br/>
+            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+        </form>
+        <h5>*required</h5>
+    </div>
+</div>
 {% endblock %}

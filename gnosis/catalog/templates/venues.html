@@ -1,36 +1,58 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-
-<p></p>
-<p>
-<a href="{% url 'venue_find' %}" class="btn btn-info">
-    <i class="glyphicon glyphicon-search" aria-hidden="true"></i> Search Venues
-</a>
-</p>
-
 {% load el_pagination_tags %}
 
-{% paginate venues %}
+<div class="card shadow-sm mt-3">
+    <div class="card-body text-center">
+        {% if message %}
+        <p class="bg-info">{{ message }}</p>
+        {% endif %}
 
-{% for venue in venues %}
-<div class="well well-sm">
-    <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
-    <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="form-group form-inline justify-content-center">
+                {{ form }}
+            </div>
+            <br>
+            <input type="submit" class="btn btn-primary btn-lg" value="Search Venues"/>
+        </form>
+    </div>
 </div>
-{% endfor %}
 
-{% get_pages %}
-Showing entries
-{{ pages.current_start_index }}-{{ pages.current_end_index }} of
-{{ pages.total_count }}.
-{# Just print pages to render the Digg-style pagination. #}
-{{ pages.get_rendered }}
+{% if venues %}
+<div class="card shadow-sm mt-3">
+    {% paginate venues %}
+    <div class="card-header"><h4>Venues</h4></div>
+    <div class="card-body">
+        {% for venue in venues %}
+        <ul class="list-group">
+            <li class="list-group-item mt-1">
+                <p><a href="{{ venue.get_absolute_url }}">{{ venue.name }}</a></p>
+                <p>Published on {{ venue.publication_date }} by {{ venue.publisher }}</p>
+            </li>
+        </ul>
+        {% endfor %}
 
-{% comment %}
-{{ pages.previous }} {{ pages.next }}
-{% show_pages %}
-{% endcomment %}
-
+        {% get_pages %}
+        <!-- Center-aligned -->
+        <ul class="pagination justify-content-center" style="margin:20px 0">
+            {% if not pages.current.is_first %}
+            <li class="page-item"><a class="page-link" href="{{ pages.previous.path }}">Previous</a></li>
+            {% endif %}
+            {% for page in pages %}
+            {% if page.is_current %}
+            <li class="page-item active"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if not pages.current.is_last %}
+            <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

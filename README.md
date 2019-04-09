@@ -96,6 +96,17 @@ You can now start the development server by issuing the command,
     
 You can access **Gnosis** running on your local machine by pointing your web browser to `http://127.0.0.1:8000/`
 
+### Tests
+
+To run all the unit tests, use the following command (you must have Neo4j running for these to work),
+
+    python manage.py test
+
+You can also run only some of the tests using,
+
+    python manage.py test tests.test_model_paper
+     
+
 ## License
 
 Copyright 2010-2019 Commonwealth Scientific and Industrial Research Organisation (CSIRO).
@@ -105,3 +116,4 @@ All Rights Reserved.
 NOTICE: All information contained herein remains the property of the CSIRO. The intellectual and technical concepts 
 contained herein are proprietary to the CSIRO and are protected by copyright law. Dissemination of this information 
 or reproduction of this material is strictly forbidden unless prior written permission is obtained from the CSIRO.
+
