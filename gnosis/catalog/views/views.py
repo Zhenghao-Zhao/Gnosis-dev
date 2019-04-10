@@ -986,11 +986,18 @@ def paper_create_from_arxiv(request):
         # get the data from arxiv
         url = request.POST["url"]
         # check if url includes https, and if not add it
-        if not url.startswith("https://"):
+        if not url.startswith("https://") and not url.startswith("http://"):
             url = "https://" + url
-        # retrieve paper info. If the information cannot be retrieved from remote
-        # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract = get_paper_info(url)
+
+        print("Given url: {}".format(url))
+        # check if valid url before trying to get the data.
+        if not url.startswith("https://arxiv.org/abs/") and not url.startswith("http://arxiv.org/abs/"):
+            title, authors, abstract = None, None, None
+        else:
+            # retrieve paper info. If the information cannot be retrieved from remote
+            # server, then we will return an error message and redirect to paper_form.html.
+            title, authors, abstract = get_paper_info(url)
+
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
