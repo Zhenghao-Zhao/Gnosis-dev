@@ -736,7 +736,7 @@ def paper_update(request, id):
             paper_inst.download_link = form.cleaned_data["download_link"]
             paper_inst.save()
 
-            return HttpResponseRedirect(reverse("papers_index"))
+            return redirect(reverse('paper_detail', kwargs={"id": id}))
     # GET request
     else:
         query = "MATCH (a) WHERE ID(a)={id} RETURN a"
