@@ -852,7 +852,7 @@ def paper_create(request):
                 # Now, add the authors and link each author to the paper with an "authors"
                 # type edge.
                 if request.session.get("from_external", False):
-                    paper_authors = request.session["arxiv_authors"]
+                    paper_authors = request.session["external_authors"]
                     for paper_author in paper_authors.split(","):
                         print("Adding author {}".format(paper_author))
                         _add_author(paper_author, paper)
@@ -864,7 +864,7 @@ def paper_create(request):
     else:  # GET
         print("   GET")
         # check if this is a redirect from paper_create_from_url
-        # if so, then pre-populate the form with the data from arXiv,
+        # if so, then pre-populate the form with the data from external source,
         # otherwise start with an empty form.
         if request.session.get("from_external", False) is True:
             title = request.session["external_title"]
@@ -883,7 +883,7 @@ def paper_create(request):
 def get_authors(bs4obj,source_website):
     """
     Extract authors from the source website
-    :param bs4obj:
+    :param bs4obj, source_website；
     :return: None or a string with comma separated author names from first to last name
     """
     if source_website == "arxiv":
@@ -936,10 +936,10 @@ def get_title(bs4obj,source_website):
     return None
 
 
-def get_abstract(bs4obj,source_website):
+def get_abstract(bs4obj, source_website):
     """
-    Extract paper abstract from arXiv.org paper page.
-    :param bs4obj:
+    Extract paper abstract from the source website.
+    :param bs4obj, source_website:
     :return:
     """
     if source_website == "arxiv":
@@ -971,7 +971,7 @@ def get_paper_info(url,source_website):
     """
     Extract paper information, title, abstract, and authors, from source website
     paper page.
-    :param url, source website name
+    :param url, source_website:
     :return:
     """
     try:
@@ -1040,7 +1040,7 @@ def paper_create_from_url(request):
         request.session["external_abstract"] = abstract
         request.session["external_url"] = url
         request.session[
-            "arxiv_authors"
+            "external_authors"
         ] = authors  # comma separate list of author names, first to last name
 
         print("Authors: {}".format(authors))
