@@ -141,7 +141,7 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-        label="Source URL, e.g., https://arxiv.org/abs/1607.00653*",
+        label="Source URL, e.g., https://arxiv.org/abs/1607.00653",
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
