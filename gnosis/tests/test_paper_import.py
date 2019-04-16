@@ -16,7 +16,7 @@ class PaperImport(TestCase):
 
     def setUp(self) -> None:
         self.user = User.objects.create_user(
-            username='luke', email='luke@luke.com', password='luke123')
+            username='gnosis', email='gnosis@gnosis.com', password='gnosis')
 
     def test_url_paper_valid_import(self):
         """ For this test, a neo4j database must be running """
