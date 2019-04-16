@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
-
+from django.utils.safestring import mark_safe
 
 #
 # Search forms
@@ -141,7 +141,8 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-        label="Source URL, e.g., https://arxiv.org/abs/1607.00653*",
+        # the label will now appear in two lines break at the br label
+        label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
