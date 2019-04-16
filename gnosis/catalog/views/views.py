@@ -880,35 +880,46 @@ def paper_create(request):
     return render(request, "paper_form.html", {"form": form, "message": message})
 
 
-def get_authors(bs4obj):
+def get_authors(bs4obj,source_website):
     """
-    Extract authors from arXiv.org paper page
+    Extract authors from the source website
     :param bs4obj:
     :return: None or a string with comma separated author names from first to last name
     """
-    authorList = bs4obj.findAll("div", {"class": "authors"})
-    if authorList is not None:
-        if len(authorList) > 1:
-            # there should be just one but let's just take the first one
-            authorList = authorList[0]
-
-        # for author in authorList:
-        # print("type of author {}".format(type(author)))
-        author_str = authorList[0].get_text()
-        if author_str.startswith("Authors:"):
-            author_str = author_str[8:]
-        return author_str
-    # authorList is None so return None
+    if source_website == "arxiv":
+        authorList = bs4obj.findAll("div", {"class": "authors"})
+        if authorList is not None:
+            if len(authorList) > 1:
+                # there should be just one but let's just take the first one
+                authorList = authorList[0]
+            # for author in authorList:
+            # print("type of author {}".format(type(author)))
+            author_str = authorList[0].get_text()
+            if author_str.startswith("Authors:"):
+                author_str = author_str[8:]
+            return author_str
+    elif source_website == 'nips':
+        authorList = bs4obj.findAll("li",{"class":"author"})
+        if authorList is not None:
+            authorList = [author.text for author in authorList]
+            author_str = ','.join(authorList)
+            return author_str
+    # if source website is not supported or the autherlist is none , return none
     return None
 
 
-def get_title(bs4obj):
+def get_title(bs4obj,source_website):
     """
     Extract paper title from arXiv.org paper page.
     :param bs4obj:
     :return:
     """
-    titleList = bs4obj.findAll("h1", {"class": "title"})
+    if source_website == "arxiv":
+        titleList = bs4obj.findAll("h1", {"class": "title"})
+    elif source_website == 'nips':
+        titleList = bs4obj.findAll("title")
+    else:
+        titleList = []
     if titleList is not None:
         if len(titleList) == 0:
             return None
@@ -924,16 +935,23 @@ def get_title(bs4obj):
     return None
 
 
-def get_abstract(bs4obj):
+def get_abstract(bs4obj,source_website):
     """
     Extract paper abstract from arXiv.org paper page.
     :param bs4obj:
     :return:
     """
-    abstract = bs4obj.find("blockquote", {"class": "abstract"})
-    if abstract is not None:
-        abstract = " ".join(abstract.get_text().split(" ")[1:])
-    return abstract
+    if source_website == "arxiv":
+        abstract = bs4obj.find("blockquote", {"class": "abstract"})
+        if abstract is not None:
+            abstract = " ".join(abstract.get_text().split(" ")[1:])
+        return abstract
+    elif source_website == 'nips':
+        abstract = bs4obj.find("p",{"class":"abstract"})
+        if abstract is not None:
+            abstract = abstract.text
+        return abstract
+    return None
 
 
 def get_venue(bs4obj):
@@ -948,11 +966,11 @@ def get_venue(bs4obj):
     return venue
 
 
-def get_paper_info(url):
+def get_paper_info(url,source_website):
     """
-    Extract paper information, title, abstract, and authors, from arXiv.org
+    Extract paper information, title, abstract, and authors, from source website
     paper page.
-    :param url:
+    :param url, source website name
     :return:
     """
     try:
@@ -966,9 +984,9 @@ def get_paper_info(url):
     else:
         bs4obj = BeautifulSoup(html)
         # Now, we can access individual element in the page
-        authors = get_authors(bs4obj)
-        title = get_title(bs4obj)
-        abstract = get_abstract(bs4obj)
+        authors = get_authors(bs4obj,source_website)
+        title = get_title(bs4obj,source_website)
+        abstract = get_abstract(bs4obj,source_website)
         # venue = get_venue(bs4obj)
         return title, authors, abstract
 
@@ -976,7 +994,7 @@ def get_paper_info(url):
 
 
 @login_required
-def paper_create_from_arxiv(request):
+def paper_create_from_url(request):
     user = request.user
 
     if request.method == "POST":
@@ -988,9 +1006,23 @@ def paper_create_from_arxiv(request):
         # check if url includes https, and if not add it
         if not url.startswith("https://"):
             url = "https://" + url
+        # check whether the url is from a supported website
+        if url.startswith("https://arxiv.org"):
+            source_website = "arxiv"
+            print("source from arXiv")
+        elif url.startswith("https://papers.nips.cc/paper"):
+            source_website = "nips"
+            print("source from nips")
+        else:
+            form = PaperImportForm()
+            return render(
+                request,
+                "paper_form.html",
+                {"form": form, "message": "Source website is not supported at this moment"},
+            )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract = get_paper_info(url)
+        title, authors, abstract = get_paper_info(url,source_website)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
