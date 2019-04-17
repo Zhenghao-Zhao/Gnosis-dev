@@ -3,6 +3,7 @@ from django.test import TestCase
 from catalog.models import Person
 from neomodel.exceptions import RequiredProperty
 
+
 # Create your tests here.
 class PersonModelTest(TestCase):
     @classmethod
