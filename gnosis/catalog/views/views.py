@@ -899,11 +899,19 @@ def get_authors(bs4obj,source_website):
                 author_str = author_str[8:]
             return author_str
     elif source_website == 'nips':
+        # authors are found to be list objects , so needs to join them to get the author string
         authorList = bs4obj.findAll("li",{"class":"author"})
         if authorList is not None:
             authorList = [author.text for author in authorList]
             author_str = ','.join(authorList)
             return author_str
+    elif source_website == "jmlr":
+        # in JMLR authors are found in the html tag "i"
+        authorList = bs4obj.findAll("i")
+        if authorList is not None:
+            if len(authorList) >= 1:
+                author_str = authorList[0].text
+                return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -918,6 +926,8 @@ def get_title(bs4obj,source_website):
         titleList = bs4obj.findAll("h1", {"class": "title"})
     elif source_website == 'nips':
         titleList = bs4obj.findAll("title")
+    elif source_website == "jmlr":
+        titleList = bs4obj.findAll("h2")
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -946,13 +956,26 @@ def get_abstract(bs4obj, source_website):
         abstract = bs4obj.find("blockquote", {"class": "abstract"})
         if abstract is not None:
             abstract = " ".join(abstract.get_text().split(" ")[1:])
-        return abstract
     elif source_website == 'nips':
         abstract = bs4obj.find("p",{"class":"abstract"})
         if abstract is not None:
             abstract = abstract.get_text()
-        return abstract
-    return None
+    elif source_website == "jmlr":
+        abstract = bs4obj.find("p",{"class":"abstract"})
+        if abstract is not None:
+            abstract = abstract.get_text()
+        else:
+            # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
+            abstract = bs4obj.find("h3")
+            if abstract != None:
+                abstract = abstract.next_sibling
+    else:
+        abstract = None
+    # want to remove all the leading and ending white space and line breakers in the abstract
+    if abstract != None :
+        abstract = abstract.strip()
+        abstract = abstract.replace('\r', '').replace('\n', '')
+    return abstract
 
 
 def get_venue(bs4obj):
@@ -1004,6 +1027,9 @@ def paper_create_from_url(request):
         print("{}".format(request.POST["url"]))
         # get the data from arxiv
         url = request.POST["url"]
+        # check if a particular url starts with http , it is important as JMLR does not support https
+        if url.startswith("http://"):
+            url = url[7:]
         # check if url includes https, and if not add it
         if not url.startswith("https://"):
             url = "https://" + url
@@ -1016,13 +1042,18 @@ def paper_create_from_url(request):
         elif url.startswith("https://papers.nips.cc/paper"):
             source_website = "nips"
             print("source from nips")
+        # for urls of JMLR, they do not support https , so we need to change it to http instead
+        elif url.startswith("https://www.jmlr.org/papers"):
+            url = "http://" + url[8:]
+            source_website = "jmlr"
+            print("source from jmlr")
         # return error message if the website is not supported
         else:
             form = PaperImportForm()
             return render(
                 request,
                 "paper_form.html",
-                {"form": form, "message": "Source website is not supported at this moment, please contact administrator"},
+                {"form": form, "message": "Source website " + url + " is not supported at this moment, please contact administrator"},
             )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
