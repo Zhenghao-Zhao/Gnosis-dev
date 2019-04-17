@@ -141,8 +141,12 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
+<<<<<<< HEAD
         # the label will now appear in two lines break at the br label
         label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
+=======
+        label="Source URL, e.g., https://arxiv.org/abs/1607.00653",
+>>>>>>> a25a1ddcdd339e29c3dd63a37cfb6851db656a67
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )

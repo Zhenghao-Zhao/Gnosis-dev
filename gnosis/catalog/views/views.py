@@ -888,7 +888,7 @@ def get_authors(bs4obj,source_website):
     """
     if source_website == "arxiv":
         authorList = bs4obj.findAll("div", {"class": "authors"})
-        if authorList is not None:
+        if authorList:
             if len(authorList) > 1:
                 # there should be just one but let's just take the first one
                 authorList = authorList[0]
@@ -901,7 +901,7 @@ def get_authors(bs4obj,source_website):
     elif source_website == 'nips':
         # authors are found to be list objects , so needs to join them to get the author string
         authorList = bs4obj.findAll("li",{"class":"author"})
-        if authorList is not None:
+        if authorList:
             authorList = [author.text for author in authorList]
             author_str = ','.join(authorList)
             return author_str
@@ -931,7 +931,7 @@ def get_title(bs4obj,source_website):
     else:
         titleList = []
     # check the validity of the abstracted titlelist
-    if titleList is not None:
+    if titleList:
         if len(titleList) == 0:
             return None
         else:
