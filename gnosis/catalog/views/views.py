@@ -908,7 +908,7 @@ def get_authors(bs4obj,source_website):
     elif source_website == "jmlr":
         # in JMLR authors are found in the html tag "i"
         authorList = bs4obj.findAll("i")
-        if authorList is not None:
+        if authorList:
             if len(authorList) >= 1:
                 author_str = authorList[0].text
                 return author_str
@@ -967,12 +967,12 @@ def get_abstract(bs4obj, source_website):
         else:
             # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
             abstract = bs4obj.find("h3")
-            if abstract != None:
+            if abstract is not None:
                 abstract = abstract.next_sibling
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
-    if abstract != None :
+    if abstract is not None :
         abstract = abstract.strip()
         abstract = abstract.replace('\r', '').replace('\n', '')
     return abstract

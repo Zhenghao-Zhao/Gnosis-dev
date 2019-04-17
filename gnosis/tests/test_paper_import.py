@@ -9,6 +9,7 @@ from django.http import HttpRequest
 
 
 # Create your tests here.
+# To run this test, use command: py -3 manage.py test tests.test_paper_import
 class PaperImport(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -33,8 +34,8 @@ class PaperImport(TestCase):
         # test whether specific entries are accurate
         self.assertEquals(request.session["from_external"], True)
         self.assertEquals(request.session["external_title"], "node2vec: Scalable Feature Learning for Networks")
-        self.assertEquals(request.session["external_abstract"][1:11], "Prediction")
-        self.assertEquals(request.session["external_abstract"][-10:], "networks.\n")
+        self.assertEquals(request.session["external_abstract"][:10], "Prediction")
+        self.assertEquals(request.session["external_abstract"][-9:], "networks.")
         self.assertEquals(request.session["external_url"], "https://arxiv.org/abs/1607.00653")
         self.assertEquals(request.session["external_authors"], "Aditya Grover, Jure Leskovec\n")
 
@@ -53,10 +54,27 @@ class PaperImport(TestCase):
         self.assertEquals(request.session["external_abstract"][-5:], "time.")
         self.assertEquals(request.session["external_url"],
                           "https://papers.nips.cc/paper/7286-efficient-algorithms-for-non-convex"
-                          "-isotonic-regression-through-submodular-optimization")
+                          "-isotonic-regression-through-submodular-optimization")  # if https"// is added automatically
         self.assertEquals(request.session["external_authors"], "Francis Bach")
 
+        # test for JMLR url
+        request.POST["url"] = "http://www.jmlr.org/papers/v20/15-192.html"
+
+        re = paper_create_from_url(request)
+        self.assertTrue('location' in re._headers)  # check if it redirects to the paper create page
+
+        # test whether specific entries are accurate
+        self.assertEquals(request.session["from_external"], True)
+        self.assertEquals(request.session["external_title"],
+                          " Adaptation Based on Generalized Discrepancy ")
+        self.assertTrue(request.session["external_abstract"].startswith("We"))
+        self.assertEquals(request.session["external_abstract"][-13:], "minimization.")
+        self.assertEquals(request.session["external_url"],
+                          "http://www.jmlr.org/papers/v20/15-192.html")
+        self.assertEquals(request.session["external_authors"], "Corinna Cortes, Mehryar Mohri, Andrés Muñoz Medina")
+
     def test_import_invalid_urls(self):
+        """ For this test, a neo4j database must be running """
         request = HttpRequest()
         request.user = self.user
         request.method = 'POST'
@@ -77,7 +95,12 @@ class PaperImport(TestCase):
             "https://arxiv.org/list/astro-ph/1001",   # selected results page(list of papers)
             # NeurIPS urls
             "https://papers.nips.cc/book/advances-in-neural-information-processing-systems-13-2000",  # all papers of 2010
-            "https://papers.nips.cc/"                   # all papers
+            "https://papers.nips.cc/",                  # all papers
+            # JMLR urls
+            "http://www.jmlr.org/",                     # homepage of JMLR
+            "http://www.jmlr.org/author-info.html",   # author info
+            "http://www.jmlr.org/papers/",             # paper selection
+            "http://www.jmlr.org/papers/v13/",        # volume selection
             ]
         for url in invalid_urls:
             request.POST["url"] = url
@@ -85,8 +108,8 @@ class PaperImport(TestCase):
             # check that it does not redirect to the paper create page
             self.assertFalse('location' in re._headers)
 
-
     def test_import_valid_urls(self):
+        """ For this test, a neo4j database must be running """
         request = HttpRequest()
         request.user = self.user
         request.method = 'POST'
@@ -105,6 +128,10 @@ class PaperImport(TestCase):
             "repeated-games-against-budgeted-adversaries",
             "https://papers.nips.cc/paper/1799-who-"   # paper from 2000
             "does-what-a-novel-algorithm-to-determine-function-localization",
+            # JMLR papers
+            "http://www.jmlr.org/papers/v13/zhang12a.html",   # paper from 2012
+            "http://www.jmlr.org/papers/v11/strumbelj10a.html",  # paper from 2010
+            "http://www.jmlr.org/papers/v1/meila00a.html",    # volumn from 2000
             ]
         for url in valid_urls:
             request.POST["url"] = url
