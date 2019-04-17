@@ -98,7 +98,7 @@ class PaperModelTest(TestCase):
 
         self.assertTrue(paper)
 
-        # This will not create an entry in the db.
+        # This will create an entry in the db.
         paper.save()
 
         papers = Paper.nodes.filter(title="No title")
