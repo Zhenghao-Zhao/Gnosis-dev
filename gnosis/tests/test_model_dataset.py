@@ -5,6 +5,7 @@ from neomodel.exceptions import RequiredProperty
 
 
 # Create your tests here.
+# To run this test, use command: py -3 manage.py test tests.test_model_dataset
 class DataSetModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
