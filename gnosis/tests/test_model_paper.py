@@ -5,6 +5,7 @@ from neomodel.exceptions import RequiredProperty
 
 
 # Create your tests here.
+# To run this test, use command: py -3 manage.py test tests.test_model_people
 class PaperModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -98,7 +99,7 @@ class PaperModelTest(TestCase):
 
         self.assertTrue(paper)
 
-        # This will not create an entry in the db.
+        # This will create an entry in the db.
         paper.save()
 
         papers = Paper.nodes.filter(title="No title")
