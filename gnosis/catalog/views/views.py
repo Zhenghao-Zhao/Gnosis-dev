@@ -128,7 +128,6 @@ def papers(request):
         },
     )
 
-
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
     paper = _get_paper_by_id(id)
@@ -238,51 +237,52 @@ def paper_detail(request, id):
 
     request.session["last-viewed-paper"] = id
 
-    ego_network_json = _get_node_ego_network(paper.id, paper.title)
+    # ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
-    print("ego_network_json: {}".format(ego_network_json))
+    # print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
         "paper_detail.html",
         {
+            "paper_title": paper.title,
             "paper": paper,
             "venue": venue,
             "authors": authors,
             "comments": comments,
             "codes": codes,
             "num_comments": num_comments,
-            "ego_network": ego_network_json,
+            # "ego_network": ego_network_json,
         },
     )
 
 
-def _get_node_ego_network(id, paper_title):
-    """
-    Returns a json formatted string of the nodes ego network
-    :param id:
-    :return:
-    """
-    query = "MATCH (s:Paper {title: {paper_title}})-->(t:Paper) RETURN t"
-    results, meta = db.cypher_query(query, dict(paper_title=paper_title))
-    ego_json = ""
-    if len(results) > 0:
-        target_papers = [Paper.inflate(row[0]) for row in results]
-        print("Paper cites {} other papers.".format(len(target_papers)))
-        ego_json = "{{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-            id, paper_title, reverse("paper_detail", kwargs={"id": id})
-        )
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id})
-            )
-        for tp in target_papers:
-            ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(
-                id, tp.id, "cites", id, tp.id
-            )
-    else:
-        print("No cited papers found!")
-
-    return "[" + ego_json + "]"
+# def _get_node_ego_network(id, paper_title):
+#     """
+#     Returns a json formatted string of the nodes ego network
+#     :param id:
+#     :return:
+#     """
+#     query = "MATCH (s:Paper {title: {paper_title}}) -->(t:Paper) RETURN t"
+#     results, meta = db.cypher_query(query, dict(paper_title=paper_title))
+#     ego_json = ""
+#     if len(results) > 0:
+#         target_papers = [Paper.inflate(row[0]) for row in results]
+#         print("Paper cites {} other papers.".format(len(target_papers)))
+#         ego_json = "{{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
+#             id, paper_title, reverse("paper_detail", kwargs={"id": id})
+#         )
+#         for tp in target_papers:
+#             ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
+#                 tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id})
+#             )
+#         for tp in target_papers:
+#             ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(
+#                 id, tp.id, "cites", id, tp.id
+#             )
+#     else:
+#         print("No cited papers found!")
+#
+#     return "[" + ego_json + "]"
 
 
 def paper_find(request):

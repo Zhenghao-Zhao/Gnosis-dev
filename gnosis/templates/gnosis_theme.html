@@ -10,7 +10,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.3.3/cytoscape.min.js"></script>
+
+    {# CDN links to NeoVis.js libraries #}
+    <script src="https://rawgit.com/neo4j-contrib/neovis.js/master/dist/neovis.js"></script>
+    <script src="https://cdn.neo4jlabs.com/neovis.js/v1.0.0/neovis.js"></script>
+
     <style>
+        {# styling the canvas that displays the ego-map #}
+        #viz {
+            width: 100%;
+            height: 700px;
+            border: 1px solid lightgray;
+            font: 22pt arial;
+        }
         /*
             !* Remove the navbar's default margin-bottom and rounded borders *!
             .navbar {
@@ -181,4 +193,9 @@
 </div>
 
 </body>
+
+{# function call to NeoVis draw function defined in paper_detail.html #}
+<script type="text/javascript">
+    draw();
+</script>
 </html>

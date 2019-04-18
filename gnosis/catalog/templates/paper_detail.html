@@ -2,159 +2,193 @@
 
 {% block content %}
 
-<div class="card shadow-sm mt-5">
-    <div class="card-header">
-        <h3>{{ paper.title }}</h3>
+    <div class="card shadow-sm mt-5">
+        <div class="card-header">
+            <h3>{{ paper.title }}</h3>
 
-        <h4>
-            <a href={{ paper.download_link }} class="btn btn-primary" role="button">Download</a>
-            {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
-                                             role="button">
-            Edit</a>
-            {% endif %}
-        </h4>
-    </div>
-    <div class="card-body">
-        <h5 class="text-left">
-            {{ authors }} {% if user.is_authenticated and user.is_superuser%}<a
-                href="{% url 'paper_authors' id=paper.id %}"
-                class="btn btn-danger btn-sm" role="button">
-            Edit</a>{% endif %}
-        </h5>
-
-        <h5 class="text-right">
-            <small>keywords: {{ paper.keywords }}</small>
-        </h5>
-
-        <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
-        {% if venue %}
-        <p>
-            <small><strong>Venue:</strong> {{ venue }}</small>
-        </p>
-        {% endif%}
-
-        {% if messages %}
-        {% for message in messages %}
-        <p class="bg-success">{{ message }}</p>
-        {% endfor %}
-        {% endif %}
-
-        <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
-                href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
-            || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
-            <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
-            <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
-            <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
-    </div>
-</div>
-{% if user.is_authenticated and user.is_superuser %}
-<div class="card text-left shadow-sm mb-3 mt-3">
-    <div class="card-header"><strong>Admin functions</strong></div>
-    <div class="card-body">
-        <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
-    </div>
-</div>
-{% endif %}
-{% if codes %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header"><h4>Code</h4></div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for code in codes %}
-            <li class="list-group-item"><h6><a href="{{ code.get_absolute_url }}">{{ code.website }}</a></h6></li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-{% endif %}
-
-<div class="card mt-3 shadow-sm">
-    <div class="card-header"><h4>Ego-graph</h4></div>
-    <div class="card-body">
-        <div id="cy"></div>
-    </div>
-</div>
-
-<p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
-    <span class="glyphicon glyphicon-plus"></span> Add Comment</a></p>
-{% else %}
-<p><a href="{% url 'login' %}?next={{request.path}}">Login</a> to comment</p>
-{% endif %}
-{% if num_comments > 0 %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header">
-        <h3>{{ num_comments }} Comments</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for comment in comments %}
-            <li class="list-group-item shadow-sm mt-1">
-                <p><strong>{{comment.author }}</strong> says:</p>
-                <p>
-                    <small>{{ comment.publication_date }}</small>
-                </p>
-                <p>{{ comment.text }}</p>
-                {% if comment.created_by == user.id %}
-                <a href="{% url 'comment_update' comment.id %}">Edit</a>
+            <h4>
+                <a href={{ paper.download_link }} class="btn btn-primary" role="button">Download</a>
+                {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
+                                                 role="button">
+                    Edit</a>
                 {% endif %}
-            </li>
-        </ul>
-        {% endfor %}
+            </h4>
+        </div>
+        <div class="card-body">
+            <h5 class="text-left">
+                {{ authors }} {% if user.is_authenticated and user.is_superuser %}<a
+                    href="{% url 'paper_authors' id=paper.id %}"
+                    class="btn btn-danger btn-sm" role="button">
+                Edit</a>{% endif %}
+            </h5>
+
+            <h5 class="text-right">
+                <small>keywords: {{ paper.keywords }}</small>
+            </h5>
+
+            <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
+            {% if venue %}
+                <p>
+                    <small><strong>Venue:</strong> {{ venue }}</small>
+                </p>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="bg-success">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+
+            <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
+                    href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
+                || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
+                <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
+                <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
+                <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
+        </div>
     </div>
-</div>
-</div>
-{% endif %}
+    {% if user.is_authenticated and user.is_superuser %}
+        <div class="card text-left shadow-sm mb-3 mt-3">
+            <div class="card-header"><strong>Admin functions</strong></div>
+            <div class="card-body">
+                <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
+            </div>
+        </div>
+    {% endif %}
+    {% if codes %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header"><h4>Code</h4></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for code in codes %}
+                        <li class="list-group-item"><h6><a href="{{ code.get_absolute_url }}">{{ code.website }}</a>
+                        </h6></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
 
-<script type="text/javascript">
-    var cy = cytoscape({
-        container: document.getElementById('cy'), // container to render in
+    <div class="card mt-3 shadow-sm">
+        <div class="card-header"><h4>Ego-graph</h4></div>
+        <div class="card-body">
+            <div id="viz"></div>
+        </div>
+    </div>
 
-        elements: {{ ego_network | safe }},
+    <p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
+        <span class="glyphicon glyphicon-plus"></span> Add Comment</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to comment</p>
+    {% endif %}
+    {% if num_comments > 0 %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h3>{{ num_comments }} Comments</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for comment in comments %}
+                        <li class="list-group-item shadow-sm mt-1">
+                            <p><strong>{{ comment.author }}</strong> says:</p>
+                            <p>
+                                <small>{{ comment.publication_date }}</small>
+                            </p>
+                            <p>{{ comment.text }}</p>
+                            {% if comment.created_by == user.id %}
+                                <a href="{% url 'comment_update' comment.id %}">Edit</a>
+                            {% endif %}
+                        </li>
+                        </ul>
+                    {% endfor %}
+            </div>
+        </div>
+        </div>
+    {% endif %}
 
-    style: [ // the stylesheet for the graph
-        {
-            selector: 'node',
-            style: {
-                'background-color': '#666',
-                'label': 'data(title)',
-                'text-wrap': 'ellipsis',
-                'text-max-width': '200'
-            }
-        },
+    <script type="text/javascript">
+{% comment %}        {#var cy = cytoscape({#}
+        {#        container: document.getElementById('cy'), // container to render in#}
+        {##}
+        {#        elements: {{ ego_network | safe }},#}
+        {##}
+        {#        style: [ // the stylesheet for the graph#}
+        {#            {#}
+        {#                selector: 'node',#}
+        {#                style: {#}
+        {#                    'background-color': '#666',#}
+        {#                    'label': 'data(title)',#}
+        {#                    'text-wrap': 'ellipsis',#}
+        {#                    'text-max-width': '200'#}
+        {#                }#}
+        {#            },#}
+        {##}
+        {#            {#}
+        {#                selector: 'edge',#}
+        {#                style: {#}
+        {#                    'width': 1,#}
+        {#                    'label': 'data(label)',#}
+        {#                    'line-color': '#ccc',#}
+        {#                    'target-arrow-color': '#ccc',#}
+        {#                    'target-arrow-shape': 'triangle'#}
+        {#                }#}
+        {#            }#}
+        {#        ],#}
+        {##}
+        {#        layout:#}
+        {#            {#}
+        {#                name: 'circle',#}
+        {#                rows:#}
+        {#                    1#}
+        {#            }#}
+        {#    })#}
+        {#;#}
+        {##}
+        {#cy.on('tap', 'node', function (evt) {#}
+        {#    var node = evt.target;#}
+        {#    console.log('tapped ' + node.data('href'));#}
+        {#    try {#}
+        {#        window.open(node.data('href'), '_self');#}
+        {#    } catch (e) {#}
+        {#        window.location.href = node.data('href');#}
+        {#    }#}
+        {#});{% endcomment %}
 
-        {
-            selector: 'edge',
-            style: {
-                'width': 1,
-                'label': 'data(label)',
-                'line-color': '#ccc',
-                'target-arrow-color': '#ccc',
-                'target-arrow-shape': 'triangle'
-            }
+        {#draw ego map using NeoVis.js library#}
+        function draw() {
+
+            var paper_title = "'" + '{{ paper_title }}' + "'";
+            var query = "MATCH (s:Paper {title: " + paper_title + "})-[r]-(e) RETURN s, e, r";
+            var query_return_all = "MATCH p=()-->() RETURN p";
+            console.log(paper_title);
+            var config = {
+                container_id: "viz",
+                server_url: "bolt://localhost:7687",
+                server_user: "neo4j",
+                server_password: "GnosisTest00",
+                arrows: true,
+                labels: {
+                    "Person": {
+                        "caption": "last_name",
+                    }
+
+                },
+                relationships: {
+                    "cites": {
+                        "caption": true
+                    },
+
+                    "authors": {
+                        "caption": true
+                    }
+                },
+                initial_cypher: query
+            };
+
+            var viz = new NeoVis.default(config);
+            viz.render();
         }
-    ],
 
-        layout
-    :
-    {
-        name: 'circle',
-            rows
-    :
-        1
-    }
-    })
-    ;
-
-    cy.on('tap', 'node', function (evt) {
-        var node = evt.target;
-        console.log('tapped ' + node.data('href'));
-        try {
-            window.open(node.data('href'), '_self');
-        } catch (e) {
-            window.location.href = node.data('href');
-        }
-    });
-
-</script>
+    </script>
 
 {% endblock %}
