@@ -98,7 +98,7 @@ def papers(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -297,7 +297,7 @@ def paper_find(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -334,12 +334,12 @@ def paper_connect_venue(request, id):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -412,7 +412,6 @@ def paper_connect_venue(request, id):
 
 @login_required
 def paper_connect_author_selected(request, id, aid):
-
     query = "MATCH (p:Paper), (a:Person) WHERE ID(p)={id} AND ID(a)={aid} MERGE (a)-[r:authors]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, aid=aid))
 
@@ -644,7 +643,6 @@ def paper_connect_dataset(request, id):
 
 @login_required
 def paper_connect_code_selected(request, id, cid):
-
     query = "MATCH (p:Paper), (c:Code) WHERE ID(p)={id} AND ID(c)={cid} MERGE (c)-[r:implements]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, cid=cid))
 
@@ -773,7 +771,7 @@ def _find_paper(query_string):
         w for w in paper_title.split(" ") if not w in english_stopwords
     ]
     paper_query = (
-        "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+            "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
     )
     query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
     print("Cypher query string {}".format(query))
@@ -860,7 +858,9 @@ def paper_create(request):
                 request.session["from_arxiv"] = False  # reset
                 # go back to paper index page.
                 # Should this redirect to the page of the new paper just added?
-                return HttpResponseRedirect(reverse("papers_index"))
+                #return HttpResponseRedirect(reverse("papers_index"))
+                return redirect("paper_detail", id=paper.id)
+
     else:  # GET
         print("   GET")
         # check if this is a redirect from paper_create_from_arxiv
@@ -1129,10 +1129,10 @@ def _dataset_find(name, keywords):
     if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
         # Search using both the name and the keywords
         keyword_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
         )
         name_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
         )
         query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
         results, meta = db.cypher_query(
@@ -1145,16 +1145,16 @@ def _dataset_find(name, keywords):
         if len(dataset_keywords) > 0:
             # only keywords given
             dataset_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
             )
             query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
         else:
             # only name or nothing (will still return all datasets if name and
             # keywords fields are left empty and sumbit button is pressed.
             dataset_query = (
-                "(?i).*"
-                + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
-                + "+.*"
+                    "(?i).*"
+                    + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
+                    + "+.*"
             )
             query = (
                 "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
@@ -1297,12 +1297,12 @@ def venues(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -1372,12 +1372,12 @@ def venue_find(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
