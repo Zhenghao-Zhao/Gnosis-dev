@@ -59,9 +59,17 @@ class VenueModelTest(TestCase):
         # Test it
         self.assertEquals(len(paper.evaluates_on), 1)
 
+        # Test that duplicate edges cannot exist in the database
+        paper.evaluates_on.connect(dataset)
+        self.assertEquals(len(paper.evaluates_on), 1)
+
         # Add edge paper -> was_published_at -> venue
         paper.was_published_at.connect(venue)
         # Test it
+        self.assertEquals(len(paper.was_published_at), 1)
+
+        # Test that duplicate edges cannot exist in the database
+        paper.was_published_at.connect(venue)
         self.assertEquals(len(paper.was_published_at), 1)
 
         # Add edge paper -> published -> dataset
@@ -69,9 +77,17 @@ class VenueModelTest(TestCase):
         # Test it
         self.assertEquals(len(paper.published), 1)
 
+        # Test that duplicate edges cannot exist in the database
+        paper.published.connect(dataset)
+        self.assertEquals(len(paper.published), 1)
+
         # Add edge person -> authors -> paper
         person.authors.connect(paper)
         # Test it
+        self.assertEquals(len(person.authors), 1)
+
+        # Test that duplicate edges cannot exist in the database
+        person.authors.connect(paper)
         self.assertEquals(len(person.authors), 1)
 
         # Delete the entries from the DB
