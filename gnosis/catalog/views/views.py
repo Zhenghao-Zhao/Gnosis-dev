@@ -25,9 +25,8 @@ from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
-
 from catalog.views.views_codes import _code_find
-
+import re
 
 #
 # Paper Views
@@ -870,9 +869,10 @@ def paper_create(request):
             title = request.session["external_title"]
             abstract = request.session["external_abstract"]
             url = request.session["external_url"]
+            download_link = request.session["download_link"]
 
             form = PaperForm(
-                initial={"title": title, "abstract": abstract, "download_link": url}
+                initial={"title": title, "abstract": abstract, "download_link": download_link, "source_link" : url}
             )
         else:
             form = PaperForm()
@@ -989,6 +989,26 @@ def get_venue(bs4obj):
         venue = venue.get_text().split(";")[0]
     return venue
 
+def get_download_link(bs4obj,source_website,url):
+    """
+    Extract download link from paper page1
+    :param bs4obj:
+    return: download link of paper
+    """
+    if url.endswith("/"):
+        url = url[:-1]
+    if source_website == "arxiv":
+        download_link = url.replace("/abs/","/pdf/",1) + ".pdf"
+    elif source_website == "nips":
+        download_link = url + ".pdf"
+    elif source_website == "jmlr":
+        download_link = bs4obj.find(href=re.compile("pdf"))['href']
+        if download_link.startswith("/papers/"):
+            download_link = "http://www.jmlr.org" + download_link
+    else:
+        download_link = None
+    return download_link;
+
 
 def get_paper_info(url,source_website):
     """
@@ -1011,10 +1031,11 @@ def get_paper_info(url,source_website):
         authors = get_authors(bs4obj,source_website)
         title = get_title(bs4obj,source_website)
         abstract = get_abstract(bs4obj,source_website)
+        download_link = get_download_link(bs4obj,source_website,url)
         # venue = get_venue(bs4obj)
-        return title, authors, abstract
+        return title, authors, abstract, download_link
 
-    return None, None, None
+    return None, None, None, None
 
 
 @login_required
@@ -1053,11 +1074,11 @@ def paper_create_from_url(request):
             return render(
                 request,
                 "paper_form.html",
-                {"form": form, "message": "Source website " + url + " is not supported at this moment, please contact administrator"},
+                {"form": form, "message": "Source website is not supported"},
             )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract = get_paper_info(url,source_website)
+        title, authors, abstract, download_link = get_paper_info(url,source_website)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
@@ -1070,6 +1091,7 @@ def paper_create_from_url(request):
         request.session["external_title"] = title
         request.session["external_abstract"] = abstract
         request.session["external_url"] = url
+        request.session["download_link"] = download_link
         request.session[
             "external_authors"
         ] = authors  # comma separate list of author names, first to last name
