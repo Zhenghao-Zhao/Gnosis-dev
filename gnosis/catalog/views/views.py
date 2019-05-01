@@ -27,6 +27,7 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
 import re
+from django.utils.safestring import mark_safe
 
 #
 # Paper Views
@@ -879,6 +880,46 @@ def paper_create(request):
 
     return render(request, "paper_form.html", {"form": form, "message": message})
 
+# the two functions below are used to abstract author names from IEEE
+# to abstract the author name from a format of "name":"author_name"
+def find_author_from_IEEE_author_info(text):
+    i = text.find('''"name":''')
+    start = i + 8
+    i = i+8
+    while text[i] != '''"''' :
+        i = i+1
+    author = text[start:i]
+    return author
+# to find the author names as a list
+def find_author_list_from_IEEE(bs4obj):
+    text = bs4obj.get_text()
+    # to find the string which stores information of authors, which is stored in a
+    # format of "authors":[{author 1 info},{author 2 info}]
+    i = text.find('''"authors":[''')
+    if i == -1 :
+        return []
+    while text[i] != '[' :
+        i = i+1
+    i= i+1
+    array_count = 1
+    bracket_count = 0
+    bracket_start = 0
+    author_list = []
+    while array_count != 0 :
+        if text[i] == '{' :
+            if bracket_count == 0:
+                bracket_start = i
+            bracket_count = bracket_count +1
+        if text[i] == '}' :
+            bracket_count = bracket_count -1
+            if bracket_count == 0:
+                author_list.append(find_author_from_IEEE_author_info(text[bracket_start:i]))
+        if text[i] == ']' :
+            array_count = array_count -1
+        if text[i] == '[' :
+            array_count = array_count +1
+        i = i+1
+    return author_list
 
 def get_authors(bs4obj,source_website):
     """
@@ -912,6 +953,12 @@ def get_authors(bs4obj,source_website):
             if len(authorList) >= 1:
                 author_str = authorList[0].text
                 return author_str
+    elif source_website == "ieee":
+        authorList = find_author_list_from_IEEE(bs4obj)
+        if authorList:
+            authorList = [author for author in authorList]
+            author_str = ','.join(authorList)
+            return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -928,6 +975,12 @@ def get_title(bs4obj,source_website):
         titleList = bs4obj.findAll("title")
     elif source_website == "jmlr":
         titleList = bs4obj.findAll("h2")
+    elif source_website == "ieee":
+        title = bs4obj.find("title").get_text()
+        i = title.find("- IEEE")
+        if i != -1 :
+            title = title[0:i]
+        return title
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -945,6 +998,22 @@ def get_title(bs4obj,source_website):
                 return title_text
     return None
 
+# this function is used to find the abstract for a paper from IEEE
+def get_abstract_from_IEEE(bs4obj):
+    text = bs4obj.get_text()
+    i = text.find('''"abstract":"''')
+    if text[i+12:i+16] == "true" :
+        i = text.find('''"abstract":"''',i+16)
+        start = i + 12
+        i = start
+        count = 1
+    while count != 0:
+        if text[i]=='''"''':
+            if text[i+1] == "," and text[i+2] == '''"''':
+                count = 0
+        i += 1
+        abstract = text[start:i]
+    return abstract
 
 def get_abstract(bs4obj, source_website):
     """
@@ -969,6 +1038,8 @@ def get_abstract(bs4obj, source_website):
             abstract = bs4obj.find("h3")
             if abstract is not None:
                 abstract = abstract.next_sibling
+    elif source_website == "ieee" :
+        abstract = get_abstract_from_IEEE(bs4obj)
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
@@ -989,6 +1060,22 @@ def get_venue(bs4obj):
         venue = venue.get_text().split(";")[0]
     return venue
 
+# this function is used to find the download_link for a paper from IEEE
+def get_ddl_from_IEEE(bs4obj):
+    text = bs4obj.get_text()
+    # the ddl link is stored in a format of "pdfUrl":"download_link"
+    i = text.find('''"pdfUrl":"''')
+    start = i + 10
+    i = start
+    count = 1
+    while count != 0:
+        if text[i]=='''"''':
+            count = 0
+        i += 1
+    ddl = text[start:i-1]
+    ddl = "https://ieeexplore.ieee.org" + ddl
+    return ddl
+
 def get_download_link(bs4obj,source_website,url):
     """
     Extract download link from paper page1
@@ -1005,6 +1092,8 @@ def get_download_link(bs4obj,source_website,url):
         download_link = bs4obj.find(href=re.compile("pdf"))['href']
         if download_link.startswith("/papers/"):
             download_link = "http://www.jmlr.org" + download_link
+    elif source_website == "ieee":
+        download_link = get_ddl_from_IEEE(bs4obj)
     else:
         download_link = None
     return download_link;
@@ -1018,7 +1107,7 @@ def get_paper_info(url,source_website):
     :return:
     """
     try:
-        # html = urlopen("http://pythonscraping.com/pages/page1.html")
+    #html = urlopen("http://pythonscraping.com/pages/page1.html")
         html = urlopen(url)
     except HTTPError as e:
         print(e)
@@ -1068,6 +1157,10 @@ def paper_create_from_url(request):
             url = "http://" + url[8:]
             source_website = "jmlr"
             print("source from jmlr")
+        # from IEEE
+        elif url.startswith("https://ieeexplore.ieee.org/document/"):
+            source_website = "ieee"
+            print("source from ieee")
         # return error message if the website is not supported
         else:
             form = PaperImportForm()
