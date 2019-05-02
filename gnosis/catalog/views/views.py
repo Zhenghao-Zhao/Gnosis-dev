@@ -21,7 +21,7 @@ from django.http import HttpResponseRedirect
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
@@ -880,6 +880,7 @@ def paper_create(request):
 
     return render(request, "paper_form.html", {"form": form, "message": message})
 
+
 # the two functions below are used to abstract author names from IEEE
 # to abstract the author name from a format of "name":"author_name"
 def find_author_from_IEEE_author_info(text):
@@ -890,6 +891,8 @@ def find_author_from_IEEE_author_info(text):
         i = i+1
     author = text[start:i]
     return author
+
+
 # to find the author names as a list
 def find_author_list_from_IEEE(bs4obj):
     text = bs4obj.get_text()
@@ -934,7 +937,7 @@ def get_authors(bs4obj,source_website):
                 # there should be just one but let's just take the first one
                 authorList = authorList[0]
             # for author in authorList:
-            # print("type of author {}".format(type(author)))
+            #     print("type of author {}".format(type(author)))
             author_str = authorList[0].get_text()
             if author_str.startswith("Authors:"):
                 author_str = author_str[8:]
@@ -959,6 +962,15 @@ def get_authors(bs4obj,source_website):
             authorList = [author for author in authorList]
             author_str = ','.join(authorList)
             return author_str
+    elif source_website == "acm":
+        author_str = bs4obj.find("meta", {"name":"citation_authors"})
+        author_str = str(author_str)
+        start = author_str.find('"')
+        end = author_str.find('"',start+1)
+        author_str = author_str[start+1:end]
+        author_str = author_str.replace(",", "")
+        author_str = author_str.replace("; ",",")
+        return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -981,6 +993,13 @@ def get_title(bs4obj,source_website):
         if i != -1 :
             title = title[0:i]
         return title
+    elif source_website == "acm":
+        titleList = bs4obj.find("meta", {"name":"citation_title"})
+        title= str(titleList)
+        start = title.find('"')
+        end = title.find('"', start + 1)
+        title = title[start + 1:end]
+        return title
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -998,10 +1017,19 @@ def get_title(bs4obj,source_website):
                 return title_text
     return None
 
+
 # this function is used to find the abstract for a paper from IEEE
 def get_abstract_from_IEEE(bs4obj):
+    """
+        Extract paper abstract from the source website.
+        :param bs4obj:
+        :return: abstract
+    """
     text = bs4obj.get_text()
     i = text.find('''"abstract":"''')
+    start = None
+    count = 0
+    abstract = None
     if text[i+12:i+16] == "true" :
         i = text.find('''"abstract":"''',i+16)
         start = i + 12
@@ -1014,6 +1042,35 @@ def get_abstract_from_IEEE(bs4obj):
         i += 1
         abstract = text[start:i]
     return abstract
+
+
+# this function is used to find the abstract for a paper from IEEE
+def get_abstract_from_ACM(bs4obj):
+    """
+        Extract paper abstract from the source website.
+        :param bs4obj:
+        :return: abstract
+    """
+    abstract = bs4obj.find("div", {"style": "display:inline"})
+    if abstract:
+        abstract = abstract.get_text()
+    else:
+        abstract = bs4obj.find("meta", {"name": "citation_abstract_html_url"})
+        abstract_url = str(abstract)
+        start = abstract_url.find('"')
+        end = abstract_url.find('"', start + 1)
+        abstract_url = abstract_url[start + 1:end]
+        abstract_url += "&preflayout=flat"
+        headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
+        req = Request(abstract_url, headers=headers)
+        html = urlopen(req)
+        bs4obj1 = BeautifulSoup(html)
+        abstract = bs4obj1.findAll("div", {"style": "display:inline"})
+        abstract = abstract[0]
+        if abstract:
+            abstract = abstract.get_text()
+    return abstract
+
 
 def get_abstract(bs4obj, source_website):
     """
@@ -1040,6 +1097,8 @@ def get_abstract(bs4obj, source_website):
                 abstract = abstract.next_sibling
     elif source_website == "ieee" :
         abstract = get_abstract_from_IEEE(bs4obj)
+    elif source_website == "acm":
+        abstract = get_abstract_from_ACM(bs4obj)
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
@@ -1060,6 +1119,7 @@ def get_venue(bs4obj):
         venue = venue.get_text().split(";")[0]
     return venue
 
+
 # this function is used to find the download_link for a paper from IEEE
 def get_ddl_from_IEEE(bs4obj):
     text = bs4obj.get_text()
@@ -1076,12 +1136,20 @@ def get_ddl_from_IEEE(bs4obj):
     ddl = "https://ieeexplore.ieee.org" + ddl
     return ddl
 
+
 def get_download_link(bs4obj,source_website,url):
     """
     Extract download link from paper page1
     :param bs4obj:
     return: download link of paper
     """
+    if source_website == "acm":
+        download_link = bs4obj.find("meta", {"name": "citation_pdf_url"})
+        download_link = str(download_link)
+        start = download_link.find('"')
+        end = download_link.find('"', start + 1)
+        download_link = download_link[start + 1:end]
+        return download_link
     if url.endswith("/"):
         url = url[:-1]
     if source_website == "arxiv":
@@ -1096,7 +1164,7 @@ def get_download_link(bs4obj,source_website,url):
         download_link = get_ddl_from_IEEE(bs4obj)
     else:
         download_link = None
-    return download_link;
+    return download_link
 
 
 def get_paper_info(url,source_website):
@@ -1108,6 +1176,9 @@ def get_paper_info(url,source_website):
     """
     try:
     #html = urlopen("http://pythonscraping.com/pages/page1.html")
+        if source_website == "acm":
+            headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
+            url = Request(url, headers=headers)
         html = urlopen(url)
     except HTTPError as e:
         print(e)
@@ -1161,6 +1232,10 @@ def paper_create_from_url(request):
         elif url.startswith("https://ieeexplore.ieee.org/document/"):
             source_website = "ieee"
             print("source from ieee")
+        # from IEEE
+        elif url.startswith("https://dl.acm.org/"):
+            source_website = "acm"
+            print("source from acm")
         # return error message if the website is not supported
         else:
             form = PaperImportForm()
@@ -1172,6 +1247,10 @@ def paper_create_from_url(request):
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
         title, authors, abstract, download_link = get_paper_info(url,source_website)
+        print("title", title)
+        print("authors", authors)
+        print("abs", abstract)
+        print("link", download_link)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
