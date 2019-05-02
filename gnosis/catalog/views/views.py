@@ -98,7 +98,7 @@ def papers(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -127,6 +127,7 @@ def papers(request):
             "message": message,
         },
     )
+
 
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
@@ -237,52 +238,90 @@ def paper_detail(request, id):
 
     request.session["last-viewed-paper"] = id
 
-    # ego_network_json = _get_node_ego_network(paper.id, paper.title)
+    ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
-    # print("ego_network_json: {}".format(ego_network_json))
+    print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
         "paper_detail.html",
         {
-            "paper_title": paper.title,
             "paper": paper,
             "venue": venue,
             "authors": authors,
             "comments": comments,
             "codes": codes,
             "num_comments": num_comments,
-            # "ego_network": ego_network_json,
+            "ego_network": ego_network_json,
         },
     )
 
 
-# def _get_node_ego_network(id, paper_title):
-#     """
-#     Returns a json formatted string of the nodes ego network
-#     :param id:
-#     :return:
-#     """
-#     query = "MATCH (s:Paper {title: {paper_title}}) -->(t:Paper) RETURN t"
-#     results, meta = db.cypher_query(query, dict(paper_title=paper_title))
-#     ego_json = ""
-#     if len(results) > 0:
-#         target_papers = [Paper.inflate(row[0]) for row in results]
-#         print("Paper cites {} other papers.".format(len(target_papers)))
-#         ego_json = "{{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-#             id, paper_title, reverse("paper_detail", kwargs={"id": id})
-#         )
-#         for tp in target_papers:
-#             ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-#                 tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id})
-#             )
-#         for tp in target_papers:
-#             ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(
-#                 id, tp.id, "cites", id, tp.id
-#             )
-#     else:
-#         print("No cited papers found!")
-#
-#     return "[" + ego_json + "]"
+def _get_node_ego_network(id, paper_title):
+    """
+    Returns a json formatted string of the nodes ego network
+    :param id:
+    :return:
+    """
+    query_out = "MATCH (s:Paper {title: {paper_title}}) --> (t:Paper) RETURN t"
+    query_in = "MATCH (s:Paper {title: {paper_title}}) <-- (t:Paper) RETURN t"
+    query_peo = "MATCH (s:Paper {title: {paper_title}}) -- (p:Person) RETURN p"
+    results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
+    results_in, meta = db.cypher_query(query_in, dict(paper_title=paper_title))
+    results_peo, meta = db.cypher_query(query_peo, dict(paper_title=paper_title))
+    print("Results are: ", results_peo)
+    ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
+        id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper'
+    )
+    if len(results_out) > 0:
+        target_papers = [Paper.inflate(row[0]) for row in results_out]
+        print("Paper cites {} other papers.".format(len(target_papers)))
+        for tp in target_papers:
+            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
+                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id}), 'Paper'
+            )
+        for tp in target_papers:
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tp.id, "cites", id, tp.id
+            )
+
+    else:
+        print("No cited papers found!")
+
+    if len(results_in) > 0:
+        target_papers = [Paper.inflate(row[0]) for row in results_in]
+        for tp in target_papers:
+            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
+                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id}), 'Paper'
+            )
+        for tp in target_papers:
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tp.id, "-", id, "cites", tp.id, id
+            )
+
+    else:
+        print("No cited papers found!")
+
+    if len(results_peo) > 0:
+        target_people = [Person.inflate(row[0]) for row in results_peo]
+
+        for tpe in target_people:
+            middleName = ''
+            if tpe.middle_name != None:
+                middleName = tpe.middle_name[2:-2]
+
+            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}'}} }}".format(
+                tpe.id, tpe.first_name, middleName, tpe.last_name, 'Person'
+            )
+
+        for tpe in target_people:
+            ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpe.id, "-", id, "authors", tpe.id, id
+            )
+
+    else:
+        print("No authors found!")
+
+    return "[" + ego_json + "]"
 
 
 def paper_find(request):
@@ -297,7 +336,7 @@ def paper_find(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -334,12 +373,12 @@ def paper_connect_venue(request, id):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -412,7 +451,6 @@ def paper_connect_venue(request, id):
 
 @login_required
 def paper_connect_author_selected(request, id, aid):
-
     query = "MATCH (p:Paper), (a:Person) WHERE ID(p)={id} AND ID(a)={aid} MERGE (a)-[r:authors]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, aid=aid))
 
@@ -644,7 +682,6 @@ def paper_connect_dataset(request, id):
 
 @login_required
 def paper_connect_code_selected(request, id, cid):
-
     query = "MATCH (p:Paper), (c:Code) WHERE ID(p)={id} AND ID(c)={cid} MERGE (c)-[r:implements]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, cid=cid))
 
@@ -773,7 +810,7 @@ def _find_paper(query_string):
         w for w in paper_title.split(" ") if not w in english_stopwords
     ]
     paper_query = (
-        "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+            "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
     )
     query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
     print("Cypher query string {}".format(query))
@@ -1122,10 +1159,10 @@ def _dataset_find(name, keywords):
     if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
         # Search using both the name and the keywords
         keyword_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
         )
         name_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
         )
         query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
         results, meta = db.cypher_query(
@@ -1138,16 +1175,16 @@ def _dataset_find(name, keywords):
         if len(dataset_keywords) > 0:
             # only keywords given
             dataset_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
             )
             query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
         else:
             # only name or nothing (will still return all datasets if name and
             # keywords fields are left empty and sumbit button is pressed.
             dataset_query = (
-                "(?i).*"
-                + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
-                + "+.*"
+                    "(?i).*"
+                    + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
+                    + "+.*"
             )
             query = (
                 "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
@@ -1290,12 +1327,12 @@ def venues(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -1365,12 +1402,12 @@ def venue_find(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
