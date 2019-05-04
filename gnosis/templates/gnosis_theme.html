@@ -84,6 +84,30 @@
             color: black;
         }
 
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+
+        .tooltip .tooltiptext {
+          visibility: hidden;
+          width: 120px;
+          background-color: black;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px 0;
+
+          /* Position the tooltip */
+          position: absolute;
+          z-index: 1;
+        }
+
+        .tooltip:hover .tooltiptext {
+          visibility: visible;
+        }
+
         @media screen and (max-width: 599px) {
             #big{
                 display: none;
@@ -149,44 +173,100 @@
 <div class="container-fluid" style="margin-top:30px ">
     <div class="row " style="margin-right:10px; place-content: center">
         {% if user.is_authenticated %}
-        <div class="btn-group">
-            <a href="{% url 'papers_index' %}" class="navButton" role="button">Papers</a>
+            <div class="btn-group" role="group">
+
+                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Actions
+    </button>
+    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+
+
+        <div class="btn-group" >
+            <a href="{% url 'papers_index' %}" class="navButton" role="button" title="Search for papers">Papers</a>
             <div class="btn-group">
-                <a href="{% url 'paper_create' %}" class="btn btn-primary " role="button">+</a>
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                <a href="{% url 'paper_create' %}" class="navButton" role="button" title="Add new papers">+</a>
+                <button title="Import" type="button" class="navButton dropdown-toggle" data-toggle="dropdown">
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="{% url 'paper_create_from_url' %}">from external links</a></li>
+                    <li><a href="{% url 'paper_create_from_url' %}">import external links</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'persons_index' %}" class="navButton" role="button">People</a>
+        <div class="btn-group ml-1" >
+            <a href="{% url 'persons_index' %}" class="navButton" role="button" title="Search for people">People</a>
             <div class="btn-group">
-                <a href="{% url 'person_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'person_create' %}" class="navButton" role="button" title="Add new People">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'venues_index' %}" class="navButton" role="button">Venues</a>
+            <a href="{% url 'venues_index' %}" class="navButton" role="button" title="Search for venues">Venues</a>
             <div class="btn-group">
-                <a href="{% url 'venue_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'venue_create' %}" class="navButton" role="button" title="Add new venue">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'datasets_index' %}" class="navButton" role="button">Datasets</a>
+            <a href="{% url 'datasets_index' %}" class="navButton" role="button" title="Search for Datasets">Datasets</a>
             <div class="btn-group">
-                <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'dataset_create' %}" class="navButton" role="button" title="Add new Datasets">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'codes_index' %}" class="navButton" role="button">Codes</a>
+            <a href="{% url 'codes_index' %}" class="navButton" role="button" title="Search for Codes">Codes</a>
             <div class="btn-group">
-                <a href="{% url 'code_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'code_create' %}" class="navButton" role="button" title="Add new Codes">+</a>
+            </div>
+        </div>
+
+
+
+
+
+
+    </div>
+  </div>
+        <div class="btn-group" style="visibility: hidden">
+            <a href="{% url 'papers_index' %}" class="navButton" role="button" title="Search for papers">Papers</a>
+            <div class="btn-group">
+                <a href="{% url 'paper_create' %}" class="navButton" role="button" title="Add new papers">+</a>
+                <button title="Import" type="button" class="navButton dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="{% url 'paper_create_from_url' %}">import external links</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1" style="visibility: hidden" >
+            <a href="{% url 'persons_index' %}" class="navButton" role="button" title="Search for people">People</a>
+            <div class="btn-group">
+                <a href="{% url 'person_create' %}" class="navButton" role="button" title="Add new People">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1" style="visibility: hidden">
+            <a href="{% url 'venues_index' %}" class="navButton" role="button" title="Search for venues">Venues</a>
+            <div class="btn-group">
+                <a href="{% url 'venue_create' %}" class="navButton" role="button" title="Add new venue">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1" style="visibility: hidden">
+            <a href="{% url 'datasets_index' %}" class="navButton" role="button" title="Search for Datasets">Datasets</a>
+            <div class="btn-group">
+                <a href="{% url 'dataset_create' %}" class="navButton" role="button" title="Add new Datasets">+</a>
+            </div>
+        </div>
+
+        <div class="btn-group ml-1" style="visibility: hidden">
+            <a href="{% url 'codes_index' %}" class="navButton" role="button" title="Search for Codes">Codes</a>
+            <div class="btn-group">
+                <a href="{% url 'code_create' %}" class="navButton" role="button" title="Add new Codes">+</a>
             </div>
         </div>
 
