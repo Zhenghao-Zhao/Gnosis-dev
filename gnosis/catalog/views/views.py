@@ -998,6 +998,8 @@ def get_title(bs4obj,source_website):
         start = title.find('"')
         end = title.find('"', start + 1)
         title = title[start + 1:end]
+        if title == "Non":
+            return None
         return title
     else:
         titleList = []
@@ -1059,6 +1061,8 @@ def get_abstract_from_ACM(bs4obj):
         start = abstract_url.find('"')
         end = abstract_url.find('"', start + 1)
         abstract_url = abstract_url[start + 1:end]
+        if abstract_url == "Non":
+            return None
         abstract_url += "&preflayout=flat"
         headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
         req = Request(abstract_url, headers=headers)
@@ -1149,6 +1153,7 @@ def get_download_link(bs4obj,source_website,url):
         download_link = url + ".pdf"
     elif source_website == "jmlr":
         download_link = bs4obj.find(href=re.compile("pdf"))['href']
+        print(download_link)
         if download_link.startswith("/papers/"):
             download_link = "http://www.jmlr.org" + download_link
     elif source_website == "ieee":
@@ -1185,11 +1190,18 @@ def get_paper_info(url,source_website):
         print("The server could not be found.")
     else:
         bs4obj = BeautifulSoup(html)
+        if source_website == "acm":
+            url = ""
+            if bs4obj.find("a", {"title": "Buy this Book"}) or bs4obj.find("a", {"ACM Magazines"}) \
+                    or bs4obj.find_all("meta", {"name":"citation_conference_title"}):
+                return None, None, None, None
         # Now, we can access individual element in the page
         authors = get_authors(bs4obj,source_website)
         title = get_title(bs4obj,source_website)
         abstract = get_abstract(bs4obj,source_website)
-        download_link = get_download_link(bs4obj,source_website,url)
+        download_link = ""
+        if authors and title and abstract:
+            download_link = get_download_link(bs4obj,source_website,url)
         # venue = get_venue(bs4obj)
         return title, authors, abstract, download_link
 
@@ -1245,10 +1257,6 @@ def paper_create_from_url(request):
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
         title, authors, abstract, download_link = get_paper_info(url,source_website)
-        print("title", title)
-        print("authors", authors)
-        print("abs", abstract)
-        print("link", download_link)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
