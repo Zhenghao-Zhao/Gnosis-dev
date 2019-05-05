@@ -892,7 +892,6 @@ def find_author_from_IEEE_author_info(text):
     author = text[start:i]
     return author
 
-
 # to find the author names as a list
 def find_author_list_from_IEEE(bs4obj):
     text = bs4obj.get_text()
@@ -1136,20 +1135,12 @@ def get_ddl_from_IEEE(bs4obj):
     ddl = "https://ieeexplore.ieee.org" + ddl
     return ddl
 
-
 def get_download_link(bs4obj,source_website,url):
     """
     Extract download link from paper page1
     :param bs4obj:
     return: download link of paper
     """
-    if source_website == "acm":
-        download_link = bs4obj.find("meta", {"name": "citation_pdf_url"})
-        download_link = str(download_link)
-        start = download_link.find('"')
-        end = download_link.find('"', start + 1)
-        download_link = download_link[start + 1:end]
-        return download_link
     if url.endswith("/"):
         url = url[:-1]
     if source_website == "arxiv":
@@ -1162,6 +1153,13 @@ def get_download_link(bs4obj,source_website,url):
             download_link = "http://www.jmlr.org" + download_link
     elif source_website == "ieee":
         download_link = get_ddl_from_IEEE(bs4obj)
+    elif source_website == "acm":
+        download_link = bs4obj.find("meta", {"name": "citation_pdf_url"})
+        download_link = str(download_link)
+        start = download_link.find('"')
+        end = download_link.find('"', start + 1)
+        download_link = download_link[start + 1:end]
+        return download_link
     else:
         download_link = None
     return download_link

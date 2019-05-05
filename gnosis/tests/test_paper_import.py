@@ -101,6 +101,18 @@ class PaperImport(TestCase):
             "http://www.jmlr.org/author-info.html",   # author info
             "http://www.jmlr.org/papers/",             # paper selection
             "http://www.jmlr.org/papers/v13/",        # volume selection
+            # ACM urls
+            "https://dl.acm.org/pubs.cfm",              # selection page for journals
+            "https://dl.acm.org/pub.cfm?id=J401",       # journals
+            "https://dl.acm.org/pub.cfm?id=J1191" ,     # journals
+            "https://dl.acm.org/pub.cfm?id=J1268" ,     # magazine
+            "https://dl.acm.org/mags.cfm",              # magazine selction page1
+            "https://dl.acm.org/event.cfm?id=RE300",    # event page
+            "https://dl.acm.org/books.cfm",             # book selection page
+            "https://dl.acm.org/sig.cfm?id=SP1280",     # sepeical event
+            "https://dl.acm.org/citation.cfm?id=2345396" ,  # proceeding
+            "https://dl.acm.org/citation.cfm?id=1996010" ,  # proceeding
+
             ]
         for url in invalid_urls:
             request.POST["url"] = url
@@ -132,9 +144,15 @@ class PaperImport(TestCase):
             "http://www.jmlr.org/papers/v13/zhang12a.html",   # paper from 2012
             "http://www.jmlr.org/papers/v11/strumbelj10a.html",  # paper from 2010
             "http://www.jmlr.org/papers/v1/meila00a.html",    # volumn from 2000
+            # ACM papers
+            "https://dl.acm.org/citation.cfm?id=3281649" ,  # book
+            "https://dl.acm.org/citation.cfm?id=3304087" ,  # book
+            "https://dl.acm.org/citation.cfm?id=2841316",   # book
+            "https://dl.acm.org/citation.cfm?id=3239571",   # article
+            "https://dl.acm.org/citation.cfm?id=2804405",   # article
+            "https://dl.acm.org/citation.cfm?id=2907069",   # article
             ]
         for url in valid_urls:
             request.POST["url"] = url
             paper_create_from_url(request)
             self.assertEquals(request.session["from_external"], True)
-
