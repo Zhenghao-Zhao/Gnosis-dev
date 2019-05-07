@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 from catalog.forms import PaperForm, PaperImportForm
-=======
-from catalog.forms import PaperForm
->>>>>>> f1864e82a017d5062707832440cfc5d576c63737
 from django.test import TestCase
 
 # Create your tests here.
@@ -22,7 +18,6 @@ class PaperFormTest(TestCase):
         form = PaperForm()
         if form.is_valid():
             form.clean_title()
-<<<<<<< HEAD
             self.assertTrue(form.fields['title'].label is None or form.fields['title'].label == 'title')
 
     def test_clean_abstract(self):
@@ -50,6 +45,3 @@ class PaperImportFormTest(TestCase):
         if form.is_valid():
             form.clean_url()
             self.assertTrue(form.fields['url'].label is None or form.fields['url'].label == 'url')
-=======
-            self.assertTrue(form.fields['title'].label is None or form.fields['title'].label == 'title')
->>>>>>> f1864e82a017d5062707832440cfc5d576c63737
