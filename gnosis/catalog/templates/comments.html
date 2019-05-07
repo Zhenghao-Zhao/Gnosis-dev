@@ -1,15 +1,14 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-
+<div class="mt-5">
 <h2>User Comments in our DB</h2>
-<ul>
+<ul class="list-group">
 {% for comment in comments %}
-    <li><a href="{{ comment.get_absolute_url }}">{{ comment.author }}</a>
+    <li class="list-group-item mt-1"><a href="{{ comment.get_absolute_url }}">{{ comment.author }}</a>
         {% if user.is_authenticated %}|| <a href="{% url 'comment_update' comment.id %}">Edit</a>{% endif %}</li>
 {% endfor %}
 </ul>
 <p>Number of comments {{ num_comments }}</p>
-<p><a href="{% url 'home' %}">Home</a>|<a href="{% url 'papers_index' %}">Papers</a></p>
-
+</div>
 {% endblock %}
