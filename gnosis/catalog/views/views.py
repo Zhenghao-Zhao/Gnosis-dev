@@ -1169,6 +1169,22 @@ def get_download_link(bs4obj,source_website,url):
         download_link = None
     return download_link
 
+def check_valid_paper_type_ieee(bs4obj):
+    text = bs4obj.get_text()
+    # the paper type is stored in a format of "xploreDocumentType":"paper_type"
+    i = text.find('''"xploreDocumentType":"''')
+    start = i + 22
+    i = start
+    count = 1
+    while count != 0:
+        if text[i]=='''"''':
+            count = 0
+        i += 1
+    paper_type = text[start:i-1]
+    print(paper_type)
+    if paper_type == "Journals & Magazine" :
+        return True
+    return False
 
 def get_paper_info(url,source_website):
     """
@@ -1191,6 +1207,9 @@ def get_paper_info(url,source_website):
         print("The server could not be found.")
     else:
         bs4obj = BeautifulSoup(html)
+        if source_website == "ieee" :
+            if check_valid_paper_type_ieee(bs4obj) == False :
+                return None, None, None ,None
         if source_website == "acm":
             url = ""
             if bs4obj.find("a", {"title": "Buy this Book"}) or bs4obj.find("a", {"ACM Magazines"}) \
