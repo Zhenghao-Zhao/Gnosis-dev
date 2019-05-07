@@ -1179,6 +1179,7 @@ def get_paper_info(url,source_website):
     """
     try:
     #html = urlopen("http://pythonscraping.com/pages/page1.html")
+        url_copy = url
         if source_website == "acm":
             headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
             url = Request(url, headers=headers)
@@ -1202,6 +1203,8 @@ def get_paper_info(url,source_website):
         download_link = ""
         if authors and title and abstract:
             download_link = get_download_link(bs4obj,source_website,url)
+        if download_link == "Non":
+            download_link = url_copy
         # venue = get_venue(bs4obj)
         return title, authors, abstract, download_link
 
@@ -1242,7 +1245,7 @@ def paper_create_from_url(request):
         elif url.startswith("https://ieeexplore.ieee.org/document/"):
             source_website = "ieee"
             print("source from ieee")
-        # from IEEE
+        # from ACM
         elif url.startswith("https://dl.acm.org/"):
             source_website = "acm"
             print("source from acm")
