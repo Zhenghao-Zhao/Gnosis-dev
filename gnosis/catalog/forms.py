@@ -63,6 +63,24 @@ class SearchPapersForm(Form):
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
 
+class PaperConnectionForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_paper_title(self):
+        return self.cleaned_data["paper_title"]
+
+    def clean_paper_connection(self):
+        return self.cleaned_data["paper_connection"]
+
+    paper_title = forms.CharField(
+        required=True, widget=forms.TextInput(attrs={"size": 60})
+    )
+    CHOICES = (('cites', 'cites'), ('uses', 'uses'), ('extends', 'extends'),)
+    paper_connection = forms.ChoiceField(choices=CHOICES)
+
 
 class SearchPeopleForm(Form):
     def __init__(self, *args, **kwargs):
