@@ -19,6 +19,7 @@ class Paper(DjangoNode):
     keywords = StringProperty(required=False)
     download_link = StringProperty(required=True)
 
+
     # Links
     cites = RelationshipTo("Paper", "cites")
     uses = RelationshipTo("Paper", "uses")
@@ -65,7 +66,7 @@ class Person(DjangoNode):
 
     def __str__(self):
 
-        if self.middle_name is not None or len(self.middle_name) > 0:
+        if self.middle_name is not None and len(self.middle_name) > 0:
             return '{} {} {}'.format(self.first_name, self.middle_name, self.last_name)
         return '{} {}'.format(self.first_name, self.last_name)
 

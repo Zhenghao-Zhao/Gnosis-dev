@@ -888,25 +888,25 @@ def paper_create(request):
                 form.save()  # store
                 # Now, add the authors and link each author to the paper with an "authors"
                 # type edge.
-                if request.session.get("from_arxiv", False):
-                    paper_authors = request.session["arxiv_authors"]
+                if request.session.get("from_external", False):
+                    paper_authors = request.session["external_authors"]
                     for paper_author in paper_authors.split(","):
                         print("Adding author {}".format(paper_author))
                         _add_author(paper_author, paper)
 
-                request.session["from_arxiv"] = False  # reset
+                request.session["from_external"] = False  # reset
                 # go back to paper index page.
                 # Should this redirect to the page of the new paper just added?
                 return HttpResponseRedirect(reverse("papers_index"))
     else:  # GET
         print("   GET")
-        # check if this is a redirect from paper_create_from_arxiv
-        # if so, then pre-populate the form with the data from arXiv,
+        # check if this is a redirect from paper_create_from_url
+        # if so, then pre-populate the form with the data from external source,
         # otherwise start with an empty form.
-        if request.session.get("from_arxiv", False) is True:
-            title = request.session["arxiv_title"]
-            abstract = request.session["arxiv_abstract"]
-            url = request.session["arxiv_url"]
+        if request.session.get("from_external", False) is True:
+            title = request.session["external_title"]
+            abstract = request.session["external_abstract"]
+            url = request.session["external_url"]
 
             form = PaperForm(
                 initial={"title": title, "abstract": abstract, "download_link": url}
@@ -917,36 +917,58 @@ def paper_create(request):
     return render(request, "paper_form.html", {"form": form, "message": message})
 
 
-def get_authors(bs4obj):
+def get_authors(bs4obj,source_website):
     """
-    Extract authors from arXiv.org paper page
-    :param bs4obj:
+    Extract authors from the source website
+    :param bs4obj, source_website；
     :return: None or a string with comma separated author names from first to last name
     """
-    authorList = bs4obj.findAll("div", {"class": "authors"})
-    if authorList is not None:
-        if len(authorList) > 1:
-            # there should be just one but let's just take the first one
-            authorList = authorList[0]
-
-        # for author in authorList:
-        # print("type of author {}".format(type(author)))
-        author_str = authorList[0].get_text()
-        if author_str.startswith("Authors:"):
-            author_str = author_str[8:]
-        return author_str
-    # authorList is None so return None
+    if source_website == "arxiv":
+        authorList = bs4obj.findAll("div", {"class": "authors"})
+        if authorList:
+            if len(authorList) > 1:
+                # there should be just one but let's just take the first one
+                authorList = authorList[0]
+            # for author in authorList:
+            # print("type of author {}".format(type(author)))
+            author_str = authorList[0].get_text()
+            if author_str.startswith("Authors:"):
+                author_str = author_str[8:]
+            return author_str
+    elif source_website == 'nips':
+        # authors are found to be list objects , so needs to join them to get the author string
+        authorList = bs4obj.findAll("li",{"class":"author"})
+        if authorList:
+            authorList = [author.text for author in authorList]
+            author_str = ','.join(authorList)
+            return author_str
+    elif source_website == "jmlr":
+        # in JMLR authors are found in the html tag "i"
+        authorList = bs4obj.findAll("i")
+        if authorList:
+            if len(authorList) >= 1:
+                author_str = authorList[0].text
+                return author_str
+    # if source website is not supported or the autherlist is none , return none
     return None
 
 
-def get_title(bs4obj):
+def get_title(bs4obj,source_website):
     """
-    Extract paper title from arXiv.org paper page.
+    Extract paper title from the source web.
     :param bs4obj:
     :return:
     """
-    titleList = bs4obj.findAll("h1", {"class": "title"})
-    if titleList is not None:
+    if source_website == "arxiv":
+        titleList = bs4obj.findAll("h1", {"class": "title"})
+    elif source_website == 'nips':
+        titleList = bs4obj.findAll("title")
+    elif source_website == "jmlr":
+        titleList = bs4obj.findAll("h2")
+    else:
+        titleList = []
+    # check the validity of the abstracted titlelist
+    if titleList:
         if len(titleList) == 0:
             return None
         else:
@@ -961,15 +983,35 @@ def get_title(bs4obj):
     return None
 
 
-def get_abstract(bs4obj):
+def get_abstract(bs4obj, source_website):
     """
-    Extract paper abstract from arXiv.org paper page.
-    :param bs4obj:
+    Extract paper abstract from the source website.
+    :param bs4obj, source_website:
     :return:
     """
-    abstract = bs4obj.find("blockquote", {"class": "abstract"})
-    if abstract is not None:
-        abstract = " ".join(abstract.get_text().split(" ")[1:])
+    if source_website == "arxiv":
+        abstract = bs4obj.find("blockquote", {"class": "abstract"})
+        if abstract is not None:
+            abstract = " ".join(abstract.get_text().split(" ")[1:])
+    elif source_website == 'nips':
+        abstract = bs4obj.find("p",{"class":"abstract"})
+        if abstract is not None:
+            abstract = abstract.get_text()
+    elif source_website == "jmlr":
+        abstract = bs4obj.find("p",{"class":"abstract"})
+        if abstract is not None:
+            abstract = abstract.get_text()
+        else:
+            # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
+            abstract = bs4obj.find("h3")
+            if abstract is not None:
+                abstract = abstract.next_sibling
+    else:
+        abstract = None
+    # want to remove all the leading and ending white space and line breakers in the abstract
+    if abstract is not None :
+        abstract = abstract.strip()
+        abstract = abstract.replace('\r', '').replace('\n', '')
     return abstract
 
 
@@ -985,11 +1027,11 @@ def get_venue(bs4obj):
     return venue
 
 
-def get_paper_info(url):
+def get_paper_info(url,source_website):
     """
-    Extract paper information, title, abstract, and authors, from arXiv.org
+    Extract paper information, title, abstract, and authors, from source website
     paper page.
-    :param url:
+    :param url, source_website:
     :return:
     """
     try:
@@ -1003,9 +1045,9 @@ def get_paper_info(url):
     else:
         bs4obj = BeautifulSoup(html)
         # Now, we can access individual element in the page
-        authors = get_authors(bs4obj)
-        title = get_title(bs4obj)
-        abstract = get_abstract(bs4obj)
+        authors = get_authors(bs4obj,source_website)
+        title = get_title(bs4obj,source_website)
+        abstract = get_abstract(bs4obj,source_website)
         # venue = get_venue(bs4obj)
         return title, authors, abstract
 
@@ -1013,7 +1055,7 @@ def get_paper_info(url):
 
 
 @login_required
-def paper_create_from_arxiv(request):
+def paper_create_from_url(request):
     user = request.user
 
     if request.method == "POST":
@@ -1022,12 +1064,37 @@ def paper_create_from_arxiv(request):
         print("{}".format(request.POST["url"]))
         # get the data from arxiv
         url = request.POST["url"]
+        # check if a particular url starts with http , it is important as JMLR does not support https
+        if url.startswith("http://"):
+            url = url[7:]
         # check if url includes https, and if not add it
         if not url.startswith("https://"):
             url = "https://" + url
+        # check whether the url is from a supported website
+        # from arXiv.org
+        if url.startswith("https://arxiv.org"):
+            source_website = "arxiv"
+            print("source from arXiv")
+        # from NeurlIPS
+        elif url.startswith("https://papers.nips.cc/paper"):
+            source_website = "nips"
+            print("source from nips")
+        # for urls of JMLR, they do not support https , so we need to change it to http instead
+        elif url.startswith("https://www.jmlr.org/papers"):
+            url = "http://" + url[8:]
+            source_website = "jmlr"
+            print("source from jmlr")
+        # return error message if the website is not supported
+        else:
+            form = PaperImportForm()
+            return render(
+                request,
+                "paper_form.html",
+                {"form": form, "message": "Source website " + url + " is not supported at this moment, please contact administrator"},
+            )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract = get_paper_info(url)
+        title, authors, abstract = get_paper_info(url,source_website)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
@@ -1036,19 +1103,19 @@ def paper_create_from_arxiv(request):
                 {"form": form, "message": "Invalid source, please try again."},
             )
 
-        request.session["from_arxiv"] = True
-        request.session["arxiv_title"] = title
-        request.session["arxiv_abstract"] = abstract
-        request.session["arxiv_url"] = url
+        request.session["from_external"] = True
+        request.session["external_title"] = title
+        request.session["external_abstract"] = abstract
+        request.session["external_url"] = url
         request.session[
-            "arxiv_authors"
+            "external_authors"
         ] = authors  # comma separate list of author names, first to last name
 
         print("Authors: {}".format(authors))
 
         return HttpResponseRedirect(reverse("paper_create"))
     else:  # GET
-        request.session["from_arxiv"] = False
+        request.session["from_external"] = False
         form = PaperImportForm()
 
     return render(request, "paper_form.html", {"form": form})
