@@ -240,6 +240,8 @@ def paper_detail(request, id):
 
     ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
+    main_paper_id = paper.id
+
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -252,6 +254,7 @@ def paper_detail(request, id):
             "codes": codes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
+            "main_paper_id": main_paper_id,
         },
     )
 

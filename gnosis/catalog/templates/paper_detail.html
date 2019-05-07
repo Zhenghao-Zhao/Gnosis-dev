@@ -72,11 +72,22 @@
 
 <div class="card mt-3 shadow-sm">
     <div class="card-header"><h4>Ego-graph</h4></div>
+
+    <div class="ego-buttons">
+        <button style="position: absolute; z-index: 1000; float: left;" type="button" class="btn btn-primary toggle" data-toggle="button"
+                aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
+            Hide Relation
+        </button>
+
+        <button style="position: absolute; z-index: 1000; float: left; left: 200px" type="button" class="btn btn-primary"
+                onclick="center_graph()">
+            Center
+        </button>
+
+    </div>
+
     <div class="card-body">
         <div id="cy">
-            <button style="position: absolute; z-index: 1000;" type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
-                Toggle relas
-            </button>
         </div>
     </div>
 </div>
@@ -123,20 +134,38 @@
         {#        cy.style().selector('node[type="Person"]').style('label', 'data(last_name)').update()#}
         {#    }#}
 
-        var state_relas = false;
+        var hide_rela = false;
         function toggle_relas(){
-            state_relas = !state_relas;
-            if (state_relas) {
-                cy.style().selector('edge').style('label', '').update()
+            hide_rela = !hide_rela;
+            if (hide_rela) {
+                cy.style().selector('edge').style('label', '').update();
+                $(".toggle").text("Show Relation")
+
             }else{
                 cy.style().selector('edge[label="cites"]').style('label', 'data(label)').update();
-                cy.style().selector('edge[label="authors"]').style('label', 'data(label)').update()
+                cy.style().selector('edge[label="authors"]').style('label', 'data(label)').update();
+                $(".toggle").text("Hide Relation");
+
             }
         }
+
+        function center_graph(){
+            cy.animate({
+               center: cy.nodes()
+            },{
+                duration: 50
+            });
+        }
+
+        var main_paper_id = '{{ main_paper_id }}';
+
+
+
         var cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
             wheelSensitivity: 0.2,
+
 
             layout:
                 {
@@ -163,6 +192,25 @@
                         'border-color': "#0c0eff"
                     },
 
+                },
+                {
+                    selector: 'node[id="'+main_paper_id+'"]',
+                    style: {
+                        'width': 30,
+                        'height': 30,
+                        'background-color': '#419aff',
+                        'label': 'data(title)',
+                        'text-opacity': 1,
+                        'text-wrap': 'ellipsis',
+                        'text-max-width': '50',
+                        'text-background-color': '#FFFFFF',
+                        'text-outline-opacity': 1,
+                        'text-outline-color': '#FFFFFF',
+                        'text-outline-width': '1px',
+                        'font-size': '10px',
+                        'border-width': '0.5px',
+                        'border-color': "#0c0eff"
+                    }
                 },
                 {
                     selector: 'node[type="Person"]',
