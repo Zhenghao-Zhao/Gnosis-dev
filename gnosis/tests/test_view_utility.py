@@ -9,7 +9,7 @@ from django.http import HttpRequest
 class UtilityViewTest(TestCase):
     def setUp(self):
         # Create a superuser
-        test_superuser1 = User.objects.create_superuser(username='superuser1', password='abc123')
+        test_superuser1 = User.objects.create_superuser(username='superuser1', password='abc123', email='superuser123@gnosis.com')
         self.user = User.objects.create_user(
             username='gnosis', email='gnosis@gnosis.com', password='gnosis')
 

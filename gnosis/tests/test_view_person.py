@@ -28,21 +28,21 @@ class PersonViewTest(TestCase):
         self.assertTrue("New Person/Author" in str(response.content) and "First Name*" in str(response.content)
                         and "Last Name*" in str(response.content) and "Affiliation" in str(response.content))
 
-    def test_person_update(self):
+    def test_person_update(self, id):
         login = self.client.login(username='testuser2', password='2HJ1vRV0Z&3iD')  # test views requires login
         request = HttpRequest()
         request.user = self.user
         request.method = 'POST', 'GET'
         request.session = {}
-        response = person_update(request)
+        response = person_update(request, id)
         self.assertEquals(response.status_code, 200)# test if response is correct
 
-    def test_person_detail(self):
+    def test_person_detail(self, id):
         login = self.client.login(username='testuser2', password='2HJ1vRV0Z&3iD')  # test views requires login
         request = HttpRequest()
         request.user = self.user
         request.session = {}
-        response = person_detail(request)
+        response = person_detail(request, id)
         self.assertEquals(response.status_code, 200)  # test if response is correct
 
     def test_persons(self):

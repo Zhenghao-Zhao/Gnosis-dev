@@ -12,7 +12,7 @@ class CommentViewTest(TestCase):
         # Create a user
         test_user1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
         test_user2 = User.objects.create_user(username='testuser2', password='2HJ1vRV0Z&3iD')
-        test_superuser1 = User.objects.create_superuser(username='superuser1', password='abc123')
+        test_superuser1 = User.objects.create_superuser(username='superuser1', password='abc123', email='superuser123@gnosis.com')
         self.user = User.objects.create_user(
             username='gnosis', email='gnosis@gnosis.com', password='gnosis')
 
@@ -30,13 +30,13 @@ class CommentViewTest(TestCase):
         self.assertEquals(response.status_code, 200)  # test if response is correct
         self.assertTrue("Share your thoughts!" in str(response.content))
 
-    def test_comment_update(self):
+    def test_comment_update(self, id):
         login = self.client.login(username='testuser2', password='2HJ1vRV0Z&3iD')  # test views requires login
         request = HttpRequest()
         request.user = self.user
         request.method = 'POST'
         request.session = {}
-        response = comment_update(request)
+        response = comment_update(request, id)
         self.assertEquals(response.status_code, 200)  # test if response is correct
 
     def test_comments(self):

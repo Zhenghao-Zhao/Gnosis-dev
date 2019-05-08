@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Permission
 from catalog.models import Code
-from catalog.views.views import code_create, code_update, code_find, codes
+from catalog.views.views_codes import code_create, code_update, code_find, codes
 from django.http import HttpRequest
 
 

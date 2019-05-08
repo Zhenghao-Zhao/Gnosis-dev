@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Permission
 from catalog.models import Dataset
-from catalog.views.views import dataset_create, dataset_detail, dataset, dataset_update, \
+from catalog.views.views import dataset_create, dataset_detail, datasets, dataset_update, \
     dataset_find
 from django.http import HttpRequest
 
@@ -30,26 +30,26 @@ class DatasetViewTest(TestCase):
         self.assertTrue("New Dataset" in str(response.content) and "Name*" in str(response.content)
                         and "Keywords*" in str(response.content) and "Description*" in str(response.content))
 
-    def test_dataset_update(self):
+    def test_dataset_update(self,  id):
         login = self.client.login(username='testuser2', password='2HJ1vRV0Z&3iD')  # test views requires login
         request = HttpRequest()
         request.user = self.user
         request.method = 'POST'
         request.session = {}
-        response = dataset_update(request)
+        response = dataset_update(request, id)
         self.assertEquals(response.status_code, 200)        # test if response is correct
 
-    def test_dataset_detail(self):
+    def test_dataset_detail(self, id):
         request = HttpRequest()
         request.user = self.user
         request.session = {}
-        response = dataset_detail(request)
+        response = dataset_detail(request, id)
         self.assertEquals(response.status_code, 200)
 
-    def test_dataset(self):
+    def test_datasets(self):
         request = HttpRequest()
         request.user = self.user
-        response = dataset(request)
+        response = datasets(request)
         self.assertEquals(response.status_code, 200)
 
     def test_dataset_find(self):

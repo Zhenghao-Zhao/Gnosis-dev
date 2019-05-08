@@ -33,7 +33,7 @@ class SearchDatasetsFormTest(TestCase):
     def test_fields(self):
         form = SearchDatasetsForm()
         self.assertEquals(form.fields["name"].label, "Name")
-        self.assertEquals(form.fields["keywords"].label, "Keyword (single keyword, e.g. network, computer vision)*")
+        self.assertEquals(form.fields["keywords"].label, "Keyword (single keyword, e.g. network, computer vision)")
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
@@ -245,7 +245,7 @@ class VenueFormTest(TestCase):
         self.assertEquals(form.fields["name"].label, "Name*")
         self.assertEquals(form.fields["publisher"].label, "Publisher*")
         self.assertEquals(form.fields["publication_date"].label, "Publication Date (yyyy-mm-dd)*")
-        self.assertEquals(form.fields["source_type"].label, "Type*")
+        self.assertEquals(form.fields["type"].label, "Type*")
         self.assertEquals(form.fields["peer_reviewed"].label, "Peer Reviewed*")
         self.assertEquals(form.fields["keywords"].label, "Keywords*")
         self.assertEquals(form.fields["website"].label, "Website")
@@ -324,7 +324,7 @@ class CodeFormTest(TestCase):
         form = CodeForm()
         self.assertEquals(form.fields["website"].label, "Website*")
         self.assertEquals(form.fields["keywords"].label, "Keywords*")
-        self.assertEquals(form.fields["descriptions"].label, "Description*")
+        self.assertEquals(form.fields["description"].label, "Description*")
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
