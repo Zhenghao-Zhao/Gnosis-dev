@@ -73,19 +73,24 @@
 <div class="card mt-3 shadow-sm">
     <div class="card-header"><h4>Ego-graph</h4></div>
     <div class="card-body">
-                    <select style="position: absolute; z-index: 1000; top: 200px;" id="graphfilter" onchange="show_cites(this.value)">
-                          <option value="all relationships"> - All Relationships - </option>
-                          <option value="cites"> - Cites - </option>
-                          <option value="uses"> - Uses - </option>
-                          <option value="extends"> - Extends - </option>
-                          <option value="authors"> - Authors - </option>
-                    </select>
+
+        <button style="position: absolute; z-index: 1000; top: 100px;" type="button" class="btn btn-primary" data-toggle="button"
+                aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
+            Toggle relas
+        </button>
+
+        <label for="graphfilter"></label>
+        <select style="position: absolute; z-index: 1000; top: 200px;" id="graphfilter"
+                onchange="show_cites(this.value)">
+            <option value="all relationships"> - All Relationships -</option>
+            <option value="cites"> - Cites -</option>
+            <option value="uses"> - Uses -</option>
+            <option value="extends"> - Extends -</option>
+            <option value="authors"> - Authors -</option>
+        </select>
+
 
         <div id="cy">
-            <button style="position: absolute; z-index: 1000;" type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
-                Toggle relas
-            </button>
-
         </div>
     </div>
 </div>

@@ -217,6 +217,7 @@ def paper_detail(request, id):
 
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
