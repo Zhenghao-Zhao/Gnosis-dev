@@ -15,6 +15,7 @@ from catalog.forms import (
     SearchPeopleForm,
     SearchDatasetsForm,
     SearchCodesForm,
+    PaperConnectionForm,
 )
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -216,6 +217,7 @@ def paper_detail(request, id):
 
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
@@ -265,40 +267,41 @@ def _get_node_ego_network(id, paper_title):
     :param id:
     :return:
     """
-    query_out = "MATCH (s:Paper {title: {paper_title}}) --> (t:Paper) RETURN t"
-    query_in = "MATCH (s:Paper {title: {paper_title}}) <-- (t:Paper) RETURN t"
+    query_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (t:Paper) RETURN t, Type(relationship_type)"
+    query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, Type(relationship_type)"
     query_peo = "MATCH (s:Paper {title: {paper_title}}) -- (p:Person) RETURN p"
     results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
+    print("Results are: ", results_out)
     results_in, meta = db.cypher_query(query_in, dict(paper_title=paper_title))
     results_peo, meta = db.cypher_query(query_peo, dict(paper_title=paper_title))
     print("Results are: ", results_peo)
-    ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
-        id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper'
+    ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
+        id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
     if len(results_out) > 0:
-        target_papers = [Paper.inflate(row[0]) for row in results_out]
+        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_out]
         print("Paper cites {} other papers.".format(len(target_papers)))
         for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
-                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id}), 'Paper'
+            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
             )
         for tp in target_papers:
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
-                id, '-', tp.id, "cites", id, tp.id
+                id, '-', tp[0].id, tp[1], id, tp[0].id
             )
 
     else:
         print("No cited papers found!")
 
     if len(results_in) > 0:
-        target_papers = [Paper.inflate(row[0]) for row in results_in]
+        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_in]
         for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}' }} }}".format(
-                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id}), 'Paper'
+            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
             )
         for tp in target_papers:
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
-                tp.id, "-", id, "cites", tp.id, id
+                tp[0].id, "-", id, tp[1], tp[0].id, id
             )
 
     else:
@@ -312,8 +315,8 @@ def _get_node_ego_network(id, paper_title):
             if tpe.middle_name != None:
                 middleName = tpe.middle_name[2:-2]
 
-            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}'}} }}".format(
-                tpe.id, tpe.first_name, middleName, tpe.last_name, 'Person'
+            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}', label: '{}'}} }}".format(
+                tpe.id, tpe.first_name, middleName, tpe.last_name, 'Person', 'authors'
             )
 
         for tpe in target_people:
@@ -523,20 +526,20 @@ def paper_connect_author(request, id):
 def paper_connect_paper(request, id):
     """
     View function for connecting a paper with another paper.
-
     :param request:
     :param id:
     :return:
     """
     message = None
     if request.method == "POST":
-        form = SearchPapersForm(request.POST)
+        form = PaperConnectionForm(request.POST)
         if form.is_valid():
             # search the db for the person
             # if the person is found, then link with paper and go back to paper view
             # if not, ask the user to create a new person
             paper_title_query = form.cleaned_data["paper_title"]
             papers_found = _find_paper(paper_title_query)
+            paper_connectted = form.cleaned_data["paper_connection"]
 
             if len(papers_found) > 0:  # found more than one matching papers
                 print("Found {} papers that match".format(len(papers_found)))
@@ -568,20 +571,25 @@ def paper_connect_paper(request, id):
                     print("Found paper: {}".format(paper_source.title))
                     # check if the papers are already connected with a cites link; if yes, then
                     # do nothing. Otherwise, add the link.
-                    query = "MATCH (q:Paper)<-[r:cites]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+                    query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
                     results, meta = db.cypher_query(
                         query,
                         dict(source_id=paper_source.id, target_id=paper_target.id),
                     )
                     if len(results) == 0:
                         # papers are not linked so add the edge
-                        print("Citation link not found, adding it!")
-                        paper_source.cites.connect(paper_target)
-                        messages.add_message(request, messages.INFO, "Citation Added!")
+                        print("Connection link not found, adding it!")
+                        if paper_connectted == 'cites':
+                            paper_source.cites.connect(paper_target)
+                        elif paper_connectted == 'uses':
+                            paper_source.uses.connect(paper_target)
+                        elif paper_connectted == 'extends':
+                            paper_source.extends.connect(paper_target)
+                        messages.add_message(request, messages.INFO, "Connection Added!")
                     else:
-                        print("Citation link found not adding it!")
+                        print("Connection link found not adding it!")
                         messages.add_message(
-                            request, messages.INFO, "Citation Already Exists!"
+                            request, messages.INFO, "Connection Already Exists!"
                         )
                 else:
                     print("Could not find paper!")
@@ -593,13 +601,14 @@ def paper_connect_paper(request, id):
                 message = "No matching papers found"
 
     if request.method == "GET":
-        form = SearchPapersForm()
+        form = PaperConnectionForm()
 
     return render(
         request,
         "paper_connect_paper.html",
         {"form": form, "papers": None, "message": message},
     )
+
 
 
 @login_required
