@@ -2,71 +2,72 @@
 
 {% block content %}
 
-<div class="card shadow-sm mt-5">
-    <div class="card-header">
-        <h3>{{ paper.title }}</h3>
+    <div class="card shadow-sm mt-5">
+        <div class="card-header">
+            <h3>{{ paper.title }}</h3>
 
-        <h4>
-            <a href={{ paper.download_link }} class="btn btn-primary" role="button">Download</a>
-            {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
-                                             role="button">
-            Edit</a>
+            <h4>
+                <a href={{ paper.download_link }} class="btn btn-primary" role="button">Download</a>
+                {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
+                                                 role="button">
+                    Edit</a>
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            <h5 class="text-left">
+                {{ authors }} {% if user.is_authenticated and user.is_superuser %}<a
+                    href="{% url 'paper_authors' id=paper.id %}"
+                    class="btn btn-danger btn-sm" role="button">
+                Edit</a>{% endif %}
+            </h5>
+
+            <h5 class="text-right">
+                <small>keywords: {{ paper.keywords }}</small>
+            </h5>
+
+            <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
+            {% if venue %}
+                <p>
+                    <small><strong>Venue:</strong> {{ venue }}</small>
+                </p>
             {% endif %}
-        </h4>
-    </div>
-    <div class="card-body">
-        <h5 class="text-left">
-            {{ authors }} {% if user.is_authenticated and user.is_superuser%}<a
-                href="{% url 'paper_authors' id=paper.id %}"
-                class="btn btn-danger btn-sm" role="button">
-            Edit</a>{% endif %}
-        </h5>
 
-        <h5 class="text-right">
-            <small>keywords: {{ paper.keywords }}</small>
-        </h5>
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="bg-success">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
 
-        <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
-        {% if venue %}
-        <p>
-            <small><strong>Venue:</strong> {{ venue }}</small>
-        </p>
-        {% endif%}
-
-        {% if messages %}
-        {% for message in messages %}
-        <p class="bg-success">{{ message }}</p>
-        {% endfor %}
-        {% endif %}
-
-        <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
-                href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
-            || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
-            <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
-            <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
-            <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
+            <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
+                    href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
+                || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
+                <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
+                <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
+                <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
+        </div>
     </div>
-</div>
-{% if user.is_authenticated and user.is_superuser %}
-<div class="card text-left shadow-sm mb-3 mt-3">
-    <div class="card-header"><strong>Admin functions</strong></div>
-    <div class="card-body">
-        <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
-    </div>
-</div>
-{% endif %}
-{% if codes %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header"><h4>Code</h4></div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for code in codes %}
-            <li class="list-group-item"><h6><a href="{{ code.get_absolute_url }}">{{ code.website }}</a></h6></li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-{% endif %}
+    {% if user.is_authenticated and user.is_superuser %}
+        <div class="card text-left shadow-sm mb-3 mt-3">
+            <div class="card-header"><strong>Admin functions</strong></div>
+            <div class="card-body">
+                <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
+            </div>
+        </div>
+    {% endif %}
+    {% if codes %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header"><h4>Code</h4></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for code in codes %}
+                        <li class="list-group-item"><h6><a href="{{ code.get_absolute_url }}">{{ code.website }}</a>
+                        </h6></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
 
 
 
@@ -74,31 +75,34 @@
         <div class="card-header"><h4>Ego-graph</h4></div>
 
         <div class="card-body">
-            <div class="ego-buttons">
-                <button style="position: absolute; z-index: 1000; float: left;" type="button"
-                        class="btn btn-primary toggle"
-                        data-toggle="button"
-                        aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
-                    Hide Relation
-                </button>
+            <button style="position: absolute; z-index: 1000; float: left;" type="button"
+                    class="btn btn-primary toggle"
+                    data-toggle="button"
+                    aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
+                Hide Relationships
+            </button>
 
-                <button style="position: absolute; z-index: 1000; float: left; left: 200px" type="button"
-                        class="btn btn-primary"
-                        onclick="center_graph()">
-                    Center
-                </button>
+            <button style="position: absolute; z-index: 1000; float: left; left: 200px" type="button"
+                    class="btn btn-primary"
+                    onclick="center_graph()">
+                Center
+            </button>
 
-                <label for="graphfilter"></label>
-                <select style="position: absolute; z-index: 1000; top: 200px;" id="graphfilter"
-                        onchange="show_cites(this.value)">
-                    <option value="all relationships"> - All Relationships -</option>
-                    <option value="cites"> - Cites -</option>
-                    <option value="uses"> - Uses -</option>
-                    <option value="extends"> - Extends -</option>
-                    <option value="authors"> - Authors -</option>
-                </select>
+            <button style="position: absolute; z-index: 1000; float: left; left: 330px" type="button"
+                    class="btn btn-primary"
+                    onclick="reset_graph()">
+                Reset
+            </button>
 
-            </div>
+            <label style="position: absolute" for="graphfilter"></label>
+            <select style="position: absolute; z-index: 1000; top: 200px;" id="graphfilter"
+                    onchange="show_cites(this.value)">
+                <option value="all relationships"> - All Relationships -</option>
+                <option value="cites"> - Cites -</option>
+                <option value="uses"> - Uses -</option>
+                <option value="extends"> - Extends -</option>
+                <option value="authors"> - Authors -</option>
+            </select>
 
             <div id="cy">
             </div>
@@ -106,35 +110,35 @@
     </div>
 
 
-<p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
-    <span class="glyphicon glyphicon-plus"></span> Add Comment</a></p>
-{% else %}
-<p><a href="{% url 'login' %}?next={{request.path}}">Login</a> to comment</p>
-{% endif %}
-{% if num_comments > 0 %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header">
-        <h3>{{ num_comments }} Comments</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            {% for comment in comments %}
-            <li class="list-group-item shadow-sm mt-1">
-                <p><strong>{{comment.author }}</strong> says:</p>
-                <p>
-                    <small>{{ comment.publication_date }}</small>
-                </p>
-                <p>{{ comment.text }}</p>
-                {% if comment.created_by == user.id %}
-                <a href="{% url 'comment_update' comment.id %}">Edit</a>
-                {% endif %}
-            </li>
-        </ul>
-        {% endfor %}
-    </div>
-</div>
-</div>
-{% endif %}
+    <p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
+        <span class="glyphicon glyphicon-plus"></span> Add Comment</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to comment</p>
+    {% endif %}
+    {% if num_comments > 0 %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h3>{{ num_comments }} Comments</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for comment in comments %}
+                        <li class="list-group-item shadow-sm mt-1">
+                            <p><strong>{{ comment.author }}</strong> says:</p>
+                            <p>
+                                <small>{{ comment.publication_date }}</small>
+                            </p>
+                            <p>{{ comment.text }}</p>
+                            {% if comment.created_by == user.id %}
+                                <a href="{% url 'comment_update' comment.id %}">Edit</a>
+                            {% endif %}
+                        </li>
+                        </ul>
+                    {% endfor %}
+            </div>
+        </div>
+        </div>
+    {% endif %}
 
     <script type="text/javascript">
         {#var state_nodes = false;#}
@@ -146,45 +150,52 @@
         {#        cy.style().selector('node[type="Paper"]').style('label', 'data(title)').update();#}
         {#        cy.style().selector('node[type="Person"]').style('label', 'data(last_name)').update()#}
         {#    }#}
-
         var hide_rela = false;
+
         function toggle_relas() {
             hide_rela = !hide_rela;
             if (hide_rela) {
                 cy.style().selector('edge').style('label', '').update();
-                $(".toggle").text("Show Relation");
+                $(".toggle").text("Show Relationships");
             } else {
                 cy.style().selector('edge[label="cites"]').style('label', 'data(label)').update();
                 cy.style().selector('edge[label="authors"]').style('label', 'data(label)').update();
-                $(".toggle").text("Hide Relation");
+                $(".toggle").text("Hide Relationships");
             }
         }
 
-        function center_graph(){
+        function center_graph() {
             cy.animate({
-               center: cy.nodes()
-            },{
+                center: cy.nodes()
+            }, {
                 duration: 50
             });
         }
 
+        function reset_graph() {
+            var layout = cy.layout({
+                name: 'cola'
+            });
+
+            layout.run();
+        }
+
         var main_paper_id = '{{ main_paper_id }}';
 
-        
-        function show_cites(value){
+
+        function show_cites(value) {
 
             var cat = value;
             //document.write('node[label="'+cat+'"]');
-            if(cat==="all relationships"){
-                cy.style().selector('node').style('visibility' , 'visible').update();
-                cy.style().selector('edge').style('visibility' , 'visible').update();
-            }
-            else{
-                cy.style().selector('node').style('visibility' , 'hidden').update();
-                cy.style().selector('edge').style('visibility' , 'hidden').update();
-                cy.style().selector('node[label="'+cat+'"]').style('visibility' , 'visible').update();
-                cy.style().selector('edge[label="'+cat+'"]').style('visibility' , 'visible').update();
-                cy.style().selector('node[label="origin"]').style('visibility' , 'visible').update();
+            if (cat === "all relationships") {
+                cy.style().selector('node').style('visibility', 'visible').update();
+                cy.style().selector('edge').style('visibility', 'visible').update();
+            } else {
+                cy.style().selector('node').style('visibility', 'hidden').update();
+                cy.style().selector('edge').style('visibility', 'hidden').update();
+                cy.style().selector('node[label="' + cat + '"]').style('visibility', 'visible').update();
+                cy.style().selector('edge[label="' + cat + '"]').style('visibility', 'visible').update();
+                cy.style().selector('node[label="origin"]').style('visibility', 'visible').update();
             }
 
         }
@@ -201,8 +212,8 @@
                 },
 
             style: [ // the stylesheet for the graph
-                {   
-                    selector: 'node[id="'+main_paper_id+'"]',
+                {
+                    selector: 'node[id="' + main_paper_id + '"]',
                     style: {
                         'width': 30,
                         'height': 30,
@@ -237,7 +248,7 @@
                         'font-size': '10px',
                         'border-width': '0.5px',
                         'border-color': "#0c0eff",
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
                     },
 
                 },
@@ -258,7 +269,7 @@
                         'font-size': '10px',
                         'border-width': '0.5px',
                         'border-color': "#0c0eff",
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
                     },
 
                 },
@@ -279,7 +290,7 @@
                         'font-size': '10px',
                         'border-width': '0.5px',
                         'border-color': "#0c0eff",
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
                     },
 
                 },
@@ -301,7 +312,7 @@
                         'font-size': '10px',
                         'border-width': '0.5px',
                         'border-color': "#e9a41f",
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
 
                     },
 
@@ -320,7 +331,7 @@
                         'text-outline-color': '#FFFFFF',
                         'text-outline-width': '1px',
                         'font-size': '9px',
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
 
                     }
                 },
@@ -338,7 +349,7 @@
                         'text-outline-color': '#FFFFFF',
                         'text-outline-width': '1px',
                         'font-size': '9px',
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
 
                     }
                 },
@@ -356,7 +367,7 @@
                         'text-outline-color': '#FFFFFF',
                         'text-outline-width': '1px',
                         'font-size': '9px',
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
 
                     }
                 },
@@ -374,7 +385,7 @@
                         'text-outline-color': '#FFFFFF',
                         'text-outline-width': '1px',
                         'font-size': '9px',
-                        'visibility' : 'visible'
+                        'visibility': 'visible'
 
                     }
                 }
