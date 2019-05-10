@@ -158,8 +158,7 @@
                 cy.style().selector('edge').style('label', '').update();
                 $(".toggle").text("Show Relationships");
             } else {
-                cy.style().selector('edge[label="cites"]').style('label', 'data(label)').update();
-                cy.style().selector('edge[label="authors"]').style('label', 'data(label)').update();
+                cy.style().selector('edge').style('label', 'data(label)').update();
                 $(".toggle").text("Hide Relationships");
             }
         }
