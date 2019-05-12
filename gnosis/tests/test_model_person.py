@@ -23,6 +23,9 @@ class PersonModelTest(TestCase):
         person.last_name = "last"
         person.affiliation = ""
         person.website = ""
+        person.id = "01"
+
+        url = person.get_absolute_url()
 
         self.assertEquals(person.__str__(),"first last")
         self.assertFalse(person.affiliation)

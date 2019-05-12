@@ -1,6 +1,7 @@
 from catalog.forms import PaperForm, PaperImportForm, PersonForm, DatasetForm, VenueForm, CommentForm, CodeForm, \
     SearchVenuesForm, SearchDatasetsForm, SearchPapersForm, SearchPeopleForm, SearchCodesForm
 from django.test import TestCase
+import datetime as dt
 
 # Create your tests here.
 # To run this test, use command: py -3 manage.py test tests.test_form_paper
@@ -12,21 +13,30 @@ from django.test import TestCase
 class SearchVenuesFormTest(TestCase):
 
     def test_fields(self):
-        form = SearchVenuesForm()
+        data = {'venue_name': "name",
+                "venue_publication_year": "1995"}
+        form = SearchVenuesForm(data)
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_venue_name(self):
-        form = SearchVenuesForm()
+        data = {'venue_name': "name",
+                "venue_publication_year": "1995"}
+        form = SearchVenuesForm(data)
         if form.is_valid():
-            form.clean_venue_name()
+            x = form.clean_venue_name()
+            self.assertEquals(x, "name")
             self.assertTrue(form.fields['venue_name'].label is None or form.fields['venue_name'].label == 'venue_name')
 
     def test_clean_venue_publication_year(self):
-        form = SearchVenuesForm()
+        data = {'venue_name': "name",
+                "venue_publication_year": "1995"}
+        form = SearchVenuesForm(data)
         if form.is_valid():
-            form.clean_venue_publication_year()
+            x = form.clean_venue_publication_year()
+            self.assertEquals(x, "1995")
             self.assertTrue(form.fields['venue_publication_year'].label is None or form.fields['venue_publication_year'].label == 'venue_publication_year')
+
 
 class SearchDatasetsFormTest(TestCase):
 
@@ -39,28 +49,37 @@ class SearchDatasetsFormTest(TestCase):
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_name(self):
-        form = SearchDatasetsForm()
+        data = {'name': "name",
+                "keywords": "ML"}
+        form = SearchDatasetsForm(data)
         if form.is_valid():
-            form.clean_name()
-            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'name')
+            x = form.clean_name()
+            self.assertTrue(x == "name")
+            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'Name')
 
     def test_clean_keywords(self):
-        form = SearchDatasetsForm()
+        data = {'name': "name",
+                "keywords": "ML"}
+        form = SearchDatasetsForm(data)
         if form.is_valid():
-            form.clean_name()
-            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+            x = form.clean_keywords()
+            self.assertTrue(x == "ML")
+            self.assertTrue(form.fields['keywords'].label is None or
+                            form.fields['keywords'].label == 'Keyword (single keyword, e.g. network, computer vision)')
+
 
 class SearchPapersFormTest(TestCase):
-
     def test_fields(self):
         form = SearchPapersForm()
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_paper_title(self):
-        form = SearchPapersForm()
+        data = {'paper_title':"ML"}
+        form = SearchPapersForm(data)
         if form.is_valid():
-            form.clean_paper_title()
+            x = form.clean_paper_title()
+            self.assertTrue(x == "ML")
             self.assertTrue(form.fields['paper_title'].label is None or form.fields['paper_title'].label == 'paper_title')
 
 
@@ -72,9 +91,11 @@ class SearchPeopleFormTest(TestCase):
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_person_name(self):
-        form = SearchPeopleForm()
+        data = {"person_name":"Alice"}
+        form = SearchPeopleForm(data)
         if form.is_valid():
-            form.clean_person_name()
+            x = form.clean_person_name()
+            self.assertTrue(x == "Alice")
             self.assertTrue(form.fields['person_name'].label is None or form.fields['person_name'].label == 'person_name')
 
 
@@ -88,11 +109,14 @@ class SearchCodesFormTest(TestCase):
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_keywords(self):
-        form = SearchCodesForm()
+        data = {"keywords": "ML"}
+        form = SearchCodesForm(data)
         if form.is_valid():
-            form.clean_keywords()
+            x = form.clean_keywords()
+            self.assertTrue(x == "ML")
             self.assertTrue(
-                form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+                form.fields['keywords'].label is None
+                or form.fields['keywords'].label == "Keywords (e.g. GCN, network, computer vision)")
 
 
 #
@@ -112,36 +136,54 @@ class PaperFormTest(TestCase):
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
 
     def test_clean_title(self):
-        form = PaperForm()
+        data = {"title": "t", "abstract": "a", "keywords": "k", "download_link": "d"}
+        form = PaperForm(data)
         if form.is_valid():
-            form.clean_title()
-            self.assertTrue(form.fields['title'].label is None or form.fields['title'].label == 'title')
+            x = form.clean_title()
+            self.assertTrue(x == "t")
+            self.assertTrue(form.fields['title'].label is None or form.fields['title'].label == 'Title*')
 
     def test_clean_abstract(self):
-        form = PaperForm()
+        data = {"title": "t", "abstract": "a", "keywords": "k", "download_link": "d"}
+        form = PaperForm(data)
         if form.is_valid():
-            form.clean_abstract()
-            self.assertTrue(form.fields['abstract'].label is None or form.fields['abstract'].label == 'abstract')
+            x = form.clean_abstract()
+            self.assertTrue(x == "a")
+            self.assertTrue(form.fields['abstract'].label is None or form.fields['abstract'].label == 'Abstract*')
 
     def test_clean_keywords(self):
-        form = PaperForm()
+        data = {"title": "t", "abstract": "a", "keywords": "k", "download_link": "d"}
+        form = PaperForm(data)
         if form.is_valid():
-            form.clean_keywords()
-            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+            x = form.clean_keywords()
+            self.assertTrue(x == "k")
+            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'Keywords')
 
     def test_clean_download_link(self):
-        form = PaperForm()
+        data = {"title": "t", "abstract": "a", "keywords": "k", "download_link": "d"}
+        form = PaperForm(data)
         if form.is_valid():
-            form.clean_download_link()
-            self.assertTrue(form.fields['download_link'].label is None or form.fields['download_link'].label == 'download_link')
+            x = form.clean_download_link()
+            self.assertTrue(x == "d")
+            self.assertTrue(form.fields['download_link'].label is None
+                            or form.fields['download_link'].label == 'Download Link*')
+
 
 class PaperImportFormTest(TestCase):
 
     def test_clean_url(self):
-        form = PaperImportForm()
+        data = {"url" : "www.google.com"}
+        form = PaperImportForm(data)
         if form.is_valid():
-            form.clean_url()
-            self.assertTrue(form.fields['url'].label is None or form.fields['url'].label == 'url')
+            x = form.clean_url()
+            self.assertTrue(x == "www.google.com")
+            self.assertTrue(form.fields['url'].label is None
+                            or form.fields['url'].label == 'Source URL, e.g., https://arxiv.org/abs/1607.00653*'+
+                                                           ' <br /> Currently supported websites: arXiv.org, '+
+                                                           'papers.nips.cc, www.jmlr.org/papers <br /> for papers '+
+                                                           'from JMLR, please provide link of the abstract([abs]) '+
+                                                           'page ')
+
 
 class PersonFormTest(TestCase):
 
@@ -155,37 +197,50 @@ class PersonFormTest(TestCase):
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
-            self.assertEquals(visible.field.widget.attrs.update({"style": "width:25em"}))
+            self.assertEquals(visible.field.widget.attrs["style"], "width:25em")
 
     def test_clean_first_name(self):
-        form = PersonForm()
+        data = {"first_name": "f", "middle_name": "m", "last_name": "l", "affiliation": "a", "website": "w"}
+        form = PersonForm(data)
         if form.is_valid():
-            form.clean_first_name()
-            self.assertTrue(form.fields['first_name'].label is None or form.fields['first_name'].label == 'first_name')
+            x = form.clean_first_name()
+            self.assertTrue(x == "f")
+            self.assertTrue(form.fields['first_name'].label is None or form.fields['first_name'].label == 'First Name*')
 
     def test_clean_middle_name(self):
-        form = PersonForm()
+        data = {"first_name": "f", "middle_name": "m", "last_name": "l", "affiliation": "a", "website": "w"}
+        form = PersonForm(data)
         if form.is_valid():
-            form.clean_middle_name()
-            self.assertTrue(form.fields['middle_name'].label is None or form.fields['middle_name'].label == 'middle_name')
+            x = form.clean_middle_name()
+            self.assertTrue(x == "m")
+            self.assertTrue(form.fields['middle_name'].label is None
+                            or form.fields['middle_name'].label == 'Middle Name')
 
     def test_clean_last_name(self):
-        form = PersonForm()
+        data = {"first_name": "f", "middle_name": "m", "last_name": "l", "affiliation": "a", "website": "w"}
+        form = PersonForm(data)
         if form.is_valid():
-            form.clean_last_name()
-            self.assertTrue(form.fields['last_name'].label is None or form.fields['last_name'].label == 'last_name')
+            x = form.clean_last_name()
+            self.assertTrue(x == "l")
+            self.assertTrue(form.fields['last_name'].label is None or form.fields['last_name'].label == 'Last Name*')
 
     def test_clean_affiliation(self):
-        form = PersonForm()
+        data = {"first_name": "f", "middle_name": "m", "last_name": "l", "affiliation": "a", "website": "w"}
+        form = PersonForm(data)
         if form.is_valid():
-            form.clean_affiliation()
-            self.assertTrue(form.fields['affiliation'].label is None or form.fields['affiliation'].label == 'affiliation')
+            x = form.clean_affiliation()
+            self.assertTrue(x == "a")
+            self.assertTrue(form.fields['affiliation'].label is None
+                            or form.fields['affiliation'].label == 'Affiliation')
 
     def test_clean_website(self):
-        form = PersonForm()
+        data = {"first_name": "f", "middle_name": "m", "last_name": "l", "affiliation": "a", "website": "w"}
+        form = PersonForm(data)
         if form.is_valid():
-            form.clean_website()
-            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'website')
+            x = form.clean_website()
+            self.assertTrue(x == "w")
+            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'Website')
+
 
 class DatasetFormTest(TestCase):
 
@@ -200,43 +255,94 @@ class DatasetFormTest(TestCase):
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
-            self.assertEquals(visible.field.widget.attrs.update({"style": "width:25em"}))
+            self.assertEquals(visible.field.widget.attrs["style"], "width:25em")
 
     def test_clean_name(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_name()
-            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'name')
+            x = form.clean_name()
+            self.assertTrue(x == "n")
+            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'Name*')
 
     def test_clean_keywords(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_keywords()
-            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+            x = form.clean_keywords()
+            self.assertTrue(x == "k")
+            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'Keywords*')
 
     def test_clean_description(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_description()
-            self.assertTrue(form.fields['description'].label is None or form.fields['description'].label == 'description')
+            x = form.clean_description()
+            self.assertTrue(x == "d")
+            self.assertTrue(form.fields['description'].label is None
+                            or form.fields['description'].label == 'Description*')
 
     def test_clean_source_type(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_source_type()
-            self.assertTrue(form.fields['source_type'].label is None or form.fields['source_type'].label == 'source_type')
+            x = form.clean_source_type()
+            self.assertTrue(x == "N")
+            self.assertTrue(form.fields['source_type'].label is None or form.fields['source_type'].label == 'Type*')
 
     def test_clean_publication_date(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_publication_date()
-            self.assertTrue(form.fields['publication_date'].label is None or form.fields['publication_date'].label == 'publication_date')
+            x = form.clean_publication_date()
+            self.assertEquals(x, dt.date(1999, 9, 9))
+            self.assertTrue(form.fields['publication_date'].label is None
+                            or form.fields['publication_date'].label == 'Publication Date (yyyy-mm-dd)')
 
     def test_clean_website(self):
-        form = DatasetForm()
+        data = {
+            "name": "n",
+            "keywords": "k",
+            "description": "d",
+            "source_type": "N",
+            "publication_date": "1999-09-09",
+            "website": "w"}
+        form = DatasetForm(data)
         if form.is_valid():
-            form.clean_website()
-            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'website')
+            x = form.clean_website()
+            self.assertTrue(x == "w")
+            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'Website')
+
 
 class VenueFormTest(TestCase):
 
@@ -252,49 +358,122 @@ class VenueFormTest(TestCase):
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
-            self.assertEquals(visible.field.widget.attrs.update({"style": "width:25em"}))
+            self.assertEquals(visible.field.widget.attrs["style"], "width:25em")
 
     def test_clean_name(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_name()
-            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'name')
+            x = form.clean_name()
+            self.assertTrue(x == "n")
+            self.assertTrue(form.fields['name'].label is None or form.fields['name'].label == 'Name*')
 
     def test_clean_publisher(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_publisher()
-            self.assertTrue(form.fields['publisher'].label is None or form.fields['publisher'].label == 'publisher')
+            x = form.clean_publisher()
+            self.assertTrue(x == "p1")
+            self.assertTrue(form.fields['publisher'].label is None or form.fields['publisher'].label == 'Publisher*')
 
     def test_clean_publication_date(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_publication_date()
-            self.assertTrue(form.fields['publication_date'].label is None or form.fields['publication_date'].label == 'publication_date')
+            x = form.clean_publication_date()
+            self.assertEquals(x, dt.date(1999, 9, 9))
+            self.assertTrue(form.fields['publication_date'].label is None
+                            or form.fields['publication_date'].label == 'Publication Date (yyyy-mm-dd)*')
 
     def test_clean_type(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_type()
-            self.assertTrue(form.fields['type'].label is None or form.fields['type'].label == 'type')
+            x = form.clean_type()
+            self.assertTrue(x == "J")
+            self.assertTrue(form.fields['type'].label is None or form.fields['type'].label == 'Type*')
 
     def test_clean_peer_reviewed(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_peer_reviewed()
-            self.assertTrue(form.fields['peer_reviewed'].label is None or form.fields['peer_reviewed'].label == 'peer_reviewed')
+            x = form.clean_peer_reviewed()
+            self.assertTrue(x == "Y")
+            self.assertTrue(form.fields['peer_reviewed'].label is None
+                            or form.fields['peer_reviewed'].label == 'Peer Reviewed*')
 
     def test_clean_keywords(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_keywords()
-            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+            x = form.clean_keywords()
+            self.assertTrue(x == "k")
+            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'Keywords*')
 
     def test_clean_website(self):
-        form = VenueForm()
+        data = {
+            "name": "n",
+            "publisher": "p1",
+            "publication_date": "1999-09-09",
+            "type": "J",
+            "peer_reviewed": "Y",
+            "keywords": "k",
+            "website": "w",
+        }
+        form = VenueForm(data)
         if form.is_valid():
-            form.clean_website()
-            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'website')
+            x = form.clean_website()
+            self.assertTrue(x == "w")
+            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'Website')
+
 
 class CommentFormTest(TestCase):
 
@@ -304,19 +483,25 @@ class CommentFormTest(TestCase):
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
-            self.assertEquals(visible.field.widget.attrs.update({"style": "width:35em"}))
+            self.assertEquals(visible.field.widget.attrs["style"], "width:35em")
 
     def test_clean_text(self):
-        form = CommentForm()
+        # data = {"text": "t", "publication_date": "2018-04-17"}
+        data = {"text": "t"}
+        form = CommentForm(data)
         if form.is_valid():
-            form.clean_text()
-            self.assertTrue(form.fields['text'].label is None or form.fields['text'].label == 'text')
+            x = form.clean_text()
+            self.assertTrue(x == "t")
+            self.assertTrue(form.fields['text'].label is None or form.fields['text'].label == "")
 
-    def test_clean_publication_date(self):
-        form = CommentForm()
-        if form.is_valid():
-            form.clean_publication_date()
-            self.assertTrue(form.fields['publication_date'].label is None or form.fields['publication_date'].label == 'publication_date')
+    # def test_clean_publication_date(self):
+    #     data = {"text": "t", "publication_date": "2018-04-17"}
+    #     form = CommentForm(data)
+    #     if form.is_valid():
+    #         x = form.clean_publication_date()
+    #         self.assertTrue(x == "2018-04-17")
+    #         self.assertTrue(form.fields['publication_date'].label is None or form.fields['publication_date'].label == 'publication_date')
+
 
 class CodeFormTest(TestCase):
 
@@ -328,25 +513,38 @@ class CodeFormTest(TestCase):
 
         for visible in form.visible_fields():
             self.assertEquals(visible.field.widget.attrs["class"], "form-control")
-            self.assertEquals(visible.field.widget.attrs.update({"style": "width:25em"}))
+            self.assertEquals(visible.field.widget.attrs["style"], "width:25em")
 
     def test_clean_keywords(self):
-        form = CodeForm()
+        data = {
+            "website": "w", "keywords": "k", "description": "d"
+        }
+        form = CodeForm(data)
         if form.is_valid():
-            form.clean_keywords()
-            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'keywords')
+            x = form.clean_keywords()
+            self.assertTrue(x == "k")
+            self.assertTrue(form.fields['keywords'].label is None or form.fields['keywords'].label == 'Keywords*')
 
     def test_clean_description(self):
-        form = CodeForm()
+        data = {
+            "website": "w", "keywords": "k", "description": "d"
+        }
+        form = CodeForm(data)
         if form.is_valid():
-            form.clean_description()
-            self.assertTrue(form.fields['description'].label is None or form.fields['description'].label == 'description')
+            x = form.clean_description()
+            self.assertTrue(x == "d")
+            self.assertTrue(form.fields['description'].label is None
+                            or form.fields['description'].label == 'Description*')
 
     def test_clean_website(self):
-        form = CodeForm()
+        data = {
+            "website": "w", "keywords": "k", "description": "d"
+        }
+        form = CodeForm(data)
         if form.is_valid():
-            form.clean_website()
-            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'website')
+            x = form.clean_website()
+            self.assertTrue(x == "w")
+            self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'Website*')
 
 
 

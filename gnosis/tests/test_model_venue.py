@@ -27,12 +27,14 @@ class VenueModelTest(TestCase):
         venue.publisher = "CSIRO"
         venue.keywords = "J"
         venue.peer_reviewed = "N"
+        venue.id = "01"
 
         self.assertEquals(venue.publication_date, time)
         self.assertEquals(venue.type, "J")
         self.assertEquals(venue.keywords, "J")
         self.assertEquals(venue.peer_reviewed, "N")
         self.assertEquals(venue.__str__(), "paper by CSIRO on 2019-04-17")
+        url = venue.get_absolute_url()
 
         # test name is required
         venue.name = None
@@ -108,6 +110,9 @@ class VenueModelTest(TestCase):
         # This will create an entry in the db.
         venue.save()
 
+        self.assertTrue(venue.type in [i for (i,_) in venue.venue_types])
+        self.assertTrue(venue.__str__() == "paper by CSIRO on 2019-04-17")
+
         # Check if the dataset was added to the DB by querying for it based on the first_name
         venues = Venue.nodes.filter(name="paper")
 
@@ -115,7 +120,8 @@ class VenueModelTest(TestCase):
         self.assertEquals(len(venues), 1)
 
         # Delete the person from db
-        venues[0].delete()
+        for v in venues:
+            v.delete()
 
         # test the person is removed
         venues = Venue.nodes.filter(name="paper")
