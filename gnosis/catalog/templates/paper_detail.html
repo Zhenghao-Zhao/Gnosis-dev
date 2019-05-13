@@ -84,13 +84,13 @@
 
             <button style="position: absolute; z-index: 1000; float: left; left: 200px" type="button"
                     class="btn btn-primary"
-                    onclick="center_graph()">
+                    onclick="center()">
                 Center
             </button>
 
             <button style="position: absolute; z-index: 1000; float: left; left: 330px" type="button"
                     class="btn btn-primary"
-                    onclick="reset_graph()">
+                    onclick="reset()">
                 Reset
             </button>
 
@@ -141,6 +141,8 @@
     {% endif %}
 
     <script type="text/javascript">
+        {# function for showing/hiding node labels #}
+
         {#var state_nodes = false;#}
         {#function toggle_nodes(){#}
         {#    state_nodes = !state_nodes;#}
@@ -150,6 +152,9 @@
         {#        cy.style().selector('node[type="Paper"]').style('label', 'data(title)').update();#}
         {#        cy.style().selector('node[type="Person"]').style('label', 'data(last_name)').update()#}
         {#    }#}
+
+        var main_paper_id = '{{ main_paper_id }}';
+
         var hide_rela = false;
 
         function toggle_relas() {
@@ -163,24 +168,24 @@
             }
         }
 
-        function center_graph() {
+        function center() {
             cy.animate({
-                center: cy.nodes()
-            }, {
-                duration: 50
+                center: cy.nodes(),
+                fit: {eles: cy.nodes(), padding: 50},
+                duration: 100,
             });
         }
 
-        function reset_graph() {
-            center_graph();
+        function reset_layout() {
             var layout = cy.layout({
-                name: 'cola'
+                name: 'cola',
             });
-
             layout.run();
         }
 
-        var main_paper_id = '{{ main_paper_id }}';
+        function reset() {
+            reset_layout();
+        }
 
 
         function show_cites(value) {
@@ -414,11 +419,11 @@
                     var tip_item = "";
 
                     var span = document.createElement("span");
-                    if (node.data('type')==='Person'){
+                    if (node.data('type') === 'Person') {
                         tip_item = node.data('first_name') + ' ' + node.data('middle_name') + ' ' + node.data('last_name');
                     }
 
-                    if (node.data('type') === 'Paper'){
+                    if (node.data('type') === 'Paper') {
                         tip_item = node.data('title')
                     }
 
@@ -429,8 +434,9 @@
 
 
                         $('#tooltip').append(span).css({
-                            "display": "inline-block",
+                            "display": "block",
                             "max-width": "200px",
+                            "margin": 0,
                             "height": "auto",
                             "position": "absolute",
                             "padding": "5px",
@@ -443,6 +449,9 @@
                             "text-align": "left"
                         });
                     }
+                    $('#tooltip span'.css({
+                        "margin": 0,
+                    }))
 
                 }, time_out);
 
