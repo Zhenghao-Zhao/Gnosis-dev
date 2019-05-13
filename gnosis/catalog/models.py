@@ -18,6 +18,8 @@ class Paper(DjangoNode):
     abstract = StringProperty(required=True)
     keywords = StringProperty(required=False)
     download_link = StringProperty(required=True)
+    # added source link for a paper to record the source website which the information of paper is collected
+    source_link = StringProperty(required=False)
 
 
     # Links
