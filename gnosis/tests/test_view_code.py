@@ -30,7 +30,7 @@ class CodeViewTest(TestCase):
         request.method = "GET"
         response = code_create(request)
         self.assertEquals(response.status_code, 200)
-        
+
     def test_codes(self):
         request = HttpRequest()
         request.method = "POST"
