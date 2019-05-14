@@ -130,23 +130,23 @@
 
 <nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-dark navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" style="font-size: 4vmin; margin-right: 4vw; filter: invert(100%);" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
+        <a class="navbar-brand" style="font-size: 3vmin; margin-right: 4vw; filter: invert(100%);" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav mr-auto">
-                <li class="nav-item"><a style=" font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'home' %}">Home</a></li>
-                <li class="nav-item"><a style=" font-size: 3vmin;filter: invert(100%);" class="nav-link" href="#">About</a></li>
-                <li class="nav-item"><a style=" font-size: 3vmin;filter: invert(100%);" class="nav-link" href="#">Contact</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="#">About</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="#">Contact</a></li>
             </ul>
 
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                <li class="nav-item"><a style=" font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
                 {% else %}
-                <li class="nav-item"><a style=" font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -318,7 +318,7 @@
     {% load static %}
         <div></div>
     <img src="{% static 'catalog/csiro-data61-logos.png' %}"
-         alt="CSIRO and Data61 Logos" style="margin-left: 27vw;width: 35vw;">
+         alt="CSIRO and Data61 Logos" style="margin-left: 42vw" >
     {% endblock %}
 
 </div>
