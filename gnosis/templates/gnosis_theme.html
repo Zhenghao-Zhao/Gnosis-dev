@@ -60,99 +60,241 @@
             height: 300px;
             display: block;
         }
+        .navButton{
+
+            place-content: center;
+            padding: 0.2vh 0.7vw;
+            text-align: center;
+            text-decoration: none !important;
+            display: inline-block;
+            font-size: 2vmin;
+            margin: 1vh 0.5vw;
+            -webkit-transition-duration: 0.4s; /* Safari */
+            transition-duration: 0.4s;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+
+        }
+
+        .navButton:hover{
+            background-color: white;
+            color: black;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+
+        .tooltip .tooltiptext {
+          visibility: hidden;
+          width: 120px;
+          background-color: black;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px 0;
+
+          /* Position the tooltip */
+          position: absolute;
+          z-index: 1;
+        }
+
+        .tooltip:hover .tooltiptext {
+          visibility: visible;
+        }
+
+        .fir-button{
+            margin-left: 8vw;
+        }
+
+
+        @media screen and (max-width: 599px) {
+            #big{
+                display: none;
+            }
+        }
+
+        @media screen and (min-width: 600px){
+            #small{
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">
+<nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-dark navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
+        <a class="navbar-brand" style="font-size: 3vmin; margin-right: 4vw; filter: invert(100%);" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="#">About</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="#">Contact</a></li>
             </ul>
 
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
                 {% else %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
+                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 
+<nav id="small" class="navbar navbar-expand-md bg-dark navbar-light sticky-top mb-2">
+    <a class="navbar-brand" style="margin-left: 2vw;font-size: 4vmin; margin-right: 4vw; filter: invert(100%);" href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span style="filter: invert(100%);height: 3vh;
+    width: 5vw;" class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="nav navbar-nav mr-auto">
+        <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'home' %}">Home</a></li>
+        <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link" href="#">About</a></li>
+        <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link" href="#">Contact</a></li>
+            </ul>
+      <ul class="nav navbar-nav">
+          {% if user.is_authenticated %}
+              <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'logout' %}?next={{request.path}}">Logout</a></li>
+          {% else %}
+              <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link" href="{% url 'login' %}?next={{request.path}}">Login</a></li>
+          {% endif %}
+      </ul>
+  </div>
+</nav>
+
 <div class="container-fluid" style="margin-top:30px ">
-    <div class="row float-right" style="margin-right:10px">
+    <div class="row " style="margin-right:10px; place-content: center">
         {% if user.is_authenticated %}
-        <div class="btn-group">
-            <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+{#            <div class="btn-group" role="group">#}
+{##}
+{#                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#}
+{#      Actions#}
+{#    </button>#}
+{#    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">#}
+{##}
+{##}
+{#        <div class="btn-group" >#}
+{#            <a href="{% url 'papers_index' %}" class="navButton" role="button" title="Search for papers">Papers</a>#}
+{#            <div class="btn-group">#}
+{#                <a href="{% url 'paper_create' %}" class="navButton" role="button" title="Add new papers">+</a>#}
+{#                <button title="Import" type="button" class="navButton dropdown-toggle" data-toggle="dropdown">#}
+{#                    <span class="caret"></span>#}
+{#                </button>#}
+{#                <ul class="dropdown-menu" role="menu">#}
+{#                    <li><a href="{% url 'paper_create_from_url' %}">import external links</a></li>#}
+{#                </ul>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <div class="btn-group ml-1" >#}
+{#            <a href="{% url 'persons_index' %}" class="navButton" role="button" title="Search for people">People</a>#}
+{#            <div class="btn-group">#}
+{#                <a href="{% url 'person_create' %}" class="navButton" role="button" title="Add new People">+</a>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <div class="btn-group ml-1">#}
+{#            <a href="{% url 'venues_index' %}" class="navButton" role="button" title="Search for venues">Venues</a>#}
+{#            <div class="btn-group">#}
+{#                <a href="{% url 'venue_create' %}" class="navButton" role="button" title="Add new venue">+</a>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <div class="btn-group ml-1">#}
+{#            <a href="{% url 'datasets_index' %}" class="navButton" role="button" title="Search for Datasets">Datasets</a>#}
+{#            <div class="btn-group">#}
+{#                <a href="{% url 'dataset_create' %}" class="navButton" role="button" title="Add new Datasets">+</a>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <div class="btn-group ml-1">#}
+{#            <a href="{% url 'codes_index' %}" class="navButton" role="button" title="Search for Codes">Codes</a>#}
+{#            <div class="btn-group">#}
+{#                <a href="{% url 'code_create' %}" class="navButton" role="button" title="Add new Codes">+</a>#}
+{#            </div>#}
+{#        </div>#}
+
+
+
+
+
+
+    </div>
+  </div>
+        <div class="btn-group" >
+            <a href="{% url 'papers_index' %}" class="navButton fir-button" role="button" title="Search for papers">Papers</a>
             <div class="btn-group">
-                <a href="{% url 'paper_create' %}" class="btn btn-primary" role="button">+</a>
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                <a href="{% url 'paper_create' %}" class="navButton" role="button" title="Add new papers">+</a>
+                <button title="Import" type="button" class="navButton dropdown-toggle" data-toggle="dropdown">
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="{% url 'paper_create_from_url' %}">from external links</a></li>
+                    <li><a href="{% url 'paper_create_from_url' %}">import external links</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+        <div class="btn-group ml-1"  >
+            <a href="{% url 'persons_index' %}" class="navButton" role="button" title="Search for people">People</a>
             <div class="btn-group">
-                <a href="{% url 'person_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'person_create' %}" class="navButton" role="button" title="Add new People">+</a>
             </div>
         </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+        <div class="btn-group ml-1" >
+            <a href="{% url 'venues_index' %}" class="navButton" role="button" title="Search for venues">Venues</a>
             <div class="btn-group">
-                <a href="{% url 'venue_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'venue_create' %}" class="navButton" role="button" title="Add new venue">+</a>
             </div>
         </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+        <div class="btn-group ml-1" >
+            <a href="{% url 'datasets_index' %}" class="navButton" role="button" title="Search for Datasets">Datasets</a>
             <div class="btn-group">
-                <a href="{% url 'dataset_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'dataset_create' %}" class="navButton" role="button" title="Add new Datasets">+</a>
             </div>
         </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+        <div class="btn-group ml-1" >
+            <a href="{% url 'codes_index' %}" class="navButton" role="button" title="Search for Codes">Codes</a>
             <div class="btn-group">
-                <a href="{% url 'code_create' %}" class="btn btn-primary" role="button">+</a>
+                <a href="{% url 'code_create' %}" class="navButton" role="button" title="Add new Codes">+</a>
             </div>
         </div>
 
         <!--                </div>-->
         {% else %}
         <div class="btn-group">
-            <a href="{% url 'papers_index' %}" class="btn btn-primary" role="button">Papers&nbsp&nbsp</a>
+            <a href="{% url 'papers_index' %}" class="navButton" role="button">Papers</a>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'persons_index' %}" class="btn btn-primary" role="button">People&nbsp&nbsp</a>
+            <a href="{% url 'persons_index' %}" class="navButton" role="button">People</a>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'venues_index' %}" class="btn btn-primary" role="button">Venues&nbsp&nbsp</a>
+            <a href="{% url 'venues_index' %}" class="navButton" role="button">Venues</a>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'datasets_index' %}" class="btn btn-primary" role="button">Datasets</a>
+            <a href="{% url 'datasets_index' %}" class="navButton" role="button">Datasets</a>
         </div>
 
         <div class="btn-group ml-1">
-            <a href="{% url 'codes_index' %}" class="btn btn-primary" role="button">Codes</a>
+            <a href="{% url 'codes_index' %}" class="navButton" role="button">Codes</a>
         </div>
         {% endif %}
     </div>
@@ -171,11 +313,12 @@
     <!--    </div>-->
 </div>
 
-<div class="container-fluid">
+<div class="container-fluid" style="place-content: center">
     {% block footer %}
     {% load static %}
-    <img src="{% static 'catalog/csiro-data61-logos.png' %}" class="mx-auto d-block"
-         alt="CSIRO and Data61 Logos">
+        <div></div>
+    <img src="{% static 'catalog/csiro-data61-logos.png' %}"
+         alt="CSIRO and Data61 Logos" style="margin-left: 42vw" >
     {% endblock %}
 
 </div>
