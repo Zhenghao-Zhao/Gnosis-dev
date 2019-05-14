@@ -1,4 +1,4 @@
-.idea/
+﻿.idea/
 .DS_Store
 *.sqlite3
 # Byte-compiled / optimized / DLL files
@@ -41,6 +41,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+gnosis/cover
 htmlcov/
 .tox/
 .nox/
