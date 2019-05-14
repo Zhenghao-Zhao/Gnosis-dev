@@ -2,15 +2,15 @@
 
 {% block content %}
 <div class="card shadow-sm mt-3">
-    <div class="card-header" style="font-size: 5vmin"><h3>New user registration</h3></div>
+    <div class="card-header"><h3>New user registration</h3></div>
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
-            <table style="font-size: 3vmin">
+            <table>
                 {{ form }}
             </table>
             <br/>
-            <input  style="font-size: 3.5vmin; " type="submit" class="btn btn-primary btn-lg float-right" value="Sign up"/>
+            <input type="submit" class="btn btn-primary btn-lg float-right" value="Sign up"/>
         </form>
     </div>
 </div>
