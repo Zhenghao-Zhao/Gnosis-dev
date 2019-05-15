@@ -635,7 +635,7 @@ module.exports = Object.assign != null ? Object.assign.bind(Object) : function (
 var defaults = {
   animate: true, // whether to show the layout as it's running
   refresh: 1, // number of ticks per frame; higher is faster but more jerky
-  maxSimulationTime: 4000, // max length in ms to run the layout
+  maxSimulationTime: 2000, // max length in ms to run the layout
   ungrabifyWhileSimulating: false, // so you can't drag nodes during layout
   fit: true, // on every layout reposition of nodes, fit the viewport
   padding: 50, // padding around the simulation

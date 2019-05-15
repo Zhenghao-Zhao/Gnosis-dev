@@ -27,8 +27,6 @@ from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
-import re
-from django.utils.safestring import mark_safe
 
 #
 # Paper Views
@@ -267,14 +265,18 @@ def _get_node_ego_network(id, paper_title):
     :param id:
     :return:
     """
-    query_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (t:Paper) RETURN t, Type(relationship_type)"
-    query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, Type(relationship_type)"
+    query_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (t:Paper) RETURN t, " \
+                "Type(relationship_type) "
+    query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, " \
+               "Type(relationship_type) "
     query_peo = "MATCH (s:Paper {title: {paper_title}}) -- (p:Person) RETURN p"
+
     results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
     print("Results are: ", results_out)
     results_in, meta = db.cypher_query(query_in, dict(paper_title=paper_title))
     results_peo, meta = db.cypher_query(query_peo, dict(paper_title=paper_title))
     print("Results are: ", results_peo)
+
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
