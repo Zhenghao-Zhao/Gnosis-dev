@@ -67,7 +67,7 @@
             text-align: center;
             text-decoration: none !important;
             display: inline-block;
-            font-size: 2vmin;
+            font-size: 2.3vmin;
             margin: 1vh 0.0vw;
             -webkit-transition-duration: 0.4s; /* Safari */
             transition-duration: 0.4s;
@@ -75,8 +75,24 @@
             background-color: #007bff;
             color: white;
             border: 2px solid #007bff;
-            border-radius: 0px;
+            border-radius: 5px;
 
+        }
+
+        .navButton-right{
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+
+        }
+
+        .navButton-left{
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+
+        }
+
+        .navButton-full{
+            border-radius: 0;
         }
 
         .navButton:hover{
@@ -235,10 +251,10 @@
     </div>
   </div>
         <div class="btn-group" style="display: inline-flex;" >
-            <a href="{% url 'papers_index' %}" class="navButton fir-button" role="button" title="Search for papers">Papers</a>
+            <a href="{% url 'papers_index' %}" class="navButton fir-button navButton-right" role="button" title="Search for papers">Papers</a>
             <div class="btn-group">
-                <a href="{% url 'paper_create' %}" class="navButton" role="button" title="Add new papers">+</a>
-                <button title="Import" type="button" class="navButton dropdown-toggle" data-toggle="dropdown">
+                <a href="{% url 'paper_create' %}" class="navButton navButton-full" role="button" title="Add new papers">+</a>
+                <button title="Import" type="button" class="navButton dropdown-toggle navButton-left" data-toggle="dropdown">
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
@@ -248,30 +264,30 @@
         </div>
 
         <div class="btn-group ml-1"  >
-            <a href="{% url 'persons_index' %}" class="navButton" role="button" title="Search for people">People</a>
+            <a href="{% url 'persons_index' %}" class="navButton navButton-right" role="button" title="Search for people">People</a>
             <div class="btn-group">
-                <a href="{% url 'person_create' %}" class="navButton" role="button" title="Add new People">+</a>
+                <a href="{% url 'person_create' %}" class="navButton navButton-left" role="button" title="Add new People">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1" >
-            <a href="{% url 'venues_index' %}" class="navButton" role="button" title="Search for venues">Venues</a>
+            <a href="{% url 'venues_index' %}" class="navButton navButton-right" role="button" title="Search for venues">Venues</a>
             <div class="btn-group">
-                <a href="{% url 'venue_create' %}" class="navButton" role="button" title="Add new venue">+</a>
+                <a href="{% url 'venue_create' %}" class="navButton navButton-left" role="button" title="Add new venue">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1" >
-            <a href="{% url 'datasets_index' %}" class="navButton" role="button" title="Search for Datasets">Datasets</a>
+            <a href="{% url 'datasets_index' %}" class="navButton navButton-right" role="button" title="Search for Datasets">Datasets</a>
             <div class="btn-group">
-                <a href="{% url 'dataset_create' %}" class="navButton" role="button" title="Add new Datasets">+</a>
+                <a href="{% url 'dataset_create' %}" class="navButton navButton-left" role="button" title="Add new Datasets">+</a>
             </div>
         </div>
 
         <div class="btn-group ml-1" >
-            <a href="{% url 'codes_index' %}" class="navButton" role="button" title="Search for Codes">Codes</a>
+            <a href="{% url 'codes_index' %}" class="navButton navButton-right" role="button" title="Search for Codes">Codes</a>
             <div class="btn-group">
-                <a href="{% url 'code_create' %}" class="navButton" role="button" title="Add new Codes">+</a>
+                <a href="{% url 'code_create' %}" class="navButton navButton-left" role="button" title="Add new Codes">+</a>
             </div>
         </div>
 
@@ -300,7 +316,7 @@
     </div>
 
     <div class="row float-left w-100 mb-3">
-        <div class="col-sm-12" style="margin-left: 0vw;">
+        <div class="col-sm-12" style="margin-left: 15px;">
             {% block content %}
             {% endblock %}
         </div>
