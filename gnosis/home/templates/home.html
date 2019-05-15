@@ -13,6 +13,7 @@
         {% endif %}
 
         <p style="font-size: 1.5vmin; margin-top: 6vmin;">Statistics: We have {{ num_papers }} papers and {{ num_people }} people in our database</p>
+
     </div>
 </div>
 
@@ -30,7 +31,7 @@
         </span>
             {% endfor %}
             <br>
-            <input type="submit" class="navButton" value="Search Papers"/>
+            <input type="submit" class="btn btn-primary btn-lg" value="Search Papers"/>
         </form>
     </div>
 </div>
@@ -38,6 +39,7 @@
 <div class="card shadow-sm mt-3">
     <div class="card-header">
         <h4 style="font-size: 3vmin">Recently added papers</h4>
+
     </div>
     <div class="card-body">
         {% for paper, authors in papers %}
