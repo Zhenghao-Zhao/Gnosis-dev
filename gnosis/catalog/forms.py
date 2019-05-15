@@ -63,6 +63,24 @@ class SearchPapersForm(Form):
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
 
+class PaperConnectionForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_paper_title(self):
+        return self.cleaned_data["paper_title"]
+
+    def clean_paper_connection(self):
+        return self.cleaned_data["paper_connection"]
+
+    paper_title = forms.CharField(
+        required=True, widget=forms.TextInput(attrs={"size": 60})
+    )
+    CHOICES = (('cites', 'cites'), ('uses', 'uses'), ('extends', 'extends'),)
+    paper_connection = forms.ChoiceField(choices=CHOICES)
+
 
 class SearchPeopleForm(Form):
     def __init__(self, *args, **kwargs):
@@ -142,9 +160,7 @@ class PaperImportForm(Form):
 
     url = forms.CharField(
     # the label will now appear in two lines break at the br label
-    #     label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
-        label=mark_safe(
-            "Please enter the source URL, e.g. https://arxiv.org/abs/1607.00653"),
+        label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
