@@ -269,7 +269,8 @@ def _get_node_ego_network(id, paper_title):
                 "Type(relationship_type) "
     query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, " \
                "Type(relationship_type) "
-    query_peo = "MATCH (s:Paper {title: {paper_title}}) -- (p:Person) RETURN p"
+    query_peo = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]- (p:Person) RETURN p, " \
+                "Type(relationship_type) "
 
     results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
     print("Results are: ", results_out)
@@ -310,20 +311,25 @@ def _get_node_ego_network(id, paper_title):
         print("No cited papers found!")
 
     if len(results_peo) > 0:
-        target_people = [Person.inflate(row[0]) for row in results_peo]
+        target_people = [[Person.inflate(row[0]),row[1]] for row in results_peo]
 
         for tpe in target_people:
             middleName = ''
-            if tpe.middle_name != None:
-                middleName = tpe.middle_name[2:-2]
 
-            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}', label: '{}'}} }}".format(
-                tpe.id, tpe.first_name, middleName, tpe.last_name, 'Person', 'authors'
+            if tpe[0].middle_name != None:
+                middleNames = tpe[0].middle_name[1:-1].split(', ')
+
+                for i in range(len(middleNames)):
+                    middleName = middleName + " " + middleNames[i][1:-1]
+
+            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}', " \
+                        "label: '{}'}} }}".format(
+                tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name, 'Person', tpe[1]
             )
 
         for tpe in target_people:
             ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
-                tpe.id, "-", id, "authors", tpe.id, id
+                tpe[0].id, "-", id, tpe[1], tpe[0].id, id
             )
 
     else:
