@@ -69,7 +69,30 @@
         </div>
     {% endif %}
 
+    <style>
+        .color_legend {
+            display: inline-block;
+            width: 50px;
+            height: 20px;
+        }
 
+        .paper {
+            background-color: #c4c9ff;
+        }
+
+        .venue {
+            background-color: #ff6a7e;
+        }
+
+        .person {
+            background-color: #FFB486;
+        }
+
+        .dataset {
+            background-color: #ffa5f8;
+
+        }
+    </style>
 
     <div class="card mt-3 shadow-sm">
         <div class="card-header"><h4>Ego-graph</h4></div>
@@ -103,6 +126,13 @@
                 <option value="extends"> - Extends -</option>
                 <option value="authors"> - Authors -</option>
             </select>
+
+            <fieldset style="position: absolute; z-index: 1000; top: 200px;">
+                <span class="color_legend paper"></span> Paper <br>
+                <span class="color_legend person"></span> Person<br>
+                <span class="color_legend venue"></span> Venue<br>
+                <span class="color_legend dataset"></span> Dataset
+            </fieldset>
 
             <div id="cy">
             </div>
@@ -218,6 +248,28 @@
 
             style: [ // the stylesheet for the graph
                 {
+                    selector: 'node[type="Paper"]',
+                    style: {
+                        'width': 20,
+                        'height': 20,
+                        'background-color': '#c4c9ff',
+                        'label': 'data(title)',
+                        'text-opacity': 1,
+                        'text-wrap': 'ellipsis',
+                        'text-max-width': '50',
+                        'text-background-color': '#FFFFFF',
+                        'text-outline-opacity': 1,
+                        'text-outline-color': '#FFFFFF',
+                        'text-outline-width': '1px',
+                        'font-size': '10px',
+                        'border-width': '1.5px',
+                        'border-color': "#664835",
+                        'visibility': 'visible'
+
+                    },
+
+                },
+                {
                     selector: 'node[id="' + main_paper_id + '"]',
                     style: {
                         'width': 30,
@@ -236,69 +288,66 @@
                         'border-color': "#4e5066"
                     }
                 },
-                {
-                    selector: 'node[label="cites"]',
-                    style: {
-                        'width': 20,
-                        'height': 20,
-                        'background-color': '#76E2F8',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#3b717c",
-                        'visibility': 'visible'
-                    },
-
-                },
-                {
-                    selector: 'node[label="uses"]',
-                    style: {
-                        'width': 20,
-                        'height': 20,
-                        'background-color': '#9FE784',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#3f5c34",
-                        'visibility': 'visible'
-                    },
-
-                },
-                {
-                    selector: 'node[label="extends"]',
-                    style: {
-                        'width': 20,
-                        'height': 20,
-                        'background-color': '#FFA2B5',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#664048",
-                        'visibility': 'visible'
-                    },
-
-                },
+                {#{#}
+                {#    selector: 'node[label="cites"]',#}
+                {#    style: {#}
+                {#        'width': 20,#}
+                {#        'height': 20,#}
+                {#        'background-color': '#76E2F8',#}
+                {#        'label': 'data(title)',#}
+                {#        'text-opacity': 1,#}
+                {#        'text-wrap': 'ellipsis',#}
+                {#        'text-max-width': '50',#}
+                {#        'text-background-color': '#FFFFFF',#}
+                {#        'text-outline-opacity': 1,#}
+                {#        'text-outline-color': '#FFFFFF',#}
+                {#        'text-outline-width': '1px',#}
+                {#        'font-size': '10px',#}
+                {#        'border-width': '1.5px',#}
+                {#        'border-color': "#3b717c",#}
+                {#        'visibility': 'visible'#}
+                {#    },#}
+                {##}
+                {#{#}
+                {#    selector: 'node[label="uses"]',#}
+                {#    style: {#}
+                {#        'width': 20,#}
+                {#        'height': 20,#}
+                {#        'background-color': '#9FE784',#}
+                {#        'label': 'data(title)',#}
+                {#        'text-opacity': 1,#}
+                {#        'text-wrap': 'ellipsis',#}
+                {#        'text-max-width': '50',#}
+                {#        'text-background-color': '#FFFFFF',#}
+                {#        'text-outline-opacity': 1,#}
+                {#        'text-outline-color': '#FFFFFF',#}
+                {#        'text-outline-width': '1px',#}
+                {#        'font-size': '10px',#}
+                {#        'border-width': '1.5px',#}
+                {#        'border-color': "#3f5c34",#}
+                {#        'visibility': 'visible'#}
+                {#    },#}
+                {##}
+                {#{#}
+                {#    selector: 'node[label="extends"]',#}
+                {#    style: {#}
+                {#        'width': 20,#}
+                {#        'height': 20,#}
+                {#        'background-color': '#FFA2B5',#}
+                {#        'label': 'data(title)',#}
+                {#        'text-opacity': 1,#}
+                {#        'text-wrap': 'ellipsis',#}
+                {#        'text-max-width': '50',#}
+                {#        'text-background-color': '#FFFFFF',#}
+                {#        'text-outline-opacity': 1,#}
+                {#        'text-outline-color': '#FFFFFF',#}
+                {#        'text-outline-width': '1px',#}
+                {#        'font-size': '10px',#}
+                {#        'border-width': '1.5px',#}
+                {#        'border-color': "#664048",#}
+                {#        'visibility': 'visible'#}
+                {#    },#}
+                {##}
 
                 {
                     selector: 'node[type="Person"]',
