@@ -275,7 +275,10 @@ def _get_node_ego_network(id, paper_title):
 
     results_all_out, meta = db.cypher_query(query_all_out, dict(paper_title=paper_title))
 
-    print("Results are: ", results_all_out)
+    print("Results out are: ", results_all_out)
+
+    print("Results in are: ", results_all_in)
+
 
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
@@ -284,6 +287,7 @@ def _get_node_ego_network(id, paper_title):
     target_people = []
     target_venues = []
     target_datasets = []
+    target_codes = []
 
 
     if len(results_all_out) > 0:
@@ -297,6 +301,8 @@ def _get_node_ego_network(id, paper_title):
                     target_venues.append([Venue.inflate(row[0]), row[1], 'out'])
                 if label == 'Dataset':
                     target_datasets.append([Dataset.inflate(row[0]), row[1], 'out'])
+                if label == 'Code':
+                    target_codes.append([Dataset.inflate(row[0]), row[1], 'out'])
 
 
     if len(results_all_in) > 0:
@@ -310,8 +316,10 @@ def _get_node_ego_network(id, paper_title):
                     target_venues.append([Venue.inflate(row[0]), row[1], 'in'])
                 if label == 'Dataset':
                     target_datasets.append([Dataset.inflate(row[0]), row[1], 'in'])
+                if label == 'Code':
+                    target_codes.append([Dataset.inflate(row[0]), row[1], 'in'])
 
-    print("the lengths are: ", len(target_papers), len(target_people), len(target_venues), len(target_datasets))
+    print("the lengths are: ", len(target_papers), len(target_people), len(target_venues), len(target_datasets), len(target_codes))
 
     for tp in target_papers:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
@@ -326,6 +334,21 @@ def _get_node_ego_network(id, paper_title):
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
                 tp[0].id, "-", id, tp[1], tp[0].id, id
             )
+
+    for tpc in target_codes:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpc[0].id, 'Code', reverse("code_detail", kwargs={"id": tpc[0].id}), 'Code', tpc[1]
+        )
+
+        if tpc[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpc[0].id, tpc[1], id, tpc[0].id
+            )
+        if tpc[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpc[0].id, "-", id, tpc[1], tpc[0].id, id
+            )
+
 
     for tpv in target_venues:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
