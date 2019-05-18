@@ -265,78 +265,123 @@ def _get_node_ego_network(id, paper_title):
     :param id:
     :return:
     """
-    query_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (t:Paper) RETURN t, " \
-                "Type(relationship_type) "
-    query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, " \
-               "Type(relationship_type) "
-    query_peo = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]- (p:Person) RETURN p, " \
-                "Type(relationship_type) "
+    query_all_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (p) RETURN p, " \
+                   "Type(relationship_type) "
 
-    results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
-    print("Results are: ", results_out)
-    results_in, meta = db.cypher_query(query_in, dict(paper_title=paper_title))
-    results_peo, meta = db.cypher_query(query_peo, dict(paper_title=paper_title))
-    print("Results are: ", results_peo)
+    query_all_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (p) RETURN p, " \
+                    "Type(relationship_type) "
+
+    results_all_in, meta = db.cypher_query(query_all_in, dict(paper_title=paper_title))
+
+    results_all_out, meta = db.cypher_query(query_all_out, dict(paper_title=paper_title))
+
+    print("Results are: ", results_all_out)
 
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
-    if len(results_out) > 0:
-        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_out]
-        print("Paper cites {} other papers.".format(len(target_papers)))
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
-            )
-        for tp in target_papers:
+    target_papers = []
+    target_people = []
+    target_venues = []
+    target_datasets = []
+
+
+    if len(results_all_out) > 0:
+        for row in results_all_out:
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), row[1], 'out'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), row[1], 'out'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), row[1], 'out'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'out'])
+
+
+    if len(results_all_in) > 0:
+        for row in results_all_in:
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), row[1], 'in'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), row[1], 'in'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), row[1], 'in'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'in'])
+
+    print("the lengths are: ", len(target_papers), len(target_people), len(target_venues), len(target_datasets))
+
+    for tp in target_papers:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
+        )
+
+        if tp[2] == 'out':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
                 id, '-', tp[0].id, tp[1], id, tp[0].id
             )
-
-    else:
-        print("No cited papers found!")
-
-    if len(results_in) > 0:
-        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_in]
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
-            )
-        for tp in target_papers:
+        if tp[2] == 'in':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
                 tp[0].id, "-", id, tp[1], tp[0].id, id
             )
 
-    else:
-        print("No cited papers found!")
+    for tpv in target_venues:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpv[0].id, tpv[0].name, reverse("venue_detail", kwargs={"id": tpv[0].id}), 'Venue', tpv[1]
+        )
 
-    if len(results_peo) > 0:
-        target_people = [[Person.inflate(row[0]),row[1]] for row in results_peo]
-
-        for tpe in target_people:
-            middleName = ''
-
-            if tpe[0].middle_name != None:
-                middleNames = tpe[0].middle_name[1:-1].split(', ')
-
-                for i in range(len(middleNames)):
-                    middleName = middleName + " " + middleNames[i][1:-1]
-
-            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}', " \
-                        "label: '{}'}} }}".format(
-                tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name, 'Person', tpe[1]
+        if tpv[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpv[0].id, tpv[1], id, tpv[0].id
+            )
+        if tpv[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpv[0].id, "-", id, tpv[1], tpv[0].id, id
             )
 
-        for tpe in target_people:
+    for tpd in target_datasets:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpd[0].id, tpd[0].name, reverse("dataset_detail", kwargs={"id": tpd[0].id}), 'Dataset', tpd[1]
+        )
+
+        if tpd[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpd[0].id, tpd[1], id, tpd[0].id
+            )
+        if tpd[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpd[0].id, "-", id, tpd[1], tpd[0].id, id
+            )
+
+    for tpe in target_people:
+        middleName = ''
+
+        if tpe[0].middle_name != None:
+            middleNames = tpe[0].middle_name[1:-1].split(', ')
+
+            for i in range(len(middleNames)):
+                middleName = middleName + " " + middleNames[i][1:-1]
+
+        ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', href: '{}', " \
+                    "type: '{}', " \
+                    "label: '{}'}} }}".format(
+            tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name,
+            reverse("person_detail", kwargs={"id": tpe[0].id}), 'Person', tpe[1]
+        )
+
+        if tpe[2] == 'in':
             ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
                 tpe[0].id, "-", id, tpe[1], tpe[0].id, id
             )
 
-    else:
-        print("No authors found!")
+        if tpe[2] == 'out':
+            ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                id, "-", tpe[0].id, tpe[1], id, tpe[0].id
+            )
 
     return "[" + ego_json + "]"
-
 
 def paper_find(request):
     message = None
