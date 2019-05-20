@@ -26,8 +26,8 @@ class Paper(DjangoNode):
     cites = RelationshipTo("Paper", "cites")
     uses = RelationshipTo("Paper", "uses")
     extends = RelationshipTo("Paper", "extends")
-    evaluates_on = RelationshipTo("Dataset", "evaluates_on")
-    was_published_at = RelationshipTo("Venue", "was_published_at")
+    evaluates_on = RelationshipTo("Dataset", "evaluates on")
+    was_published_at = RelationshipTo("Venue", "was published at")
     published = RelationshipTo("Dataset", "published")
 
     class Meta:
