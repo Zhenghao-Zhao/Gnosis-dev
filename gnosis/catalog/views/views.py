@@ -28,6 +28,7 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
 
+
 #
 # Paper Views
 #
@@ -265,75 +266,149 @@ def _get_node_ego_network(id, paper_title):
     :param id:
     :return:
     """
-    query_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (t:Paper) RETURN t, " \
-                "Type(relationship_type) "
-    query_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (t:Paper) RETURN t, " \
-               "Type(relationship_type) "
-    query_peo = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]- (p:Person) RETURN p, " \
-                "Type(relationship_type) "
+    # query for everything that points to the paper
+    query_all_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (p) RETURN p, " \
+                   "Type(relationship_type) "
 
-    results_out, meta = db.cypher_query(query_out, dict(paper_title=paper_title))
-    print("Results are: ", results_out)
-    results_in, meta = db.cypher_query(query_in, dict(paper_title=paper_title))
-    results_peo, meta = db.cypher_query(query_peo, dict(paper_title=paper_title))
-    print("Results are: ", results_peo)
+    # query for everything the paper points to
+    query_all_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (p) RETURN p, " \
+                    "Type(relationship_type) "
+
+    results_all_in, meta = db.cypher_query(query_all_in, dict(paper_title=paper_title))
+
+    results_all_out, meta = db.cypher_query(query_all_out, dict(paper_title=paper_title))
+
+    print("Results out are: ", results_all_out)
+
+    print("Results in are: ", results_all_in)
 
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
-    if len(results_out) > 0:
-        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_out]
-        print("Paper cites {} other papers.".format(len(target_papers)))
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
-            )
-        for tp in target_papers:
+    target_papers = []
+    target_people = []
+    target_venues = []
+    target_datasets = []
+    target_codes = []
+
+    # Assort nodes and store them in arrays accordingly
+    # 'out' refers to form the paper to the object
+    if len(results_all_out) > 0:
+        for row in results_all_out:
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), row[1], 'out'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), row[1], 'out'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), row[1], 'out'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'out'])
+                if label == 'Code':
+                    target_codes.append([Dataset.inflate(row[0]), row[1], 'out'])
+
+    if len(results_all_in) > 0:
+        for row in results_all_in:
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), row[1], 'in'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), row[1], 'in'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), row[1], 'in'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'in'])
+                if label == 'Code':
+                    target_codes.append([Dataset.inflate(row[0]), row[1], 'in'])
+
+    print("length of connected papers: ", len(target_papers))
+    print("length of connected people: ", len(target_people))
+    print("length of connected venues: ", len(target_venues))
+    print("length of connected datasets: ", len(target_datasets))
+    print("length of connected codes: ", len(target_codes))
+
+    for tp in target_papers:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
+        )
+
+        # '-' distinguishes id e.g. 1-11 to 111 in relationships
+        if tp[2] == 'out':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
                 id, '-', tp[0].id, tp[1], id, tp[0].id
             )
-
-    else:
-        print("No cited papers found!")
-
-    if len(results_in) > 0:
-        target_papers = [[Paper.inflate(row[0]),row[1]] for row in results_in]
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-                tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
-            )
-        for tp in target_papers:
+        if tp[2] == 'in':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
                 tp[0].id, "-", id, tp[1], tp[0].id, id
             )
 
-    else:
-        print("No cited papers found!")
+    for tpc in target_codes:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpc[0].id, 'Code', reverse("code_detail", kwargs={"id": tpc[0].id}), 'Code', tpc[1]
+        )
 
-    if len(results_peo) > 0:
-        target_people = [[Person.inflate(row[0]),row[1]] for row in results_peo]
-
-        for tpe in target_people:
-            middleName = ''
-
-            if tpe[0].middle_name != None:
-                middleNames = tpe[0].middle_name[1:-1].split(', ')
-
-                for i in range(len(middleNames)):
-                    middleName = middleName + " " + middleNames[i][1:-1]
-
-            ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', type: '{}', " \
-                        "label: '{}'}} }}".format(
-                tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name, 'Person', tpe[1]
+        if tpc[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpc[0].id, tpc[1], id, tpc[0].id
+            )
+        if tpc[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpc[0].id, "-", id, tpc[1], tpc[0].id, id
             )
 
-        for tpe in target_people:
+    for tpv in target_venues:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpv[0].id, tpv[0].name, reverse("venue_detail", kwargs={"id": tpv[0].id}), 'Venue', tpv[1]
+        )
+
+        if tpv[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpv[0].id, tpv[1], id, tpv[0].id
+            )
+        if tpv[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpv[0].id, "-", id, tpv[1], tpv[0].id, id
+            )
+
+    for tpd in target_datasets:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpd[0].id, tpd[0].name, reverse("dataset_detail", kwargs={"id": tpd[0].id}), 'Dataset', tpd[1]
+        )
+
+        if tpd[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpd[0].id, tpd[1], id, tpd[0].id
+            )
+        if tpd[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpd[0].id, "-", id, tpd[1], tpd[0].id, id
+            )
+
+    for tpe in target_people:
+        middleName = ''
+        # reformat middle name from string "['mn1', 'mn2', ...]" to array ['mn1', 'mn2', ...]
+        if tpe[0].middle_name != None:
+            middleNames = tpe[0].middle_name[1:-1].split(', ')
+            # concatenate middle names to get 'mn1 mn2 ...'
+            for i in range(len(middleNames)):
+                middleName = middleName + " " + middleNames[i][1:-1]
+
+        ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', href: '{}', " \
+                    "type: '{}', " \
+                    "label: '{}'}} }}".format(
+            tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name,
+            reverse("person_detail", kwargs={"id": tpe[0].id}), 'Person', tpe[1]
+        )
+
+        if tpe[2] == 'in':
             ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
                 tpe[0].id, "-", id, tpe[1], tpe[0].id, id
             )
 
-    else:
-        print("No authors found!")
+        if tpe[2] == 'out':
+            ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                id, "-", tpe[0].id, tpe[1], id, tpe[0].id
+            )
 
     return "[" + ego_json + "]"
 
@@ -616,7 +691,6 @@ def paper_connect_paper(request, id):
         "paper_connect_paper.html",
         {"form": form, "papers": None, "message": message},
     )
-
 
 
 @login_required
@@ -930,7 +1004,7 @@ def paper_create(request):
             download_link = request.session["download_link"]
 
             form = PaperForm(
-                initial={"title": title, "abstract": abstract, "download_link": download_link, "source_link" : url}
+                initial={"title": title, "abstract": abstract, "download_link": download_link, "source_link": url}
             )
         else:
             form = PaperForm()
@@ -943,11 +1017,12 @@ def paper_create(request):
 def find_author_from_IEEE_author_info(text):
     i = text.find('''"name":''')
     start = i + 8
-    i = i+8
-    while text[i] != '''"''' :
-        i = i+1
+    i = i + 8
+    while text[i] != '''"''':
+        i = i + 1
     author = text[start:i]
     return author
+
 
 # to find the author names as a list
 def find_author_list_from_IEEE(bs4obj):
@@ -955,32 +1030,33 @@ def find_author_list_from_IEEE(bs4obj):
     # to find the string which stores information of authors, which is stored in a
     # format of "authors":[{author 1 info},{author 2 info}]
     i = text.find('''"authors":[''')
-    if i == -1 :
+    if i == -1:
         return []
-    while text[i] != '[' :
-        i = i+1
-    i= i+1
+    while text[i] != '[':
+        i = i + 1
+    i = i + 1
     array_count = 1
     bracket_count = 0
     bracket_start = 0
     author_list = []
-    while array_count != 0 :
-        if text[i] == '{' :
+    while array_count != 0:
+        if text[i] == '{':
             if bracket_count == 0:
                 bracket_start = i
-            bracket_count = bracket_count +1
-        if text[i] == '}' :
-            bracket_count = bracket_count -1
+            bracket_count = bracket_count + 1
+        if text[i] == '}':
+            bracket_count = bracket_count - 1
             if bracket_count == 0:
                 author_list.append(find_author_from_IEEE_author_info(text[bracket_start:i]))
-        if text[i] == ']' :
-            array_count = array_count -1
-        if text[i] == '[' :
-            array_count = array_count +1
-        i = i+1
+        if text[i] == ']':
+            array_count = array_count - 1
+        if text[i] == '[':
+            array_count = array_count + 1
+        i = i + 1
     return author_list
 
-def get_authors(bs4obj,source_website):
+
+def get_authors(bs4obj, source_website):
     """
     Extract authors from the source website
     :param bs4obj, source_website；
@@ -1000,7 +1076,7 @@ def get_authors(bs4obj,source_website):
             return author_str
     elif source_website == 'nips':
         # authors are found to be list objects , so needs to join them to get the author string
-        authorList = bs4obj.findAll("li",{"class":"author"})
+        authorList = bs4obj.findAll("li", {"class": "author"})
         if authorList:
             authorList = [author.text for author in authorList]
             author_str = ','.join(authorList)
@@ -1019,19 +1095,19 @@ def get_authors(bs4obj,source_website):
             author_str = ','.join(authorList)
             return author_str
     elif source_website == "acm":
-        author_str = bs4obj.find("meta", {"name":"citation_authors"})
+        author_str = bs4obj.find("meta", {"name": "citation_authors"})
         author_str = str(author_str)
         start = author_str.find('"')
-        end = author_str.find('"',start+1)
-        author_str = author_str[start+1:end]
+        end = author_str.find('"', start + 1)
+        author_str = author_str[start + 1:end]
         author_str = author_str.replace(",", "")
-        author_str = author_str.replace("; ",",")
+        author_str = author_str.replace("; ", ",")
         return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
 
 
-def get_title(bs4obj,source_website):
+def get_title(bs4obj, source_website):
     """
     Extract paper title from the source web.
     :param bs4obj:
@@ -1046,12 +1122,12 @@ def get_title(bs4obj,source_website):
     elif source_website == "ieee":
         title = bs4obj.find("title").get_text()
         i = title.find("- IEEE")
-        if i != -1 :
+        if i != -1:
             title = title[0:i]
         return title
     elif source_website == "acm":
-        titleList = bs4obj.find("meta", {"name":"citation_title"})
-        title= str(titleList)
+        titleList = bs4obj.find("meta", {"name": "citation_title"})
+        title = str(titleList)
         start = title.find('"')
         end = title.find('"', start + 1)
         title = title[start + 1:end]
@@ -1088,14 +1164,14 @@ def get_abstract_from_IEEE(bs4obj):
     start = None
     count = 0
     abstract = None
-    if text[i+12:i+16] == "true" :
-        i = text.find('''"abstract":"''',i+16)
+    if text[i + 12:i + 16] == "true":
+        i = text.find('''"abstract":"''', i + 16)
         start = i + 12
         i = start
         count = 1
     while count != 0:
-        if text[i]=='''"''':
-            if text[i+1] == "," and text[i+2] == '''"''':
+        if text[i] == '''"''':
+            if text[i + 1] == "," and text[i + 2] == '''"''':
                 count = 0
         i += 1
         abstract = text[start:i]
@@ -1143,11 +1219,11 @@ def get_abstract(bs4obj, source_website):
         if abstract is not None:
             abstract = " ".join(abstract.get_text().split(" ")[1:])
     elif source_website == 'nips':
-        abstract = bs4obj.find("p",{"class":"abstract"})
+        abstract = bs4obj.find("p", {"class": "abstract"})
         if abstract is not None:
             abstract = abstract.get_text()
     elif source_website == "jmlr":
-        abstract = bs4obj.find("p",{"class":"abstract"})
+        abstract = bs4obj.find("p", {"class": "abstract"})
         if abstract is not None:
             abstract = abstract.get_text()
         else:
@@ -1155,14 +1231,14 @@ def get_abstract(bs4obj, source_website):
             abstract = bs4obj.find("h3")
             if abstract is not None:
                 abstract = abstract.next_sibling
-    elif source_website == "ieee" :
+    elif source_website == "ieee":
         abstract = get_abstract_from_IEEE(bs4obj)
     elif source_website == "acm":
         abstract = get_abstract_from_ACM(bs4obj)
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
-    if abstract is not None :
+    if abstract is not None:
         abstract = abstract.strip()
         abstract = abstract.replace('\r', '').replace('\n', '')
     return abstract
@@ -1189,14 +1265,15 @@ def get_ddl_from_IEEE(bs4obj):
     i = start
     count = 1
     while count != 0:
-        if text[i]=='''"''':
+        if text[i] == '''"''':
             count = 0
         i += 1
-    ddl = text[start:i-1]
+    ddl = text[start:i - 1]
     ddl = "https://ieeexplore.ieee.org" + ddl
     return ddl
 
-def get_download_link(bs4obj,source_website,url):
+
+def get_download_link(bs4obj, source_website, url):
     """
     Extract download link from paper page1
     :param bs4obj:
@@ -1205,7 +1282,7 @@ def get_download_link(bs4obj,source_website,url):
     if url.endswith("/"):
         url = url[:-1]
     if source_website == "arxiv":
-        download_link = url.replace("/abs/","/pdf/",1) + ".pdf"
+        download_link = url.replace("/abs/", "/pdf/", 1) + ".pdf"
     elif source_website == "nips":
         download_link = url + ".pdf"
     elif source_website == "jmlr":
@@ -1226,6 +1303,7 @@ def get_download_link(bs4obj,source_website,url):
         download_link = None
     return download_link
 
+
 def check_valid_paper_type_ieee(bs4obj):
     text = bs4obj.get_text()
     # the paper type is stored in a format of "xploreDocumentType":"paper_type"
@@ -1234,16 +1312,17 @@ def check_valid_paper_type_ieee(bs4obj):
     i = start
     count = 1
     while count != 0:
-        if text[i]=='''"''':
+        if text[i] == '''"''':
             count = 0
         i += 1
-    paper_type = text[start:i-1]
+    paper_type = text[start:i - 1]
     print(paper_type)
-    if paper_type == "Journals & Magazine" :
+    if paper_type == "Journals & Magazine":
         return True
     return False
 
-def get_paper_info(url,source_website):
+
+def get_paper_info(url, source_website):
     """
     Extract paper information, title, abstract, and authors, from source website
     paper page.
@@ -1251,7 +1330,7 @@ def get_paper_info(url,source_website):
     :return:
     """
     try:
-    #html = urlopen("http://pythonscraping.com/pages/page1.html")
+        # html = urlopen("http://pythonscraping.com/pages/page1.html")
         url_copy = url
         if source_website == "acm":
             headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
@@ -1264,21 +1343,21 @@ def get_paper_info(url,source_website):
         print("The server could not be found.")
     else:
         bs4obj = BeautifulSoup(html)
-        if source_website == "ieee" :
-            if check_valid_paper_type_ieee(bs4obj) == False :
-                return None, None, None ,None
+        if source_website == "ieee":
+            if check_valid_paper_type_ieee(bs4obj) == False:
+                return None, None, None, None
         if source_website == "acm":
             url = ""
             if bs4obj.find("a", {"title": "Buy this Book"}) or bs4obj.find("a", {"ACM Magazines"}) \
-                    or bs4obj.find_all("meta", {"name":"citation_conference_title"}):
+                    or bs4obj.find_all("meta", {"name": "citation_conference_title"}):
                 return None, None, None, None
         # Now, we can access individual element in the page
-        authors = get_authors(bs4obj,source_website)
-        title = get_title(bs4obj,source_website)
-        abstract = get_abstract(bs4obj,source_website)
+        authors = get_authors(bs4obj, source_website)
+        title = get_title(bs4obj, source_website)
+        abstract = get_abstract(bs4obj, source_website)
         download_link = ""
         if authors and title and abstract:
-            download_link = get_download_link(bs4obj,source_website,url)
+            download_link = get_download_link(bs4obj, source_website, url)
         if download_link == "Non":
             download_link = url_copy
         # venue = get_venue(bs4obj)
@@ -1335,7 +1414,7 @@ def paper_create_from_url(request):
             )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract, download_link = get_paper_info(url,source_website)
+        title, authors, abstract, download_link = get_paper_info(url, source_website)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
