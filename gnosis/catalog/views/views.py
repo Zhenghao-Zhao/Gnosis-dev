@@ -291,6 +291,8 @@ def _get_node_ego_network(id, paper_title):
     target_datasets = []
     target_codes = []
 
+    # Assort nodes and store them in arrays accordingly
+    # 'out' refers to form the paper to the object
     if len(results_all_out) > 0:
         for row in results_all_out:
             for label in row[0].labels:
@@ -319,8 +321,11 @@ def _get_node_ego_network(id, paper_title):
                 if label == 'Code':
                     target_codes.append([Dataset.inflate(row[0]), row[1], 'in'])
 
-    print("the lengths are: ", len(target_papers), len(target_people), len(target_venues), len(target_datasets),
-          len(target_codes))
+    print("length of connected papers: ", len(target_papers))
+    print("length of connected people: ", len(target_people))
+    print("length of connected venues: ", len(target_venues))
+    print("length of connected datasets: ", len(target_datasets))
+    print("length of connected codes: ", len(target_codes))
 
     for tp in target_papers:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(

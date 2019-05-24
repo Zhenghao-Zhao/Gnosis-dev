@@ -69,41 +69,6 @@
         </div>
     {% endif %}
 
-    <style>
-        .color_legend {
-            display: inline-block;
-            width: 50px;
-            height: 20px;
-        }
-
-        .paper {
-            background-color: #39acff;
-        }
-
-        .venue {
-            background-color: #d97fff;
-        }
-
-        .person {
-            background-color: #ffb836;
-        }
-
-        .dataset {
-            background-color: #ff723d;
-
-        }
-
-        .code {
-            background: #59d143;
-        }
-
-        .ego-button {
-            font-family: "Lucida Console", Monaco, monospace;
-        }
-
-
-    </style>
-
     <div class="card mt-3 shadow-sm">
         <div class="card-header">
             <div style="display: inline-flex; width: 100%; justify-content: space-between">
@@ -144,25 +109,6 @@
         </div>
 
         <div class="card-body">
-            {#            <button style="position: absolute; z-index: 1000; float: left;" type="button"#}
-            {#                    class="btn btn-primary toggle"#}
-            {#                    data-toggle="button"#}
-            {#                    aria-pressed="false" autocomplete="off" onclick="toggle_relas()">#}
-            {#                Hide relations#}
-            {#            </button>#}
-            {##}
-            {#            <button style="position: absolute; z-index: 1000; float: left; left: 200px" type="button"#}
-            {#                    class="btn btn-primary"#}
-            {#                    onclick="center()">#}
-            {#                Center#}
-            {#            </button>#}
-            {##}
-            {#            <button style="position: absolute; z-index: 1000; float: left; left: 330px" type="button"#}
-            {#                    class="btn btn-primary"#}
-            {#                    onclick="reset()">#}
-            {#                Reset#}
-            {#            </button>#}
-
             <fieldset style="position: absolute; z-index: 1000; right: 20px;">
                 <span class="color_legend paper"></span> Paper <br>
                 <span class="color_legend person"></span> Person<br>
@@ -208,17 +154,6 @@
     {% endif %}
 
     <script type="text/javascript">
-        {# function for showing/hiding node labels #}
-
-        {#var state_nodes = false;#}
-        {#function toggle_nodes(){#}
-        {#    state_nodes = !state_nodes;#}
-        {#    if (state_nodes) {#}
-        {#        cy.style().selector('node').style('label', '').update()#}
-        {#    }else{#}
-        {#        cy.style().selector('node[type="Paper"]').style('label', 'data(title)').update();#}
-        {#        cy.style().selector('node[type="Person"]').style('label', 'data(last_name)').update()#}
-        {#    }#}
 
         var main_paper_id = '{{ main_paper_id }}';
 
@@ -605,7 +540,6 @@
                     }))
 
                 }, time_out);
-
 
             })
 
