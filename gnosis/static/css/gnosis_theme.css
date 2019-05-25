@@ -6,7 +6,7 @@
 
 .navButton {
 
-    place-content: left;
+    place-content: start;
     padding: 0.2vh 0.7vw;
     text-align: center;
     text-decoration: none !important;
