@@ -27,7 +27,7 @@ from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
-
+import re
 
 #
 # Paper Views
@@ -1200,7 +1200,7 @@ def get_abstract_from_ACM(bs4obj):
         headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
         req = Request(abstract_url, headers=headers)
         html = urlopen(req)
-        bs4obj1 = BeautifulSoup(html)
+        bs4obj1 = BeautifulSoup(html,features="html.parser")
         abstract = bs4obj1.findAll("div", {"style": "display:inline"})
         abstract = abstract[0]
         if abstract:
@@ -1342,7 +1342,7 @@ def get_paper_info(url, source_website):
         print(e)
         print("The server could not be found.")
     else:
-        bs4obj = BeautifulSoup(html)
+        bs4obj = BeautifulSoup(html,features="html.parser")
         if source_website == "ieee":
             if check_valid_paper_type_ieee(bs4obj) == False:
                 return None, None, None, None

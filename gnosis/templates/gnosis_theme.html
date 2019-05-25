@@ -80,7 +80,7 @@
 </nav>
 
 <div class="container-fluid" style="margin-top:30px ">
-    <div class="row " style="margin-right:10px; place-content: center">
+    <div class="row " style="margin-right:10px">
         {% if user.is_authenticated %}
 
             </div>
@@ -139,8 +139,8 @@
 
             <!--                </div>-->
         {% else %}
-            <div class="btn-group">
-                <a href="{% url 'papers_index' %}" class="navButton" role="button">Papers</a>
+            <div class="btn-group" style="display: inline-flex;">
+                <a href="{% url 'papers_index' %}" class="navButton fir-button" role="button">Papers</a>
             </div>
 
             <div class="btn-group ml-1">
