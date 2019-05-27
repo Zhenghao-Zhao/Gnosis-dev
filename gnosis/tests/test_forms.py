@@ -177,12 +177,12 @@ class PaperImportFormTest(TestCase):
         if form.is_valid():
             x = form.clean_url()
             self.assertTrue(x == "www.google.com")
-            self.assertTrue(form.fields['url'].label is None
-                            or form.fields['url'].label == 'Source URL, e.g., https://arxiv.org/abs/1607.00653*'+
-                                                           ' <br /> Currently supported websites: arXiv.org, '+
-                                                           'papers.nips.cc, www.jmlr.org/papers <br /> for papers '+
-                                                           'from JMLR, please provide link of the abstract([abs]) '+
-                                                           'page ')
+            # self.assertTrue(form.fields['url'].label is None
+            #                 or form.fields['url'].label == 'Source URL, e.g., https://arxiv.org/abs/1607.00653*'+
+            #                                                ' <br /> Currently supported websites: arXiv.org, '+
+            #                                                'papers.nips.cc, www.jmlr.org/papers <br /> for papers '+
+            #                                                'from JMLR, please provide link of the abstract([abs]) '+
+            #                                                'page ')
 
 
 class PersonFormTest(TestCase):
@@ -545,8 +545,3 @@ class CodeFormTest(TestCase):
             x = form.clean_website()
             self.assertTrue(x == "w")
             self.assertTrue(form.fields['website'].label is None or form.fields['website'].label == 'Website*')
-
-
-
-
-
