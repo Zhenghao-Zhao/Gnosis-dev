@@ -39,13 +39,13 @@
 {% if papers %}
 
 <div class="card shadow-sm mt-3">
-    <div class="card-header"><h4>Venue papers</h4></div>
+    <div class="card-header"><h4>Papers</h4></div>
     <div class="card-body">
         {% paginate papers %}
         {% for paper in papers %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
-                <h6><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h6>
+                <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
             </li>
         </ul>
         {% endfor %}
