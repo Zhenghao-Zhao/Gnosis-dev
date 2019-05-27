@@ -295,31 +295,33 @@ def _get_node_ego_network(id, paper_title):
     # 'out' refers to form the paper to the object
     if len(results_all_out) > 0:
         for row in results_all_out:
+            new_rela = row[1].replace("_", " ")
             for label in row[0].labels:
                 if label == 'Paper':
-                    target_papers.append([Paper.inflate(row[0]), row[1], 'out'])
+                    target_papers.append([Paper.inflate(row[0]), new_rela, 'out'])
                 if label == 'Person':
-                    target_people.append([Person.inflate(row[0]), row[1], 'out'])
+                    target_people.append([Person.inflate(row[0]), new_rela, 'out'])
                 if label == 'Venue':
-                    target_venues.append([Venue.inflate(row[0]), row[1], 'out'])
+                    target_venues.append([Venue.inflate(row[0]), new_rela, 'out'])
                 if label == 'Dataset':
-                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'out'])
+                    target_datasets.append([Dataset.inflate(row[0]), new_rela, 'out'])
                 if label == 'Code':
-                    target_codes.append([Dataset.inflate(row[0]), row[1], 'out'])
+                    target_codes.append([Code.inflate(row[0]), new_rela, 'out'])
 
     if len(results_all_in) > 0:
         for row in results_all_in:
+            new_rela = row[1].replace("_", " ")
             for label in row[0].labels:
                 if label == 'Paper':
-                    target_papers.append([Paper.inflate(row[0]), row[1], 'in'])
+                    target_papers.append([Paper.inflate(row[0]), new_rela, 'in'])
                 if label == 'Person':
-                    target_people.append([Person.inflate(row[0]), row[1], 'in'])
+                    target_people.append([Person.inflate(row[0]), new_rela, 'in'])
                 if label == 'Venue':
-                    target_venues.append([Venue.inflate(row[0]), row[1], 'in'])
+                    target_venues.append([Venue.inflate(row[0]), new_rela, 'in'])
                 if label == 'Dataset':
-                    target_datasets.append([Dataset.inflate(row[0]), row[1], 'in'])
+                    target_datasets.append([Dataset.inflate(row[0]), new_rela, 'in'])
                 if label == 'Code':
-                    target_codes.append([Dataset.inflate(row[0]), row[1], 'in'])
+                    target_codes.append([Code.inflate(row[0]), new_rela, 'in'])
 
     print("length of connected papers: ", len(target_papers))
     print("length of connected people: ", len(target_people))
