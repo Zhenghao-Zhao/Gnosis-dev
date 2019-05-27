@@ -83,6 +83,9 @@
     #small {
         display: none;
     }
+    .navButton{
+        font-size: 15px;
+    }
 }
 
 /*

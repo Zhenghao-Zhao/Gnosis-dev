@@ -19,9 +19,9 @@
 </head>
 <body onresize="cy.center()">
 
-<nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-dark navbar-light sticky-top">
+<nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" style="font-size: 3vmin; margin-right: 4vw; filter: invert(100%);"
+        <a class="navbar-brand" style="font-size: 3vmin; margin-right: 4vw; "
            href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -29,20 +29,20 @@
 
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav mr-auto">
-                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link"
+                <li class="nav-item"><a style=" font-size: 2vmin;" class="nav-link"
                                         href="{% url 'home' %}">Home</a></li>
-                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link"
+                <li class="nav-item"><a style=" font-size: 2vmin;" class="nav-link"
                                         href="#">About</a></li>
-                <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link" href="#">Contact</a>
+                <li class="nav-item"><a style=" font-size: 2vmin;" class="nav-link" href="#">Contact</a>
                 </li>
             </ul>
 
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                    <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link"
+                    <li class="nav-item"><a style=" font-size: 2vmin;" class="nav-link"
                                             href="{% url 'logout' %}?next={{ request.path }}">Logout</a></li>
                 {% else %}
-                    <li class="nav-item"><a style=" font-size: 2vmin;filter: invert(100%);" class="nav-link"
+                    <li class="nav-item"><a style=" font-size: 2vmin;" class="nav-link"
                                             href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
                 {% endif %}
             </ul>
@@ -50,41 +50,46 @@
     </div>
 </nav>
 
-<nav id="small" class="navbar navbar-expand-md bg-dark navbar-light sticky-top mb-2">
-    <a class="navbar-brand" style="margin-left: 2vw;font-size: 4vmin; margin-right: 4vw; filter: invert(100%);"
+<nav id="small" class="navbar navbar-expand-md shadow bg-white navbar-light sticky-top mb-2">
+    <a class="navbar-brand" style="margin-left: 2vw;font-size: 4vmin; margin-right: 4vw; "
        href="{% url 'home' %}">&gamma;&nu;&#974;&sigma;&iota;&sigmaf;</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-    <span style="filter: invert(100%);height: 3vh;
+    <span style="height: 3vh; color: black;
     width: 5vw;" class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <ul class="nav navbar-nav mr-auto">
-            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link"
+            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;" class="nav-link"
                                     href="{% url 'home' %}">Home</a></li>
-            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link"
+            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;" class="nav-link"
                                     href="#">About</a></li>
-            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);" class="nav-link"
+            <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;" class="nav-link"
                                     href="#">Contact</a></li>
         </ul>
         <ul class="nav navbar-nav">
             {% if user.is_authenticated %}
-                <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);"
+                <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;"
                                         class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
                 </li>
             {% else %}
-                <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;filter: invert(100%);"
+                <li class="nav-item"><a style=" margin-left: 4vw;font-size: 3vmin;"
                                         class="nav-link" href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
             {% endif %}
         </ul>
     </div>
 </nav>
 
-<div class="container-fluid" style="margin-top:30px ">
-    <div class="row " style="margin-right:10px">
+<div class="container-fluid" style="margin-top:30px; ">
+    <div class="row " style="margin-right:10px; margin-left: 0px !important; display: flex; place-content: flex-end">
         {% if user.is_authenticated %}
 
             </div>
-            </div>
+
+            <div style="display: flex;
+    place-content: flex-end;">
+
+
+
             <div class="btn-group" style="display: inline-flex;">
                 <a href="{% url 'papers_index' %}" class="navButton fir-button navButton-right" role="button"
                    title="Search for papers">Papers</a>
@@ -136,6 +141,14 @@
                        title="Add new Codes">+</a>
                 </div>
             </div>
+             </div>
+
+
+
+
+            </div>
+
+
 
             <!--                </div>-->
         {% else %}
