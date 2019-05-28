@@ -155,6 +155,11 @@
 
     <script type="text/javascript">
 
+        // auto-centering the graph when browser is resized
+        $(window).resize(function () {
+            cy.center();
+        });
+
         var main_paper_id = '{{ main_paper_id }}';
 
         var hide_rela = false;
@@ -480,7 +485,7 @@
             ],
 
         });
-
+        // interactivity with the ego graph
         // timeout for delaying tooltip
         var time_out = 1000;
         cy.on('click', 'node', function (evt) {
@@ -504,11 +509,12 @@
                     var tip_item = "";
 
                     var span = document.createElement("span");
+                    // what is shown on the tooltip
                     if (node.data('type') === 'Person') {
                         // combine individual names to one
                         tip_item = node.data('first_name') + node.data('middle_name') + ' ' + node.data('last_name');
                     }
-
+                    // for paper showing title only
                     if (node.data('type') === 'Paper' || node.data('type') === 'Venue' || node.data('type') === 'Dataset') {
                         tip_item = node.data('title')
                     }

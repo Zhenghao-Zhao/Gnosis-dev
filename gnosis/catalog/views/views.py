@@ -292,7 +292,7 @@ def _get_node_ego_network(id, paper_title):
     target_codes = []
 
     # Assort nodes and store them in arrays accordingly
-    # 'out' refers to form the paper to the object
+    # 'out' refers to being from the paper to the object
     if len(results_all_out) > 0:
         for row in results_all_out:
             new_rela = row[1].replace("_", " ")
