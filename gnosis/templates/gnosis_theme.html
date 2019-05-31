@@ -18,6 +18,11 @@
     <script src="{% static "js/cytoscape-cola.js" %}"></script>
 
 </head>
+ <style>
+        .max-width {
+            max-width: 1024px;
+        }
+        </style>
 <body>
 
 <nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">
@@ -80,8 +85,8 @@
     </div>
 </nav>
 
-<div class="container-fluid float-container" style="margin-top:30px ">
-    <div class="row float-right" style="margin-right:10px">
+<div class="container-fluid  max-width float-container" style="margin-top:30px ">
+    <div class="row float-right" style="margin-right:30px">
         {% if user.is_authenticated %}
         <div class="btn-group">
             <a href="{% url 'papers_index' %}" class="btn btn-primary flex-item" role="button" title="View all papers">Papers&nbsp&nbsp</a>
