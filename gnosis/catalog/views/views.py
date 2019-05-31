@@ -1242,7 +1242,10 @@ def get_abstract(bs4obj, source_website):
     # want to remove all the leading and ending white space and line breakers in the abstract
     if abstract is not None:
         abstract = abstract.strip()
-        abstract = abstract.replace('\r', '').replace('\n', '')
+        if source_website != "arxiv":
+            abstract = abstract.replace('\r', '').replace('\n', '')
+        else:
+            abstract = abstract.replace('\n', ' ')
     return abstract
 
 
