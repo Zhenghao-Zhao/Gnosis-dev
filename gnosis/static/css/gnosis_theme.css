@@ -4,85 +4,28 @@
     display: block;
 }
 
-.navButton {
 
-    place-content: start;
-    padding: 0.2vh 0.7vw;
-    text-align: center;
-    text-decoration: none !important;
-    display: inline-block;
-    font-size: 2.4vmin;
-    margin: 1vh 0.0vw;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    cursor: pointer;
-    background-color: #007bff;
-    color: white;
-    border: 2px solid #007bff;
-    border-radius: 5px;
-
-}
-
-.navButton-right {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-
-}
-
-.navButton-left {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-
-}
-
-.navButton-full {
-    border-radius: 0;
-}
-
-.navButton:hover {
-    background-color: white;
-    color: black;
-}
-
-.tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
-}
-
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-}
-
-.fir-button {
-    margin-left: 2vw;
-}
-
-
-@media screen and (max-width: 599px) {
+@media screen and (max-width: 679px) {
     #big {
         display: none;
     }
+    /*used when buttons wrap to create seperation*/
+    .flex-item {
+        margin-top: 10px;
+    }
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 680px) {
     #small {
         display: none;
     }
+
+}
+
+.float-container::after{
+    display: block;
+    content: "";
+    clear: both;
 }
 
 /*

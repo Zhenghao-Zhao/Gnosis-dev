@@ -292,7 +292,7 @@ def _get_node_ego_network(id, paper_title):
     target_codes = []
 
     # Assort nodes and store them in arrays accordingly
-    # 'out' refers to form the paper to the object
+    # 'out' refers to being from the paper to the object
     if len(results_all_out) > 0:
         for row in results_all_out:
             new_rela = row[1].replace("_", " ")
@@ -1242,7 +1242,10 @@ def get_abstract(bs4obj, source_website):
     # want to remove all the leading and ending white space and line breakers in the abstract
     if abstract is not None:
         abstract = abstract.strip()
-        abstract = abstract.replace('\r', '').replace('\n', '')
+        if source_website != "arxiv":
+            abstract = abstract.replace('\r', '').replace('\n', '')
+        else:
+            abstract = abstract.replace('\n', ' ')
     return abstract
 
 
@@ -1747,6 +1750,7 @@ def venues(request):
 
 
 def venue_detail(request, id):
+    papers_published_at_venue = None
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -1758,7 +1762,7 @@ def venue_detail(request, id):
         # we should be checking for > 1 and failing gracefully.
         all_venues = [Venue.inflate(row[0]) for row in results]
         venue = all_venues[0]
-    else:  # go back to the paper index page
+    else:  # go back to the venue index page
         return render(
             request,
             "venues.html",
@@ -1768,8 +1772,16 @@ def venue_detail(request, id):
     #
     # TO DO: Retrieve all papers published at this venue and list them
     #
+    query = "MATCH (p:Paper)-[r:was_published_at]->(v:Venue) where id(v)={id} return p"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        papers_published_at_venue = [Paper.inflate(row[0]) for row in results]
+        print("Number of papers published at this venue {}".format(len(papers_published_at_venue)))
+        for p in papers_published_at_venue:
+            print("Title: {}".format(p.title))
+
     request.session["last-viewed-venue"] = id
-    return render(request, "venue_detail.html", {"venue": venue})
+    return render(request, "venue_detail.html", {"venue": venue, "papers": papers_published_at_venue})
 
 
 def venue_find(request):
