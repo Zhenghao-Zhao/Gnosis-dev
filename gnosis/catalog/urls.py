@@ -25,6 +25,8 @@ urlpatterns += [
     path('paper/create/', views.paper_create, name='paper_create'),
     path('paper/import/', views.paper_create_from_url, name='paper_create_from_url'),
     path('paper/find/', views.paper_find, name='paper_find'),
+    path('paper/<int:id>/group/add', views.paper_add_to_group, name='paper_add_to_group'),
+    path('paper/<int:id>/group/add/<int:gid>', views.paper_add_to_group_selected, name='paper_add_to_group_selected'),
 ]
 
 # for updating/creating a new Person node

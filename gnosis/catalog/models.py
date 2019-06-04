@@ -245,6 +245,7 @@ class ReadingGroupEntry(models.Model):
                                       related_name="papers")  # ReadingGroup.papers()
 
     paper_id = models.IntegerField(null=False, blank=False)  # A paper in the Neo4j DB
+    paper_title = models.TextField(null=False, blank=False)  # The paper title to avoid extra DB calls
     proposed_by = models.ForeignKey(to=User,
                                     on_delete=models.CASCADE,
                                     related_name="papers")  # User.papers()

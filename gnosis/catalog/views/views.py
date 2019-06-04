@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from catalog.models import ReadingGroup, ReadingGroupEntry
+
 from catalog.forms import (
     PaperForm,
     DatasetForm,
@@ -28,6 +31,7 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
 import re
+
 
 #
 # Paper Views
@@ -537,6 +541,53 @@ def paper_connect_venue(request, id):
         request,
         "paper_connect_venue.html",
         {"form": form, "venues": None, "message": message},
+    )
+
+
+@login_required
+def paper_add_to_group_selected(request, id, gid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:  # go back to the paper index page
+        raise Http404
+
+    group = get_object_or_404(ReadingGroup, pk=gid)
+    group_entry = ReadingGroupEntry()
+    group_entry.reading_group = group
+    group_entry.proposed_by = request.user
+    group_entry.paper_id = id
+    group_entry.paper_title = paper.title
+    group_entry.save()
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id}))
+
+@login_required
+def paper_add_to_group(request, id):
+
+    message = None
+    # Get all reading groups that this person has created
+    # Note: This should be extended to allow user to propose
+    #       papers to group they belong to as well.
+    groups = ReadingGroup.objects.filter(owner=request.user.id)
+
+    group_urls = [
+        reverse(
+            "paper_add_to_group_selected",
+            kwargs={"id": id, "gid": group.id},
+        )
+        for group in groups
+    ]
+
+    all_groups = zip(groups, group_urls)
+
+    return render(
+        request,
+        "paper_add_to_group.html",
+        {"groups": all_groups, "message": message},
     )
 
 
