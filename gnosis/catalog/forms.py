@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
+from .models import ReadingGroup
 from django.utils.safestring import mark_safe
 
 #
@@ -364,3 +365,39 @@ class CodeForm(ModelForm):
     class Meta:
         model = Code
         fields = ["website", "keywords", "description"]
+
+
+#
+# SQL models
+#
+class GroupForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields["name"].widget = forms.Textarea()
+        self.fields["name"].widget.attrs.update({"rows": "1"})
+
+        self.fields["description"].widget = forms.Textarea()
+        self.fields["description"].widget.attrs.update({"rows": "5"})
+
+        self.fields["keywords"].label = "Keywords*"
+        self.fields["description"].label = "Description*"
+        self.fields["name"].label = "Name*"
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:25em"})
+
+    def clean_keywords(self):
+        return self.cleaned_data["keywords"]
+
+    def clean_description(self):
+        return self.cleaned_data["description"]
+
+    def clean_name(self):
+        return self.cleaned_data["name"]
+
+    class Meta:
+        model = ReadingGroup
+        fields = ["name", "description", "keywords"]

@@ -230,7 +230,7 @@ class ReadingGroup(models.Model):
 
     # Methods
     def get_absolute_url(self):
-        return reverse('reading-group-detail', args=[str(self.id)])
+        return reverse('group_detail', args=[str(self.id)])
 
     def __str__(self):
         return self.name
@@ -252,7 +252,7 @@ class ReadingGroupEntry(models.Model):
     date_proposed = models.DateField(auto_now_add=True, auto_now=False)
 
     def get_absolute_url(self):
-        return reverse('reading-group-entry-detail', args=[str[self.id]])
+        return reverse('group_detail', args=[str[self.id]])
 
     def __str__(self):
         return str(self.paper_id)

@@ -73,3 +73,13 @@ urlpatterns += [
     path('code/<int:id>/update', views.code_update, name='code_update'),
     path('code/<int:id>/delete', views.code_delete, name='code_delete'),
 ]
+
+# for updating/creating a ReadingGroup object
+urlpatterns += [
+    path('groups', views.groups, name='groups_index'),
+    path('group/create/', views.group_create, name='group_create'),
+    path('group/<int:id>', views.group_detail, name='group_detail'),
+    path('group/<int:id>/update', views.group_update, name='group_update'),
+    path('group/<int:id>/delete', views.group_delete, name='group_delete'),
+#   path('group/<int:id>/<int:pdid>/propose', views.group_propose_paper, name='group_propose_paper'),
+]
