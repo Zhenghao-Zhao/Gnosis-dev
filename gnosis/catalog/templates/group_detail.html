@@ -1,0 +1,92 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+<div class="card shadow-sm mt-5">
+    <div class="card-header">
+        <h3>
+            {{ group.name }}
+            {% if user.is_authenticated %}
+            {% if user.is_superuser or user.id == group.owner.id %}
+            <p>
+                <a href="{% url 'group_update' group.id %}" class="btn btn-danger btn-sm" role="" button>
+                    Edit
+                </a>
+            </p>
+            {% endif %}
+            {% endif %}
+        </h3>
+        created by {{ group.owner }} on {{ group.created_at }}
+    </div>
+    <div class="card-body">
+        <p>{{ group.description }}</p>
+        <p class="text-right">
+            <small>Keywords: {{ group.keywords }}</small>
+        </p>
+    </div>
+</div>
+
+
+<div class="card shadow-sm mt-5">
+    <div class="card-header">
+        <h3>Papers</h3>
+    </div>
+    <div class="card-body">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-discussed-tab" data-toggle="tab" href="#nav-discussed"
+                   role="tab"
+                   aria-controls="nav-discussed" aria-selected="true">Discussed</a>
+                <a class="nav-item nav-link" id="nav-proposed-tab" data-toggle="tab" href="#nav-proposed" role="tab"
+                   aria-controls="nav-proposed" aria-selected="false">Proposed</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-discussed" role="tabpanel"
+                 aria-labelledby="nav-discussed-tab">
+                {% if papers_discussed %}
+                    <ul class="list-group list-group-flush">
+                        {% for paper in papers_discussed %}
+                            {% if paper.date_discussed %}
+                                <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                                    discussed on {{ paper.date_discussed }} and proposed on {{ paper.date_proposed }} by {{ paper.proposed_by }}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <div class="tab-pane fade" id="nav-proposed" role="tabpanel" aria-labelledby="nav-proposed-tab">
+                {% if papers_proposed %}
+                    <ul class="list-group list-group-flush">
+                        {% for paper in papers_proposed %}
+                            {% if not paper.date_discussed %}
+                                <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                                    proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.
+                                    {% if user.id == group.owner.id %}
+                                        <a href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a>
+                                    {% endif %}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+        </div>
+        <p></p>
+    </div>
+</div>
+
+
+{% if user.is_authenticated and user.is_superuser %}
+<div class="card text-left shadow-sm mb-5 mt-3">
+    <div class="card-header"><strong>Admin functions</strong></div>
+    <div class="card-body">
+        <a href="{% url 'group_delete' group.id %}" class="btn btn-danger btn-sm" role="button">Delete Group</a>
+    </div>
+</div>
+{% endif %}
+
+
+{% endblock %}
