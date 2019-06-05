@@ -78,6 +78,18 @@ def group_update(request, id):
 
 
 @login_required
+def group_entry_remove(request, id, eid):
+
+    group = get_object_or_404(ReadingGroup, pk=id)
+
+    # Only the owner of a group can delete entries.
+    if group.owner.id == request.user.id:
+        group_entry = get_object_or_404(ReadingGroupEntry, pk=eid)
+        group_entry.delete()
+
+    return HttpResponseRedirect(reverse("group_detail", kwargs={"id": id}))
+
+@login_required
 def group_entry_update(request, id, eid):
 
     group = get_object_or_404(ReadingGroup, pk=id)
