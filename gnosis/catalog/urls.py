@@ -83,5 +83,5 @@ urlpatterns += [
     path('group/<int:id>', views.group_detail, name='group_detail'),
     path('group/<int:id>/update', views.group_update, name='group_update'),
     path('group/<int:id>/delete', views.group_delete, name='group_delete'),
-#   path('group/<int:id>/<int:pdid>/propose', views.group_propose_paper, name='group_propose_paper'),
+    path('group/<int:id>/entry/<int:eid>/update', views.group_entry_update, name='group_entry_update'),
 ]

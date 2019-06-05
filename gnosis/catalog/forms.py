@@ -1,8 +1,9 @@
 from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
-from .models import ReadingGroup
+from .models import ReadingGroup, ReadingGroupEntry
 from django.utils.safestring import mark_safe
+
 
 #
 # Search forms
@@ -401,3 +402,24 @@ class GroupForm(ModelForm):
     class Meta:
         model = ReadingGroup
         fields = ["name", "description", "keywords"]
+
+
+class GroupEntryForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields["date_discussed"].widget = forms.DateInput()
+        self.fields["date_discussed"].label = "Date (mm/dd/yyyy)"
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:25em"})
+
+    def clean_date_discussed(self):
+        return self.cleaned_data["date_discussed"]
+
+    class Meta:
+        model = ReadingGroupEntry
+        fields = ["date_discussed"]

@@ -572,7 +572,8 @@ def paper_add_to_group(request, id):
     # Get all reading groups that this person has created
     # Note: This should be extended to allow user to propose
     #       papers to group they belong to as well.
-    groups = ReadingGroup.objects.filter(owner=request.user.id)
+    # groups = ReadingGroup.objects.filter(owner=request.user.id)
+    groups = ReadingGroup.objects.all()
 
     group_urls = [
         reverse(
