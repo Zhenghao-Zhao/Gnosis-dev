@@ -1038,7 +1038,7 @@ def paper_create(request):
                 # type edge.
                 if request.session.get("from_external", False):
                     paper_authors = request.session["external_authors"]
-                    for paper_author in paper_authors.split(","):
+                    for paper_author in reversed(paper_authors.split(",")):
                         print("Adding author {}".format(paper_author))
                         _add_author(paper_author, paper)
 
