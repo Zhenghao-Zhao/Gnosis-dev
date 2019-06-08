@@ -155,9 +155,17 @@
 
     <script type="text/javascript">
 
-        // auto-centering the graph when browser is resized
-        $(window).resize(function () {
-            cy.center();
+        // simulate stop resizing using timer
+        var resizeTimer;
+
+        $(window).on('resize', function (e) {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                reset_layout()
+                // Run code here, resizing has "stopped"
+
+            }, 250);
+
         });
 
         var main_paper_id = '{{ main_paper_id }}';
