@@ -8,34 +8,38 @@ from django.http import HttpResponseRedirect
 from catalog.forms import CollectionForm
 
 
+@login_required
 def collections(request):
 
-    all_collections = Collection.objects.all()
+    all_collections = Collection.objects.filter(owner=request.user)
 
     message = None
-
+    print("Collections view!")
     return render(
         request, "collections.html", {"collections": all_collections, "message": message}
     )
 
 
+@login_required
 def collection_detail(request, id):
 
     collection = get_object_or_404(Collection, pk=id)
 
-    papers = collection.papers.order_by('-created_at')
-    print(papers)
+    if collection.owner == request.user:
+        papers = collection.papers.order_by('-created_at')
+        print(papers)
 
-    # papers_proposed = group.papers.filter(date_discussed=None).order_by('-date_proposed')
-    # papers_discussed = group.papers.exclude(date_discussed=None).order_by('-date_discussed')
+        return render(request, "collection_detail.html", {"collection": collection,
+                                                          "papers": papers, })
 
-    return render(request, "group_detail.html", {"collection": collection,
-                                                 "papers": papers, })
+    return HttpResponseRedirect(reverse("collections"))
 
 
 @login_required
 def collection_create(request):
     user = request.user
+
+    print("Creating a new collection")
 
     if request.method == "POST":
         collection = Collection()
@@ -51,7 +55,9 @@ def collection_create(request):
 
 
 @login_required
-def group_update(request, id):
+def collection_update(request, id):
+
+    print("Creating/Updating collection with id: {}".format(id))
 
     collection = get_object_or_404(Collection, pk=id)
     # if this is POST request then process the Form data
@@ -78,11 +84,11 @@ def group_update(request, id):
 
 
 @login_required
-def group_entry_remove(request, id, eid):
+def collection_entry_remove(request, id, eid):
 
     collection = get_object_or_404(Collection, pk=id)
 
-    # Only the owner of a group can delete entries.
+    # Only the owner of a collection can delete entries.
     if collection.owner.id == request.user.id:
         c_entry = get_object_or_404(CollectionEntry, pk=eid)
         c_entry.delete()
@@ -123,5 +129,5 @@ def group_entry_remove(request, id, eid):
 
 # should limit access to admin users only!!
 @staff_member_required
-def group_delete(request, id):
-    print("WARNING: Deleting code repo id {} and all related edges".format(id))
+def collection_delete(request, id):
+    print("WARNING: Deleting collection with id {}".format(id))

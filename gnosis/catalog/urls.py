@@ -27,6 +27,8 @@ urlpatterns += [
     path('paper/find/', views.paper_find, name='paper_find'),
     path('paper/<int:id>/group/add', views.paper_add_to_group, name='paper_add_to_group'),
     path('paper/<int:id>/group/add/<int:gid>', views.paper_add_to_group_selected, name='paper_add_to_group_selected'),
+    path('paper/<int:id>/collection/add', views.paper_add_to_collection, name='paper_add_to_collection'),
+    path('paper/<int:id>/collection/add/<int:cid>', views.paper_add_to_collection_selected, name='paper_add_to_collection_selected'),
 ]
 
 # for updating/creating a new Person node
@@ -92,8 +94,8 @@ urlpatterns += [
     path('collections', views.collections, name='collections'),
     path('collection/create/', views.collection_create, name='collection_create'),
     path('collection/<int:id>', views.collection_detail, name='collection_detail'),
-    # path('collection/<int:id>/update', views.collection_update, name='collection_update'),
-    # path('collection/<int:id>/delete', views.collection_delete, name='collection_delete'),
+    path('collection/<int:id>/update', views.collection_update, name='collection_update'),
+    path('collection/<int:id>/delete', views.collection_delete, name='collection_delete'),
     # path('collection/<int:id>/entry/<int:eid>/update', views.collection_entry_update, name='collection_entry_update'),
     # path('collection/<int:id>/entry/<int:eid>/remove', views.collection_entry_remove, name='collection_entry_remove'),
 ]

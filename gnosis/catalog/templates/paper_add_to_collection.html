@@ -1,0 +1,27 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+<div class="card shadow-sm mt-5">
+    <div class="card-header">
+        <h3>Select a collection</h3>
+    </div>
+    <div class="card-body">
+
+        {% if message %}
+        <p class="bg-danger">{{ message }}</p>
+        {% endif %}
+        {% if collections %}
+        <ul class="list-group">
+            {% for collection, collection_url in collections %}
+            <li class="list-group-item clearfix mt-1">
+                <a href="{{ collection.get_absolute_url }}">{{ collection.name }}</a>
+                {% if user.is_authenticated %}
+                <a class="btn btn-warning float-right" href={{ collection_url }}>Add</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

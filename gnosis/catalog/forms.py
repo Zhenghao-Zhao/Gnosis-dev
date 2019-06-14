@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
 from .models import ReadingGroup, ReadingGroupEntry
+from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
 
 
@@ -431,6 +432,7 @@ class GroupEntryForm(ModelForm):
 class CollectionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
+
         # The default for the description field widget is text input. Buy we want to display
         # more than one rows so we replace it with a Textarea widget.
         self.fields["name"].widget = forms.Textarea()
@@ -439,8 +441,8 @@ class CollectionForm(ModelForm):
         self.fields["description"].widget = forms.Textarea()
         self.fields["description"].widget.attrs.update({"rows": "5"})
 
-        self.fields["keywords"].label = "Keywords*"
-        self.fields["description"].label = "Description*"
+        self.fields["keywords"].label = "Keywords"
+        self.fields["description"].label = "Description"
         self.fields["name"].label = "Name*"
 
         for visible in self.visible_fields():
@@ -457,5 +459,5 @@ class CollectionForm(ModelForm):
         return self.cleaned_data["name"]
 
     class Meta:
-        model = ReadingGroup
+        model = Collection
         fields = ["name", "description", "keywords"]

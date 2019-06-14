@@ -261,12 +261,15 @@ class ReadingGroupEntry(models.Model):
 
 # Collections are private folders for user to organise their papers
 class Collection(models.Model):
-    """A ReadingGroup model"""
+    """A Collection model"""
 
     # Fields
-    name = models.CharField(max_length=100, blank=False)
-    description = models.TextField(blank=True)
-    keywords = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100,
+                            blank=False)
+    description = models.TextField(null=True,
+                                   blank=True)
+    keywords = models.CharField(max_length=100,
+                                null=True, blank=True)
 
     created_at = models.DateField(auto_now_add=True, auto_now=False)
     updated_at = models.DateField(null=True)

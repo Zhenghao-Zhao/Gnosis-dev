@@ -38,6 +38,11 @@
                 <li class="nav-item"><a class="nav-link"
                                         href="{% url 'groups_index' %}">Groups</a></li>
                 </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link"
+                                        href="{% url 'collections' %}">Collections</a></li>
+                </li>
+                {% endif %}
             </ul>
 
             <ul class="nav navbar-nav">

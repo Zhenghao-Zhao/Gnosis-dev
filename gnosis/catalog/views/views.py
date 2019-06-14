@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
+from catalog.models import Collection, CollectionEntry
 
 from catalog.forms import (
     PaperForm,
@@ -541,6 +542,61 @@ def paper_connect_venue(request, id):
         request,
         "paper_connect_venue.html",
         {"form": form, "venues": None, "message": message},
+    )
+
+
+@login_required
+def paper_add_to_collection_selected(request, id, cid):
+
+    print("In paper_add_to_collection_selected")
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        raise Http404
+
+    collection = get_object_or_404(Collection, pk=cid)
+    print("Found collection {}".format(collection))
+
+    if collection.owner == request.user:
+        c_entry = CollectionEntry()
+        c_entry.collection = collection
+        c_entry.paper_id = id
+        c_entry.paper_title = paper.title
+        c_entry.save()
+        print("Added entry to collection.")
+    else:
+        print("collection owner does not match user")
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id}))
+
+
+@login_required
+def paper_add_to_collection(request, id):
+
+    print("In paper_add_to_collection")
+    message = None
+    # Get all collections that this person has created
+    collections = Collection.objects.filter(owner=request.user)
+
+    print("User has {} collections.".format(len(collections)))
+
+    collection_urls = [
+        reverse(
+            "paper_add_to_collection_selected",
+            kwargs={"id": id, "cid": collection.id},
+        )
+        for collection in collections
+    ]
+
+    all_collections = zip(collections, collection_urls)
+
+    return render(
+        request,
+        "paper_add_to_collection.html",
+        {"collections": all_collections, "message": message},
     )
 
 
