@@ -86,3 +86,14 @@ urlpatterns += [
     path('group/<int:id>/entry/<int:eid>/update', views.group_entry_update, name='group_entry_update'),
     path('group/<int:id>/entry/<int:eid>/remove', views.group_entry_remove, name='group_entry_remove'),
 ]
+
+# for updating/creating a Collection
+urlpatterns += [
+    path('collections', views.collections, name='collections'),
+    path('collection/create/', views.collection_create, name='collection_create'),
+    path('collection/<int:id>', views.collection_detail, name='collection_detail'),
+    # path('collection/<int:id>/update', views.collection_update, name='collection_update'),
+    # path('collection/<int:id>/delete', views.collection_delete, name='collection_delete'),
+    # path('collection/<int:id>/entry/<int:eid>/update', views.collection_entry_update, name='collection_entry_update'),
+    # path('collection/<int:id>/entry/<int:eid>/remove', views.collection_entry_remove, name='collection_entry_remove'),
+]
