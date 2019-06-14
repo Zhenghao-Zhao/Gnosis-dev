@@ -257,3 +257,51 @@ class ReadingGroupEntry(models.Model):
 
     def __str__(self):
         return str(self.paper_id)
+
+
+# Collections are private folders for user to organise their papers
+class Collection(models.Model):
+    """A ReadingGroup model"""
+
+    # Fields
+    name = models.CharField(max_length=100, blank=False)
+    description = models.TextField(blank=True)
+    keywords = models.CharField(max_length=100, blank=True)
+
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+    updated_at = models.DateField(null=True)
+
+    owner = models.ForeignKey(to=User,
+                              on_delete=models.CASCADE,
+                              related_name="collections")
+
+    # Metadata
+    class Meta:
+        ordering = ['name', '-created_at']
+
+    # Methods
+    def get_absolute_url(self):
+        return reverse('collection_detail', args=[str(self.id)])
+
+    def __str__(self):
+        return self.name
+
+
+class CollectionEntry(models.Model):
+    """An entry, that is paper, in a reading group"""
+
+    # Fields
+    collection = models.ForeignKey(to=Collection,
+                                   on_delete=models.CASCADE,
+                                   related_name="papers")  # Collection.papers()
+
+    paper_id = models.IntegerField(null=False, blank=False)  # A paper in the Neo4j DB
+    paper_title = models.TextField(null=False, blank=False)  # The paper title to avoid extra DB calls
+
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+
+    def get_absolute_url(self):
+        return reverse('collection_detail', args=[str[self.id]])
+
+    def __str__(self):
+        return str(self.paper_id)
