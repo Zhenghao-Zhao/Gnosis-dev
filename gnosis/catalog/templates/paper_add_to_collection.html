@@ -21,6 +21,8 @@
             </li>
             {% endfor %}
         </ul>
+        {% else %}
+        You have not created any collections. <a href="{% url 'collection_create' %}">Create a Collection</a> to start organising your papers.
         {% endif %}
     </div>
 </div>

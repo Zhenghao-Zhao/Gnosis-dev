@@ -583,15 +583,18 @@ def paper_add_to_collection(request, id):
 
     print("User has {} collections.".format(len(collections)))
 
-    collection_urls = [
-        reverse(
-            "paper_add_to_collection_selected",
-            kwargs={"id": id, "cid": collection.id},
-        )
-        for collection in collections
-    ]
+    if len(collections) > 0:
+        collection_urls = [
+            reverse(
+                "paper_add_to_collection_selected",
+                kwargs={"id": id, "cid": collection.id},
+            )
+            for collection in collections
+        ]
 
-    all_collections = zip(collections, collection_urls)
+        all_collections = zip(collections, collection_urls)
+    else:
+        all_collections = None
 
     return render(
         request,
