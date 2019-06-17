@@ -17,6 +17,7 @@ urlpatterns += [
     path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/<int:id>/connect/author/<int:aid>', views.paper_connect_author_selected, name='paper_connect_author_selected'),
     path('paper/<int:id>/connect/paper', views.paper_connect_paper, name='paper_connect_paper'),
+    path('paper/<int:id>/connect/paper/<int:pid>', views.paper_connect_paper_selected, name='paper_connect_paper_selected'),
     path('paper/<int:id>/connect/dataset', views.paper_connect_dataset, name='paper_connect_dataset'),
     path('paper/<int:id>/connect/code', views.paper_connect_code, name='paper_connect_code'),
     path('paper/<int:id>/connect/code/<int:cid>', views.paper_connect_code_selected, name='paper_connect_code_selected'),

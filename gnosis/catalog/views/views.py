@@ -6,6 +6,7 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 
+
 from catalog.forms import (
     PaperForm,
     DatasetForm,
@@ -728,6 +729,56 @@ def paper_connect_author(request, id):
 
 
 @login_required
+def paper_connect_paper_selected(request, id, pid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper_source = all_papers[
+            0
+        ]  # since we search by id only one paper should have been returned.
+        print("Found source paper: {}".format(paper_source.title))
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=pid))
+        if len(results) > 0:
+            all_papers = [Paper.inflate(row[0]) for row in results]
+            paper_target = all_papers[
+                0
+            ]  # since we search by id only one paper should have been returned.
+            print("Found target paper: {}".format(paper_target.title))
+
+            # check if the papers are already connected with a cites link; if yes, then
+            # do nothing. Otherwise, add the link.
+            query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+            results, meta = db.cypher_query(
+                query,
+                dict(source_id=id, target_id=pid),
+            )
+            if len(results) == 0:
+                link_type = request.session["link_type"]
+                # papers are not linked so add the edge
+                print("Connection link not found, adding it!")
+                if link_type == 'cites':
+                    paper_source.cites.connect(paper_target)
+                elif link_type == 'uses':
+                    paper_source.uses.connect(paper_target)
+                elif link_type == 'extends':
+                    paper_source.extends.connect(paper_target)
+                messages.add_message(request, messages.INFO, "Connection Added!")
+            else:
+                print("Connection link found not adding it!")
+                messages.add_message(
+                    request, messages.INFO, "Papers are already linked!"
+                )
+    else:
+        print("Could not find paper!")
+        messages.add_message(
+            request, messages.INFO, "Could not find paper!"
+        )
+    return redirect("paper_detail", id=id)
+
+@login_required
 def paper_connect_paper(request, id):
     """
     View function for connecting a paper with another paper.
@@ -744,64 +795,84 @@ def paper_connect_paper(request, id):
             # if not, ask the user to create a new person
             paper_title_query = form.cleaned_data["paper_title"]
             papers_found = _find_paper(paper_title_query)
-            paper_connectted = form.cleaned_data["paper_connection"]
+            paper_connected = form.cleaned_data["paper_connection"]
 
             if len(papers_found) > 0:  # found more than one matching papers
                 print("Found {} papers that match".format(len(papers_found)))
                 for paper in papers_found:
                     print("\t{}".format(paper.title))
 
-                if len(papers_found) > 1:
+                    # for rid in relationship_ids:
+                    paper_connect_urls = [
+                        reverse(
+                            "paper_connect_paper_selected",
+                            kwargs={"id": id, "pid": paper.id},
+                        )
+                        for paper in papers_found
+                    ]
+                    print("paper connect urls")
+                    print(paper_connect_urls)
+
+                    papers = zip(papers_found, paper_connect_urls)
+
+                    request.session["link_type"] = paper_connected
+                    # ask the user to select one of them
                     return render(
                         request,
                         "paper_connect_paper.html",
-                        {
-                            "form": form,
-                            "papers": papers_found,
-                            "message": "Found more than one matching papers. Please narrow your search",
-                        },
+                        {"form": form, "papers": papers, "message": ""},
                     )
-                else:
-                    paper_target = papers_found[0]  # one person found
-                    print("Selected paper: {}".format(paper.title))
+             # if len(papers_found) > 1:
+                #     return render(
+                #         request,
+                #         "paper_connect_paper.html",
+                #         {
+                #             "form": form,
+                #             "papers": papers_found,
+                #             "message": "Found more than one matching papers. Please narrow your search",
+                #         },
+                #     )
+                # else:
+                #     paper_target = papers_found[0]  # one person found
+                #     print("Selected paper: {}".format(paper.title))
 
                 # retrieve the paper
-                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
-                results, meta = db.cypher_query(query, dict(id=id))
-                if len(results) > 0:
-                    all_papers = [Paper.inflate(row[0]) for row in results]
-                    paper_source = all_papers[
-                        0
-                    ]  # since we search by id only one paper should have been returned.
-                    print("Found paper: {}".format(paper_source.title))
-                    # check if the papers are already connected with a cites link; if yes, then
-                    # do nothing. Otherwise, add the link.
-                    query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
-                    results, meta = db.cypher_query(
-                        query,
-                        dict(source_id=paper_source.id, target_id=paper_target.id),
-                    )
-                    if len(results) == 0:
-                        # papers are not linked so add the edge
-                        print("Connection link not found, adding it!")
-                        if paper_connectted == 'cites':
-                            paper_source.cites.connect(paper_target)
-                        elif paper_connectted == 'uses':
-                            paper_source.uses.connect(paper_target)
-                        elif paper_connectted == 'extends':
-                            paper_source.extends.connect(paper_target)
-                        messages.add_message(request, messages.INFO, "Connection Added!")
-                    else:
-                        print("Connection link found not adding it!")
-                        messages.add_message(
-                            request, messages.INFO, "Connection Already Exists!"
-                        )
-                else:
-                    print("Could not find paper!")
-                    messages.add_message(
-                        request, messages.INFO, "Could not find paper!"
-                    )
-                return redirect("paper_detail", id=id)
+                # query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                # results, meta = db.cypher_query(query, dict(id=id))
+                # if len(results) > 0:
+                #     all_papers = [Paper.inflate(row[0]) for row in results]
+                #     paper_source = all_papers[
+                #         0
+                #     ]  # since we search by id only one paper should have been returned.
+                #     print("Found paper: {}".format(paper_source.title))
+                #     # check if the papers are already connected with a cites link; if yes, then
+                #     # do nothing. Otherwise, add the link.
+                #     query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+                #     results, meta = db.cypher_query(
+                #         query,
+                #         dict(source_id=paper_source.id, target_id=paper_target.id),
+                #     )
+                #     if len(results) == 0:
+                #         # papers are not linked so add the edge
+                #         print("Connection link not found, adding it!")
+                #         if paper_connected == 'cites':
+                #             paper_source.cites.connect(paper_target)
+                #         elif paper_connected == 'uses':
+                #             paper_source.uses.connect(paper_target)
+                #         elif paper_connected == 'extends':
+                #             paper_source.extends.connect(paper_target)
+                #         messages.add_message(request, messages.INFO, "Connection Added!")
+                #     else:
+                #         print("Connection link found not adding it!")
+                #         messages.add_message(
+                #             request, messages.INFO, "Connection Already Exists!"
+                #         )
+                # else:
+                #     print("Could not find paper!")
+                #     messages.add_message(
+                #         request, messages.INFO, "Could not find paper!"
+                #     )
+                # return redirect("paper_detail", id=id)
             else:
                 message = "No matching papers found"
 
