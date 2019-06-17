@@ -89,6 +89,7 @@ def group_entry_remove(request, id, eid):
 
     return HttpResponseRedirect(reverse("group_detail", kwargs={"id": id}))
 
+
 @login_required
 def group_entry_update(request, id, eid):
 
@@ -120,7 +121,20 @@ def group_entry_update(request, id, eid):
                                                        "group": group,
                                                        "group_entry": group_entry})
 
-# should limit access to admin users only!!
-@staff_member_required
+
+#
+@login_required
 def group_delete(request, id):
-    print("WARNING: Deleting code repo id {} and all related edges".format(id))
+    print("WARNING: Deleting group with id {}.".format(id))
+
+    group = get_object_or_404(ReadingGroup, pk=id)
+    if group:
+            if group.owner == request.user:
+                print("Found group")
+                group.delete()
+                print("   ==> Deleted group.")
+            else:
+                print("Group does not belong to user.")
+
+    return HttpResponseRedirect(reverse("groups_index"))
+
