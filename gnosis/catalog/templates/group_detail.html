@@ -1,6 +1,7 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
+{% load el_pagination_tags %}
 
 <div class="card shadow-sm mt-5">
     <div class="card-header">
@@ -34,44 +35,83 @@
     <div class="card-body">
         <nav>
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active" id="nav-discussed-tab" data-toggle="tab" href="#nav-discussed"
-                   role="tab"
-                   aria-controls="nav-discussed" aria-selected="true">Discussed</a>
-                <a class="nav-item nav-link" id="nav-proposed-tab" data-toggle="tab" href="#nav-proposed" role="tab"
-                   aria-controls="nav-proposed" aria-selected="false">Proposed</a>
+                <a class="nav-item nav-link active" id="nav-discussed-tab" data-toggle="tab" href="#navdiscussed"
+                   role="tab" aria-controls="navdiscussed" aria-selected="true">Discussed</a>
+                <a class="nav-item nav-link" id="nav-proposed-tab" data-toggle="tab" href="#navproposed" role="tab"
+                   aria-controls="navproposed" aria-selected="false">Proposed</a>
             </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-discussed" role="tabpanel"
+            <div class="tab-pane fade show active" id="navdiscussed" role="tabpanel"
                  aria-labelledby="nav-discussed-tab">
                 {% if papers_discussed %}
-                    <ul class="list-group list-group-flush">
-                        {% for paper in papers_discussed %}
-                            {% if paper.date_discussed %}
-                                <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
-                                    discussed on {{ paper.date_discussed }} and proposed on {{ paper.date_proposed }} by {{ paper.proposed_by }}
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                {% paginate papers_discussed %}
+                <ul class="list-group list-group-flush">
+                    {% for paper in papers_discussed %}
+                    {% if paper.date_discussed %}
+                    <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                        discussed on {{ paper.date_discussed }} and proposed on {{ paper.date_proposed }} by {{ paper.proposed_by }}
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% get_pages %}
+                <!-- Center-aligned -->
+                <ul class="pagination justify-content-center" style="margin:20px 0">
+                    {% if not pages.current.is_first %}
+                    <li class="page-item"><a class="page-link" href="{{ pages.previous.path }}">Previous</a></li>
+                    {% endif %}
+                    {% for page in pages %}
+                    {% if page.is_current %}
+                    <li class="page-item active"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if not pages.current.is_last %}
+                    <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
+                    {% endif %}
+                </ul>
+
                 {% endif %}
             </div>
-            <div class="tab-pane fade" id="nav-proposed" role="tabpanel" aria-labelledby="nav-proposed-tab">
+            <div class="tab-pane fade" id="navproposed" role="tabpanel" aria-labelledby="nav-proposed-tab">
                 {% if papers_proposed %}
-                    <ul class="list-group list-group-flush">
-                        {% for paper in papers_proposed %}
-                            {% if not paper.date_discussed %}
-                                <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
-                                    proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.
-                                    {% if user.id == group.owner.id %}
-                                        <a class="btn btn-sm btn-primary" href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a>
-                                        <a class="btn btn-sm btn-outline-danger" href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Remove</a>
-                                    {% endif %}
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                {% paginate papers_proposed %}
+                <ul class="list-group list-group-flush">
+                    {% for paper in papers_proposed %}
+                    {% if not paper.date_discussed %}
+                    <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                        proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.
+                        {% if user.id == group.owner.id %}
+                        <a class="btn btn-sm btn-primary"
+                           href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a>
+                        <a class="btn btn-sm btn-outline-danger"
+                           href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Remove</a>
+                        {% endif %}
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% get_pages %}
                 {% endif %}
+                        <!-- Center-aligned -->
+                <ul class="pagination justify-content-center" style="margin:20px 0">
+            {% if not pages.current.is_first %}
+            <li class="page-item"><a class="page-link" href="{{ pages.previous.path }}">Previous</a></li>
+            {% endif %}
+            {% for page in pages %}
+            {% if page.is_current %}
+            <li class="page-item active"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if not pages.current.is_last %}
+            <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
+            {% endif %}
+        </ul>
+
             </div>
 
         </div>
@@ -90,6 +130,51 @@
 </div>
 {% endif %}
 {% endif %}
+
+<script type="text/javascript">
+// wire up shown event
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    // console.log("tab shown is "+$(e.target).attr('href'));
+    localStorage.setItem('activeTab', $(e.target).attr('href'));
+});
+
+// read hash from page load and change tab
+var activeTab = localStorage.getItem('activeTab');
+
+if(activeTab){
+    // console.log("Active tab is "+activeTab)
+    $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+}
+/*
+else {
+    console.log("No active tab")
+}
+*/
+
+/*
+$(document).ready(function() {
+    console.log("ready()")
+    if (location.hash) {
+        $("a[href='" + location.hash + "']").tab("show");
+        console.log("location.hash "+ location.hash)
+    }
+    else {
+        console.log("No location.hash")
+    }
+    $(document.body).on("click", "a[data-toggle='tab']", function(event) {
+        location.hash = this.getAttribute("href");
+        console.log("Clicked and has location.hash="+location.hash)
+    });
+});
+
+$(window).on("popstate", function() {
+    console.log("On popstate")
+    var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
+    console.log("anchor = "+anchor)
+    $(".nav-tabs a[href='" + anchor + "']").tab("show");
+});
+*/
+</script>
 
 
 {% endblock %}
