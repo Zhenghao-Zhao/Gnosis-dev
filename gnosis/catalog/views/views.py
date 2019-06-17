@@ -548,6 +548,7 @@ def paper_connect_venue(request, id):
 @login_required
 def paper_add_to_collection_selected(request, id, cid):
 
+    message = None
     print("In paper_add_to_collection_selected")
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -561,16 +562,24 @@ def paper_add_to_collection_selected(request, id, cid):
     print("Found collection {}".format(collection))
 
     if collection.owner == request.user:
-        c_entry = CollectionEntry()
-        c_entry.collection = collection
-        c_entry.paper_id = id
-        c_entry.paper_title = paper.title
-        c_entry.save()
-        print("Added entry to collection.")
+        # check if paper already exists in collection.
+        paper_in_collection = collection.papers.filter(paper_id=paper.id)
+        if paper_in_collection:
+            message = "Paper already exists in collection {}".format(collection.name)
+        else:
+            c_entry = CollectionEntry()
+            c_entry.collection = collection
+            c_entry.paper_id = id
+            c_entry.paper_title = paper.title
+            c_entry.save()
+            message = "Paper added to collection {}".format(collection.name)
     else:
         print("collection owner does not match user")
 
-    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id}))
+    print(message)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id,}))
 
 
 @login_required
