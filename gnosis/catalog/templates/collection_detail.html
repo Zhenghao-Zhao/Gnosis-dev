@@ -1,6 +1,7 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
+{% load el_pagination_tags %}
 
 <div class="card shadow-sm mt-5">
     <div class="card-header">
@@ -30,6 +31,7 @@
         </p>
         {% endif %}
         {% if papers %}
+        {% paginate papers %}
         {% for paper in papers %}
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
@@ -37,6 +39,23 @@
             </li>
         </ul>
         {% endfor %}
+                {% get_pages %}
+        <!-- Center-aligned -->
+        <ul class="pagination justify-content-center" style="margin:20px 0">
+            {% if not pages.current.is_first %}
+            <li class="page-item"><a class="page-link" href="{{ pages.previous.path }}">Previous</a></li>
+            {% endif %}
+            {% for page in pages %}
+            {% if page.is_current %}
+            <li class="page-item active"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if not pages.current.is_last %}
+            <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
+            {% endif %}
+        </ul>
         {% else %}
         <p class="font-weight-light font-italic">This collection doesn't have any papers yet.</p>
         {% endif %}
