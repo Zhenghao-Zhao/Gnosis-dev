@@ -128,6 +128,19 @@ def collection_entry_remove(request, id, eid):
 #                                                        "group_entry": group_entry})
 
 # should limit access to admin users only!!
-@staff_member_required
+# @staff_member_required
+@login_required
 def collection_delete(request, id):
+    """Delete view"""
     print("WARNING: Deleting collection with id {}".format(id))
+
+    collection = get_object_or_404(Collection, pk=id)
+    if collection:
+            if collection.owner == request.user:
+                print("Found collection")
+                collection.delete()
+                print("   ==> Deleted collection.")
+            else:
+                print("Collection does not belong to user.")
+
+    return HttpResponseRedirect(reverse("collections"))
