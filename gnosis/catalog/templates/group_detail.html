@@ -65,7 +65,7 @@
                                     proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.
                                     {% if user.id == group.owner.id %}
                                         <a class="btn btn-sm btn-primary" href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a>
-                                        <a class="btn btn-sm btn-danger" href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Delete</a>
+                                        <a class="btn btn-sm btn-outline-danger" href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Remove</a>
                                     {% endif %}
                                 </li>
                             {% endif %}
