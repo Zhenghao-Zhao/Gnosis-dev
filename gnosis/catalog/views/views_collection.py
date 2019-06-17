@@ -144,3 +144,23 @@ def collection_delete(request, id):
                 print("Collection does not belong to user.")
 
     return HttpResponseRedirect(reverse("collections"))
+
+
+@login_required
+def collection_entry_remove(request, id, eid):
+    """Delete view"""
+    print("WARNING: Deleting collection entry with id {}".format(eid))
+
+    collection = get_object_or_404(Collection, pk=id)
+    if collection:
+            if collection.owner == request.user:
+                print("Found collection")
+                c_entry = get_object_or_404(CollectionEntry, pk=eid)
+                # c_entry = collection.papers.filter(id=eid)
+                c_entry.delete()
+                print("   ==> Deleted collection entry.")
+                return HttpResponseRedirect(reverse("collection_detail", kwargs={"id": id}))
+            else:
+                print("Collection does not belong to user.")
+
+    return HttpResponseRedirect(reverse("collections"))

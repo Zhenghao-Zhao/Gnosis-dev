@@ -36,6 +36,7 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                <a href="{% url 'collection_entry_remove' collection.id paper.id %}" class="btn btn-outline-danger btn-sm" role="button">Remove</a>
             </li>
         </ul>
         {% endfor %}
