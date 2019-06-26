@@ -1129,6 +1129,7 @@ def _add_author(author, paper=None):
         else:
             p.middle_name = None
         p.last_name = author_name[-1]
+        #print("**** Person {} ***".format(p))
         p.save()  # save to DB
         link_with_paper = True
     elif len(people_found) == 1:
@@ -1290,11 +1291,22 @@ def get_authors(bs4obj, source_website):
     elif source_website == "acm":
         author_str = bs4obj.find("meta", {"name": "citation_authors"})
         author_str = str(author_str)
+        # print("get_authors() downloaded author_str: {}".format(author_str))
         start = author_str.find('"')
         end = author_str.find('"', start + 1)
         author_str = author_str[start + 1:end]
-        author_str = author_str.replace(",", "")
+
+        author_str_rev = ""
+        for n in author_str.split(";"):
+            if len(author_str_rev) == 0:
+                author_str_rev = ", ".join(n.split(",")[::-1])
+            else:
+                author_str_rev = author_str_rev + "; " + ",".join(n.split(", ")[::-1])
+        #print("get_authors() author_str_rev: {}".format(author_str_rev))
+        author_str = author_str_rev.replace(",", "")
         author_str = author_str.replace("; ", ",")
+        #print("get_authors() cleaned author_str: {}".format(author_str))
+        # names are last, first so reverse to first, last
         return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
