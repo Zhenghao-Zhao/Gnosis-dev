@@ -6,6 +6,7 @@ from catalog.models import ReadingGroup, ReadingGroupEntry
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from catalog.forms import GroupForm, GroupEntryForm
+from datetime import date
 
 
 def groups(request):
@@ -27,10 +28,12 @@ def group_detail(request, id):
 
     print(papers_proposed)
     print(papers_discussed)
+    today = date.today()
 
     return render(request, "group_detail.html", {"group": group,
                                                  "papers_proposed": papers_proposed,
-                                                 "papers_discussed": papers_discussed})
+                                                 "papers_discussed": papers_discussed,
+                                                 "today": today})
 
 
 @login_required
