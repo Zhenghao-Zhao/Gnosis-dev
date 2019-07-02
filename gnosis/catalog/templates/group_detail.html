@@ -81,14 +81,18 @@
                 <ul class="list-group list-group-flush">
                     {% for paper in papers_proposed %}
                     {% if not paper.date_discussed %}
-                    <li class="list-group-item"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
-                        proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.
+                    <li class="list-group-item">
+                        <div class="d-flex flex-row">
+                            <div class="p-2"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                        proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.</div>
                         {% if user.id == group.owner.id %}
-                        <a class="btn btn-sm btn-primary"
-                           href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a>
-                        <a class="btn btn-sm btn-outline-danger"
-                           href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Remove</a>
+                            <div class="p-2">
+                                <a class="btn btn-sm btn-primary"  href="{% url 'group_entry_update' paper.reading_group.id paper.id %}">Discuss</a></div>
+                            <div class="p-2">
+                                <a class="btn btn-sm btn-outline-danger" href="{% url 'group_entry_remove' paper.reading_group.id paper.id %}">Remove</a>
+                            </div>
                         {% endif %}
+                        </div>
                     </li>
                     {% endif %}
                     {% endfor %}
