@@ -83,7 +83,7 @@
                     {% if not paper.date_discussed %}
                     <li class="list-group-item">
                         <div class="d-flex flex-row">
-                            <div class="p-2"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
+                            <div class="mr-auto p-2"><a href="{% url 'paper_detail' paper.paper_id %}">{{ paper.paper_title }}</a>
                         proposed on {{ paper.date_proposed}} by {{ paper.proposed_by }}.</div>
                         {% if user.id == group.owner.id %}
                             <div class="p-2">
