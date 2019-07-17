@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
-from catalog.models import Person
+from catalog.models import Person, Paper
 from catalog.forms import PersonForm
 from catalog.forms import SearchPeopleForm
 from django.urls import reverse
@@ -95,6 +95,7 @@ def persons(request):
 
 def person_detail(request, id):
     # Retrieve the paper from the database
+    papers_authored = []
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
     if len(results) > 0:
@@ -113,11 +114,20 @@ def person_detail(request, id):
         )
 
     #
-    # TO DO: Retrieve all papers co-authored by this person and list them; same for
-    # co-authors and advisees.
+    # Retrieve all papers co-authored by this person and list them
     #
+    query = "MATCH (a:Person)-[r:authors]->(p:Paper) where id(a)={id} return p"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        papers_authored = [Paper.inflate(row[0]) for row in results]
+        print("Number of papers co-authored by {}: {}".format(person.last_name, len(papers_authored)))
+        for p in papers_authored:
+            print("Title: {}".format(p.title))
+    else:
+        print("No papers found for author {}".format(person.last_name))
+
     request.session["last-viewed-person"] = id
-    return render(request, "person_detail.html", {"person": person})
+    return render(request, "person_detail.html", {"person": person, "papers": papers_authored})
 
 
 @login_required
