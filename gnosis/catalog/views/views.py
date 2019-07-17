@@ -137,6 +137,7 @@ def papers(request):
 
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
+    relationship_ids = []
     paper = _get_paper_by_id(id)
     print("Retrieved paper with title {}".format(paper.title))
 
@@ -147,9 +148,10 @@ def paper_authors(request, id):
         relationship_ids = [row[1] for row in results]
     else:
         authors = []
+
+    num_authors = len(authors)
     print("paper author link ids {}".format(relationship_ids))
     print("Found {} authors for paper with id {}".format(len(authors), id))
-
     # for rid in relationship_ids:
     delete_urls = [
         reverse("paper_remove_author", kwargs={"id": id, "rid": rid})
@@ -160,7 +162,7 @@ def paper_authors(request, id):
 
     authors = zip(authors, delete_urls)
 
-    return render(request, "paper_authors.html", {"authors": authors, "paper": paper})
+    return render(request, "paper_authors.html", {"authors": authors, "paper": paper, "number_of_authors": num_authors})
 
 
 # should limit access to admin users only!!
