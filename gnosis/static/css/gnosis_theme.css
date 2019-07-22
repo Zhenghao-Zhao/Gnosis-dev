@@ -1,0 +1,72 @@
+#cy {
+    width: auto;
+    height: 600px;
+    display: block;
+}
+
+
+@media screen and (max-width: 679px) {
+    #big {
+        display: none;
+    }
+    /*used when buttons wrap to create seperation*/
+    .flex-item {
+        margin-top: 10px;
+    }
+}
+
+@media screen and (min-width: 680px) {
+    #small {
+        display: none;
+    }
+
+}
+
+.float-container::after{
+    display: block;
+    content: "";
+    clear: both;
+}
+
+/*
+    !* Remove the navbar's default margin-bottom and rounded borders *!
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    !* Set height of the grid so .sidenav can be 100% (adjust as needed) *!
+    .row.content {height: 450px}
+
+    !* Set gray background color and 100% height  #f1f1f1*!
+    .sidenav {
+      padding-top: 20px;
+      background-color: #ffffff;
+      height: 100%;
+    }
+
+    !* Set black background color, white text and some padding *!
+    footer {
+      background-color: #ffffff;
+      color: white;
+      padding: 15px;
+    }
+
+    !* Adds a small buffer between the two rows in the middle column. *!
+    .top-buffer { margin-top:10px; }
+
+    !* Adds a small buffer between the two rows in the right column. *!
+    .top-buffer-sidenav { margin-top:5px; }
+
+    !* Adds margins around the main content colum *!
+    .main-column-left-right-buffer { margin-left:10px; margin-right:10px }
+
+    !* On small screens, set height to 'auto' for sidenav and grid *!
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;}
+    }
+*/

@@ -1,13 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
-from catalog.models import Person
+from catalog.models import Person, Paper
 from catalog.forms import PersonForm
 from catalog.forms import SearchPeopleForm
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
-# from nltk.corpus import stopwords
+from django.shortcuts import redirect
+from django.contrib import messages
 
 
 def _person_find(person_name, exact_match=False):
@@ -43,7 +44,21 @@ def person_find(request):
     :param request:
     :return:
     """
+    print("Calling person_find")
+    people_found_ids = []
     message = None
+    storage = messages.get_messages(request=request)
+    for request_message in storage:
+        people_found_ids = request_message.message
+        print("IDs of people found: {}".format(people_found_ids))
+        people_found_ids = people_found_ids.split(",")
+        break
+
+    people = []
+    if len(people_found_ids) > 0:
+        people = Person.nodes.filter(uid__in=people_found_ids)
+        print("Retrieved {} people from the database".format(len(people)))
+
     if request.method == "POST":
         form = SearchPeopleForm(request.POST)
         print("Received POST request")
@@ -51,7 +66,7 @@ def person_find(request):
 
             people = _person_find(form.cleaned_data["person_name"])
             if people is not None:
-                return render(request, "people.html", {"people": people, "form": form, "message": message})
+                return render(request, "person_find.html", {"people": people, "form": form, "message": message})
             else:
                 message = "No results found. Please try again!"
 
@@ -59,28 +74,31 @@ def person_find(request):
         print("Received GET request")
         form = SearchPeopleForm()
 
-    return render(request, "person_find.html", {"form": form, "message": message})
-
+    return render(request, "person_find.html", {"people": people, "form": form, "message": message})
 
 #
 # Person Views
 #
 def persons(request):
     people = Person.nodes.order_by("-created")[:50]
-
     message = None
     if request.method == "POST":
         form = SearchPeopleForm(request.POST)
         print("Received POST request")
         if form.is_valid():
-
+            print("Valid form")
             people_found = _person_find(form.cleaned_data["person_name"])
             if people_found is not None:
-                return render(
-                    request,
-                    "people.html",
-                    {"people": people_found, "form": form, "message": ""},
-                )
+                #print("Found people. Rendering person_find.html")
+                people_found_ids = [person.uid for person in people_found]
+                #print("ids as string {}".format(",".join(str(pid) for pid in people_found_ids)))
+                messages.add_message(request, messages.INFO, ",".join(str(pid) for pid in people_found_ids))
+                return redirect("person_find")
+                # return render(
+                #      request,
+                #      "person_find.html",
+                #      {"people": people_found, "form": form, "message": ""},
+                # )
             else:
                 message = "No results found. Please try again!"
 
@@ -95,6 +113,7 @@ def persons(request):
 
 def person_detail(request, id):
     # Retrieve the paper from the database
+    papers_authored = []
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
     if len(results) > 0:
@@ -113,11 +132,20 @@ def person_detail(request, id):
         )
 
     #
-    # TO DO: Retrieve all papers co-authored by this person and list them; same for
-    # co-authors and advisees.
+    # Retrieve all papers co-authored by this person and list them
     #
+    query = "MATCH (a:Person)-[r:authors]->(p:Paper) where id(a)={id} return p"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        papers_authored = [Paper.inflate(row[0]) for row in results]
+        print("Number of papers co-authored by {}: {}".format(person.last_name, len(papers_authored)))
+        for p in papers_authored:
+            print("Title: {}".format(p.title))
+    else:
+        print("No papers found for author {}".format(person.last_name))
+
     request.session["last-viewed-person"] = id
-    return render(request, "person_detail.html", {"person": person})
+    return render(request, "person_detail.html", {"person": person, "papers": papers_authored})
 
 
 @login_required

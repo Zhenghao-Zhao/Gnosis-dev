@@ -1,6 +1,9 @@
 from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
+from .models import ReadingGroup, ReadingGroupEntry
+from .models import Collection, CollectionEntry
+from django.utils.safestring import mark_safe
 
 
 #
@@ -62,6 +65,24 @@ class SearchPapersForm(Form):
     paper_title = forms.CharField(
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
+
+class PaperConnectionForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_paper_title(self):
+        return self.cleaned_data["paper_title"]
+
+    def clean_paper_connection(self):
+        return self.cleaned_data["paper_connection"]
+
+    paper_title = forms.CharField(
+        required=True, widget=forms.TextInput(attrs={"size": 60})
+    )
+    CHOICES = (('cites', 'cites'), ('uses', 'uses'), ('extends', 'extends'),)
+    paper_connection = forms.ChoiceField(choices=CHOICES)
 
 
 class SearchPeopleForm(Form):
@@ -141,7 +162,9 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-        label="Source URL, e.g., https://arxiv.org/abs/1607.00653*",
+    # the label will now appear in two lines break at the br label
+        # label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
+        label= mark_safe("Source URL*"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
@@ -344,3 +367,97 @@ class CodeForm(ModelForm):
     class Meta:
         model = Code
         fields = ["website", "keywords", "description"]
+
+
+#
+# SQL models
+#
+class GroupForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields["name"].widget = forms.Textarea()
+        self.fields["name"].widget.attrs.update({"rows": "1"})
+
+        self.fields["description"].widget = forms.Textarea()
+        self.fields["description"].widget.attrs.update({"rows": "5"})
+
+        self.fields["keywords"].label = "Keywords*"
+        self.fields["description"].label = "Description*"
+        self.fields["name"].label = "Name*"
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:25em"})
+
+    def clean_keywords(self):
+        return self.cleaned_data["keywords"]
+
+    def clean_description(self):
+        return self.cleaned_data["description"]
+
+    def clean_name(self):
+        return self.cleaned_data["name"]
+
+    class Meta:
+        model = ReadingGroup
+        fields = ["name", "description", "keywords"]
+
+
+class GroupEntryForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields["date_discussed"].widget = forms.DateInput()
+        self.fields["date_discussed"].label = "Date (mm/dd/yyyy)"
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:25em"})
+
+    def clean_date_discussed(self):
+        return self.cleaned_data["date_discussed"]
+
+    class Meta:
+        model = ReadingGroupEntry
+        fields = ["date_discussed"]
+
+
+#
+# Collections
+#
+class CollectionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        # The default for the description field widget is text input. Buy we want to display
+        # more than one rows so we replace it with a Textarea widget.
+        self.fields["name"].widget = forms.Textarea()
+        self.fields["name"].widget.attrs.update({"rows": "1"})
+
+        self.fields["description"].widget = forms.Textarea()
+        self.fields["description"].widget.attrs.update({"rows": "5"})
+
+        self.fields["keywords"].label = "Keywords"
+        self.fields["description"].label = "Description"
+        self.fields["name"].label = "Name*"
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:25em"})
+
+    def clean_keywords(self):
+        return self.cleaned_data["keywords"]
+
+    def clean_description(self):
+        return self.cleaned_data["description"]
+
+    def clean_name(self):
+        return self.cleaned_data["name"]
+
+    class Meta:
+        model = Collection
+        fields = ["name", "description", "keywords"]
