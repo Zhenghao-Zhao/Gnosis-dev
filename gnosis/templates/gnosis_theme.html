@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link rel="shortcut icon" href=""> {# solves favicon not found error #}
+    <link rel="shortcut icon" href="">
+    {# solves favicon not found error #}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
@@ -18,11 +19,11 @@
     <script src="{% static "js/cytoscape-cola.js" %}"></script>
 
 </head>
- <style>
-        .max-width {
-            max-width: 1024px;
-        }
-        </style>
+<style>
+    .max-width {
+        max-width: 1024px;
+    }
+</style>
 <body>
 
 <nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">
@@ -75,11 +76,11 @@
         <ul class="nav navbar-nav">
             {% if user.is_authenticated %}
                 <li class="nav-item"><a
-                                        class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
+                        class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
                 </li>
             {% else %}
                 <li class="nav-item"><a
-                                        class="nav-link" href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
+                        class="nav-link" href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
             {% endif %}
         </ul>
     </div>
@@ -88,68 +89,84 @@
 <div class="container-fluid  max-width float-container" style="margin-top:30px ">
     <div class="row float-right" style="margin-right:30px">
         {% if user.is_authenticated %}
-        <div class="btn-group">
-            <a href="{% url 'papers_index' %}" class="btn btn-primary flex-item" role="button" title="View all papers">Papers&nbsp&nbsp</a>
             <div class="btn-group">
-                <a href="{% url 'paper_create' %}" class="btn btn-primary flex-item" role="button" title="Add new paper">+</a>
-                <button type="button" class="btn btn-primary flex-item dropdown-toggle" data-toggle="dropdown" title="Add with URL">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a href="{% url 'paper_create_from_url' %}">from URL</a></li>
-                </ul>
+                <a href="{% url 'papers_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all papers">Papers&nbsp&nbsp</a>
+                <div class="btn-group">
+                    <a href="{% url 'paper_create' %}" class="btn btn-primary flex-item" role="button"
+                       title="Add new paper">+</a>
+                    <button type="button" class="btn btn-primary flex-item dropdown-toggle" data-toggle="dropdown"
+                            title="Add with URL">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'paper_create_from_url' %}">from URL</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'persons_index' %}" class="btn btn-primary flex-item" role="button" title="View all people">People&nbsp&nbsp</a>
-            <div class="btn-group">
-                <a href="{% url 'person_create' %}" class="btn btn-primary flex-item" role="button" title="Add new person">+</a>
+            <div class="btn-group ml-1">
+                <a href="{% url 'persons_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all people">People&nbsp&nbsp</a>
+                <div class="btn-group">
+                    <a href="{% url 'person_create' %}" class="btn btn-primary flex-item" role="button"
+                       title="Add new person">+</a>
+                </div>
             </div>
-        </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'venues_index' %}" class="btn btn-primary flex-item" role="button" title="View all venues">Venues&nbsp&nbsp</a>
-            <div class="btn-group">
-                <a href="{% url 'venue_create' %}" class="btn btn-primary flex-item" role="button" title="Add new venue">+</a>
+            <div class="btn-group ml-1">
+                <a href="{% url 'venues_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all venues">Venues&nbsp&nbsp</a>
+                <div class="btn-group">
+                    <a href="{% url 'venue_create' %}" class="btn btn-primary flex-item" role="button"
+                       title="Add new venue">+</a>
+                </div>
             </div>
-        </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'datasets_index' %}" class="btn btn-primary flex-item" role="button" title="View all datasets">Datasets</a>
-            <div class="btn-group">
-                <a href="{% url 'dataset_create' %}" class="btn btn-primary flex-item" role="button" title="Add new dataset">+</a>
+            <div class="btn-group ml-1">
+                <a href="{% url 'datasets_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all datasets">Datasets</a>
+                <div class="btn-group">
+                    <a href="{% url 'dataset_create' %}" class="btn btn-primary flex-item" role="button"
+                       title="Add new dataset">+</a>
+                </div>
             </div>
-        </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'codes_index' %}" class="btn btn-primary flex-item" role="button" title="View all codes" >Codes</a>
-            <div class="btn-group">
-                <a href="{% url 'code_create' %}" class="btn btn-primary flex-item" role="button" title="Add new code">+</a>
+            <div class="btn-group ml-1">
+                <a href="{% url 'codes_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all codes">Codes</a>
+                <div class="btn-group">
+                    <a href="{% url 'code_create' %}" class="btn btn-primary flex-item" role="button"
+                       title="Add new code">+</a>
+                </div>
             </div>
-        </div>
 
-        <!--               </div>-->
+            <!--               </div>-->
         {% else %}
-        <div class="btn-group">
-            <a href="{% url 'papers_index' %}" class="btn btn-primary flex-item" role="button" title="View all papers">Papers&nbsp&nbsp</a>
-        </div>
+            <div class="btn-group">
+                <a href="{% url 'papers_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all papers">Papers&nbsp&nbsp</a>
+            </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'persons_index' %}" class="btn btn-primary flex-item" role="button" title="View all people">People&nbsp&nbsp</a>
-        </div>
+            <div class="btn-group ml-1">
+                <a href="{% url 'persons_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all people">People&nbsp&nbsp</a>
+            </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'venues_index' %}" class="btn btn-primary flex-item" role="button" title="View all venues">Venues&nbsp&nbsp</a>
-        </div>
+            <div class="btn-group ml-1">
+                <a href="{% url 'venues_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all venues">Venues&nbsp&nbsp</a>
+            </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'datasets_index' %}" class="btn btn-primary flex-item" role="button" title="View all datasets">Datasets</a>
-        </div>
+            <div class="btn-group ml-1">
+                <a href="{% url 'datasets_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all datasets">Datasets</a>
+            </div>
 
-        <div class="btn-group ml-1">
-            <a href="{% url 'codes_index' %}" class="btn btn-primary flex-item" role="button" title="View all codes">Codes</a>
-        </div>
+            <div class="btn-group ml-1">
+                <a href="{% url 'codes_index' %}" class="btn btn-primary flex-item" role="button"
+                   title="View all codes">Codes</a>
+            </div>
         {% endif %}
     </div>
 
@@ -169,9 +186,9 @@
 
 <div class="container-fluid">
     {% block footer %}
-    {% load static %}
-    <img src="{% static 'catalog/csiro-data61-logos.png' %}" class="mx-auto d-block"
-         alt="CSIRO and Data61 Logos">
+        {% load static %}
+        <img src="{% static 'catalog/csiro-data61-logos.png' %}" class="mx-auto d-block"
+             alt="CSIRO and Data61 Logos">
     {% endblock %}
 
 </div>

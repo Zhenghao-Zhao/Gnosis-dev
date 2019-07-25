@@ -241,8 +241,6 @@ def paper_detail(request, id):
 
     ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
-    main_paper_id = paper.id
-
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -255,7 +253,6 @@ def paper_detail(request, id):
             "codes": codes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
-            "main_paper_id": main_paper_id,
         },
     )
 
@@ -285,6 +282,7 @@ def _get_node_ego_network(id, paper_title):
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
+
     target_papers = []
     target_people = []
     target_venues = []
@@ -323,11 +321,6 @@ def _get_node_ego_network(id, paper_title):
                 if label == 'Code':
                     target_codes.append([Code.inflate(row[0]), new_rela, 'in'])
 
-    print("length of connected papers: ", len(target_papers))
-    print("length of connected people: ", len(target_people))
-    print("length of connected venues: ", len(target_venues))
-    print("length of connected datasets: ", len(target_datasets))
-    print("length of connected codes: ", len(target_codes))
 
     for tp in target_papers:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
@@ -344,46 +337,46 @@ def _get_node_ego_network(id, paper_title):
                 tp[0].id, "-", id, tp[1], tp[0].id, id
             )
 
-    for tpc in target_codes:
+    for tc in target_codes:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-            tpc[0].id, 'Code', reverse("code_detail", kwargs={"id": tpc[0].id}), 'Code', tpc[1]
+            tc[0].id, 'Code', reverse("code_detail", kwargs={"id": tc[0].id}), 'Code', tc[1]
         )
 
-        if tpc[2] == 'out':
+        if tc[2] == 'out':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
-                id, '-', tpc[0].id, tpc[1], id, tpc[0].id
+                id, '-', tc[0].id, tc[1], id, tc[0].id
             )
-        if tpc[2] == 'in':
+        if tc[2] == 'in':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
-                tpc[0].id, "-", id, tpc[1], tpc[0].id, id
+                tc[0].id, "-", id, tc[1], tc[0].id, id
             )
 
-    for tpv in target_venues:
+    for tv in target_venues:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-            tpv[0].id, tpv[0].name, reverse("venue_detail", kwargs={"id": tpv[0].id}), 'Venue', tpv[1]
+            tv[0].id, tv[0].name, reverse("venue_detail", kwargs={"id": tv[0].id}), 'Venue', tv[1]
         )
 
-        if tpv[2] == 'out':
+        if tv[2] == 'out':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
-                id, '-', tpv[0].id, tpv[1], id, tpv[0].id
+                id, '-', tv[0].id, tv[1], id, tv[0].id
             )
-        if tpv[2] == 'in':
+        if tv[2] == 'in':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
-                tpv[0].id, "-", id, tpv[1], tpv[0].id, id
+                tv[0].id, "-", id, tv[1], tv[0].id, id
             )
 
-    for tpd in target_datasets:
+    for td in target_datasets:
         ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
-            tpd[0].id, tpd[0].name, reverse("dataset_detail", kwargs={"id": tpd[0].id}), 'Dataset', tpd[1]
+            td[0].id, td[0].name, reverse("dataset_detail", kwargs={"id": td[0].id}), 'Dataset', td[1]
         )
 
-        if tpd[2] == 'out':
+        if td[2] == 'out':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
-                id, '-', tpd[0].id, tpd[1], id, tpd[0].id
+                id, '-', td[0].id, td[1], id, td[0].id
             )
-        if tpd[2] == 'in':
+        if td[2] == 'in':
             ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
-                tpd[0].id, "-", id, tpd[1], tpd[0].id, id
+                td[0].id, "-", id, td[1], td[0].id, id
             )
 
     for tpe in target_people:

@@ -1,7 +1,9 @@
 from django.test import TestCase
 
-from catalog.models import Paper
+from catalog.models import Paper, Person, Dataset
 from neomodel.exceptions import RequiredProperty
+from neomodel import db
+
 
 
 # Create your tests here.
@@ -65,6 +67,57 @@ class PaperModelTest(TestCase):
             assert True
         else:
             assert False
+
+    # def create_dummy_papers(self):
+    #     """
+    #     create dummy papers for testing purposes
+    #     """
+    #     # delete previous dummy data
+    #     query = "MATCH (s:Paper {title: 'main'}) -- (p) DETACH DELETE p, s"
+    #     results, meta = db.cypher_query(query)
+    #
+    #     main_paper = Paper()
+    #     main_paper.title = "smaller main"
+    #     main_paper.abstract = "This main paper has fewer connections"
+    #     main_paper.download_link = "www.main.com"
+    #     main_paper.save()
+    #
+    #     for i in range(10):
+    #         paper = Paper()
+    #         title = "Paper " + str(i)
+    #         abstract = "Abstract " + str(i)
+    #         download_link = "www.DownloadLink" + str(i) + ".com"
+    #         paper.title = title
+    #         paper.abstract = abstract
+    #         paper.keywords = "k"
+    #         paper.download_link = download_link
+    #         paper.save()
+    #         paper.cites.connect(main_paper)
+    #
+    #     for i in range(5):
+    #         dataset = Dataset()
+    #         dataset.name = "Dataset " + str(i)
+    #         dataset.description = "Description " + str(i)
+    #         dataset.keywords = "k"
+    #         dataset.source_type = "N"
+    #         dataset.save()
+    #         main_paper.published.connect(dataset)
+    #
+    #     for i in range(5):
+    #         person = Person()
+    #         person.first_name = "FirstName"
+    #         person.last_name = "Author " + str(i)
+    #         person.save()
+    #         person.authors.connect(main_paper)
+    #
+    #         # cites = RelationshipTo("Paper", "cites")
+    #         # uses = RelationshipTo("Paper", "uses")
+    #         # extends = RelationshipTo("Paper", "extends")
+    #         # evaluates_on = RelationshipTo("Dataset", "evaluates_on")
+    #         # was_published_at = RelationshipTo("Venue", "was_published_at")
+    #         # published = RelationshipTo("Dataset", "published")
+
+
 
     def test_create_duplicate(self):
         """

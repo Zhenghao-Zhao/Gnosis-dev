@@ -101,6 +101,7 @@
                     <option value="authors"> - authors -</option>
                     <option value="was published at"> - was published at -</option>
                     <option value="evaluates on"> - evaluates on -</option>
+                    <option value="published"> - published -</option>
                     <option value="implements"> - implements -</option>
 
                 </select>
@@ -153,85 +154,36 @@
         </div>
     {% endif %}
 
-    <script type="text/javascript">
+    {% load static %}
 
-        // simulate stop resizing using timer
-        var resizeTimer;
+    <scrip type="text/javascript" src="graph-drawing.js"></scrip>
 
-        $(window).on('resize', function (e) {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function () {
-                reset_layout()
-                // Run code here, resizing has "stopped"
-
-            }, 250);
-
-        });
-
-        var main_paper_id = '{{ main_paper_id }}';
-
-        var hide_rela = false;
-
-        // function for toggle relationships button
-        function toggle_relas() {
-            hide_rela = !hide_rela;
-            if (hide_rela) {
-                cy.style().selector('edge').style('label', '').update();
-                $(".toggle").text("Show relationships");
-            } else {
-                cy.style().selector('edge').style('label', 'data(label)').update();
-                $(".toggle").text("Hide relationships");
-            }
-        }
-
-        // center button
-        function center() {
-            cy.animate({
-                center: cy.nodes(),
-                fit: {eles: cy.nodes(), padding: 50},
-                duration: 50,
-            });
-        }
-
-        function reset_layout() {
-            var layout = cy.layout({
-                name: 'cola',
-            });
-            layout.run();
-        }
-
-        // reset button
-        function reset() {
-            reset_layout();
-        }
-
-        // dropdown menu
-        function show_cites(value) {
-
-            var cat = value;
-            //document.write('node[label="'+cat+'"]');
-            if (cat === "all relationships") {
-                cy.style().selector('node').style('visibility', 'visible').update();
-                cy.style().selector('edge').style('visibility', 'visible').update();
-            } else {
-                cy.style().selector('node').style('visibility', 'hidden').update();
-                cy.style().selector('edge').style('visibility', 'hidden').update();
-                cy.style().selector('node[label="' + cat + '"]').style('visibility', 'visible').update();
-                cy.style().selector('edge[label="' + cat + '"]').style('visibility', 'visible').update();
-                cy.style().selector('node[label="origin"]').style('visibility', 'visible').update();
-            }
-
-        }
+    <script>
+        let paper_count = 50;
+        let data_count = 50;
+        let person_count = 50;
 
         var cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
             wheelSensitivity: 0.2,
 
-
             layout:
                 {
-                    name: 'cola'
+                    name: 'concentric',
+                    concentric: (node) => {
+                        if (node.data('type') === 'Paper') {
+                            if (node.data('label') === "origin") return 1000;
+                            return paper_count;
+                        }
+                        if (node.data('type') === 'Dataset') {
+                            return data_count;
+                        }
+                        else {
+                            return person_count;
+                        }
+                    },
+
                 },
 
             style: [ // styling the graph
@@ -258,7 +210,7 @@
 
                 },
                 {
-                    selector: 'node[id="' + main_paper_id + '"]',
+                    selector: 'node[label="origin"]',
                     style: {
                         'width': 30,
                         'height': 30,
@@ -455,6 +407,24 @@
                     }
                 },
                 {
+                    selector: 'edge[label="published"]',
+                    style: {
+                        'width': 5,
+                        'label': 'data(label)',
+                        'line-color': '#ff607a',
+                        'curve-style': 'bezier',
+                        'target-arrow-color': '#ff607a',
+                        'target-arrow-shape': 'triangle',
+                        'text-opacity': 1,
+                        'text-outline-opacity': 1,
+                        'text-outline-color': '#FFFFFF',
+                        'text-outline-width': '1px',
+                        'font-size': '9px',
+                        'visibility': 'visible'
+
+                    }
+                },
+                {
                     selector: 'edge[label="was published at"]',
                     style: {
                         'width': 5,
@@ -493,91 +463,9 @@
             ],
 
         });
-        // interactivity with the ego graph
-        // timeout for delaying tooltip
-        var time_out = 1000;
-        cy.on('click', 'node', function (evt) {
-            var node = evt.target;
-            console.log('tapped ' + node.data('href'));
-            try {
-                window.open(node.data('href'), '_self');
-            } catch (e) {
-                window.location.href = node.data('href');
-            }
-        })
-
-            .on('mouseover', 'node', function (evt) {
-                var node = evt.target;
-                node.style('opacity', 0.8);
-
-                hoverTimeout = setTimeout(function () {
-                    var px = node.renderedPosition('x');
-                    var py = node.renderedPosition('y');
-
-                    var tip_item = "";
-
-                    var span = document.createElement("span");
-                    // what is shown on the tooltip
-                    if (node.data('type') === 'Person') {
-                        // combine individual names to one
-                        tip_item = node.data('first_name') + node.data('middle_name') + ' ' + node.data('last_name');
-                    }
-                    // for paper showing title only
-                    if (node.data('type') === 'Paper' || node.data('type') === 'Venue' || node.data('type') === 'Dataset') {
-                        tip_item = node.data('title')
-                    }
-
-                    span.innerHTML = tip_item;
-                    if (tip_item.length > 0) {
-
-                        $("#cy").append("<div id='tooltip'></div>");
-
-                        // css for tooltip
-                        $('#tooltip').append(span).css({
-                            "display": "block",
-                            "max-width": "200px",
-                            "margin": 0,
-                            "height": "auto",
-                            "position": "absolute",
-                            "padding": "5px",
-                            "left": px,
-                            "top": py,
-                            "background-color": "#f2e5b8",
-                            "z-index": 1000,
-                            "border-radius": "6px",
-                            "opacity": 0.9,
-                            "text-align": "left"
-                        });
-                    }
-                    $('#tooltip span').css({
-                        "margin": 0,
-                    })
-
-                }, time_out);
-
-            })
-
-            // remove tooltip on mouseout
-            .on('mouseout', 'node', function (evt) {
-                clearTimeout(hoverTimeout);
-                var node = evt.target;
-                node.style('opacity', 1);
-                $('#tooltip').remove();
-
-            })
-
-            // graph components changes color to reflect hovering
-            .on('mouseover', 'edge', function (evt) {
-                var edge = evt.target;
-                edge.style('opacity', 0.8);
-
-            })
-            .on('mouseout', 'edge', function (evt) {
-                var edge = evt.target;
-                edge.style('opacity', 1);
-
-            })
 
     </script>
+
+    <script src="{% static "js/ego-graph.js" %}"></script>
 
 {% endblock %}
