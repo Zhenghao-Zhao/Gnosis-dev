@@ -18,8 +18,13 @@
         {% if papers %}
         <h4>These are the papers that matched your query</h4>
         <ul class="list-group">
-            {% for paper in papers %}
-            <li class="list-group-item mt-1"><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></li>
+            {% for paper, paper_connect_url in papers %}
+            <li class="list-group-item mt-1">
+                <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+                {% if user.is_authenticated %}
+                <a class="btn btn-warning float-right" href={{ paper_connect_url }}>Connect</a>
+                {% endif %}
+                </li>
             {% endfor %}
         </ul>
         {% endif %}

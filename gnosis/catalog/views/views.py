@@ -1,7 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from catalog.models import ReadingGroup, ReadingGroupEntry
+from catalog.models import Collection, CollectionEntry
+
+
 from catalog.forms import (
     PaperForm,
     DatasetForm,
@@ -15,18 +20,19 @@ from catalog.forms import (
     SearchPeopleForm,
     SearchDatasetsForm,
     SearchCodesForm,
+    PaperConnectionForm,
 )
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 from django.contrib import messages
-
 from catalog.views.views_codes import _code_find
+import re
 
 
 #
@@ -98,7 +104,7 @@ def papers(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -131,6 +137,7 @@ def papers(request):
 
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
+    relationship_ids = []
     paper = _get_paper_by_id(id)
     print("Retrieved paper with title {}".format(paper.title))
 
@@ -141,9 +148,10 @@ def paper_authors(request, id):
         relationship_ids = [row[1] for row in results]
     else:
         authors = []
+
+    num_authors = len(authors)
     print("paper author link ids {}".format(relationship_ids))
     print("Found {} authors for paper with id {}".format(len(authors), id))
-
     # for rid in relationship_ids:
     delete_urls = [
         reverse("paper_remove_author", kwargs={"id": id, "rid": rid})
@@ -154,7 +162,7 @@ def paper_authors(request, id):
 
     authors = zip(authors, delete_urls)
 
-    return render(request, "paper_authors.html", {"authors": authors, "paper": paper})
+    return render(request, "paper_authors.html", {"authors": authors, "paper": paper, "number_of_authors": num_authors})
 
 
 # should limit access to admin users only!!
@@ -216,6 +224,7 @@ def paper_detail(request, id):
 
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
@@ -240,6 +249,8 @@ def paper_detail(request, id):
 
     ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
+    main_paper_id = paper.id
+
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -252,6 +263,7 @@ def paper_detail(request, id):
             "codes": codes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
+            "main_paper_id": main_paper_id,
         },
     )
 
@@ -262,25 +274,151 @@ def _get_node_ego_network(id, paper_title):
     :param id:
     :return:
     """
-    query = "MATCH (s:Paper {title: {paper_title}})-->(t:Paper) RETURN t"
-    results, meta = db.cypher_query(query, dict(paper_title=paper_title))
-    ego_json = ""
-    if len(results) > 0:
-        target_papers = [Paper.inflate(row[0]) for row in results]
-        print("Paper cites {} other papers.".format(len(target_papers)))
-        ego_json = "{{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-            id, paper_title, reverse("paper_detail", kwargs={"id": id})
+    # query for everything that points to the paper
+    query_all_in = "MATCH (s:Paper {title: {paper_title}}) <-[relationship_type]- (p) RETURN p, " \
+                   "Type(relationship_type) "
+
+    # query for everything the paper points to
+    query_all_out = "MATCH (s:Paper {title: {paper_title}}) -[relationship_type]-> (p) RETURN p, " \
+                    "Type(relationship_type) "
+
+    results_all_in, meta = db.cypher_query(query_all_in, dict(paper_title=paper_title))
+
+    results_all_out, meta = db.cypher_query(query_all_out, dict(paper_title=paper_title))
+
+    print("Results out are: ", results_all_out)
+
+    print("Results in are: ", results_all_in)
+
+    ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
+        id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
+    )
+    target_papers = []
+    target_people = []
+    target_venues = []
+    target_datasets = []
+    target_codes = []
+
+    # Assort nodes and store them in arrays accordingly
+    # 'out' refers to being from the paper to the object
+    if len(results_all_out) > 0:
+        for row in results_all_out:
+            new_rela = row[1].replace("_", " ")
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), new_rela, 'out'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), new_rela, 'out'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), new_rela, 'out'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), new_rela, 'out'])
+                if label == 'Code':
+                    target_codes.append([Code.inflate(row[0]), new_rela, 'out'])
+
+    if len(results_all_in) > 0:
+        for row in results_all_in:
+            new_rela = row[1].replace("_", " ")
+            for label in row[0].labels:
+                if label == 'Paper':
+                    target_papers.append([Paper.inflate(row[0]), new_rela, 'in'])
+                if label == 'Person':
+                    target_people.append([Person.inflate(row[0]), new_rela, 'in'])
+                if label == 'Venue':
+                    target_venues.append([Venue.inflate(row[0]), new_rela, 'in'])
+                if label == 'Dataset':
+                    target_datasets.append([Dataset.inflate(row[0]), new_rela, 'in'])
+                if label == 'Code':
+                    target_codes.append([Code.inflate(row[0]), new_rela, 'in'])
+
+    print("length of connected papers: ", len(target_papers))
+    print("length of connected people: ", len(target_people))
+    print("length of connected venues: ", len(target_venues))
+    print("length of connected datasets: ", len(target_datasets))
+    print("length of connected codes: ", len(target_codes))
+
+    for tp in target_papers:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tp[0].id, tp[0].title, reverse("paper_detail", kwargs={"id": tp[0].id}), 'Paper', tp[1]
         )
-        for tp in target_papers:
-            ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}' }} }}".format(
-                tp.id, tp.title, reverse("paper_detail", kwargs={"id": tp.id})
+
+        # '-' distinguishes id e.g. 1-11 to 111 in relationships
+        if tp[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tp[0].id, tp[1], id, tp[0].id
             )
-        for tp in target_papers:
-            ego_json += ",{{data: {{ id: '{}{}', label: '{}', source: {}, target: {} }}}}".format(
-                id, tp.id, "cites", id, tp.id
+        if tp[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tp[0].id, "-", id, tp[1], tp[0].id, id
             )
-    else:
-        print("No cited papers found!")
+
+    for tpc in target_codes:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpc[0].id, 'Code', reverse("code_detail", kwargs={"id": tpc[0].id}), 'Code', tpc[1]
+        )
+
+        if tpc[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpc[0].id, tpc[1], id, tpc[0].id
+            )
+        if tpc[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpc[0].id, "-", id, tpc[1], tpc[0].id, id
+            )
+
+    for tpv in target_venues:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpv[0].id, tpv[0].name, reverse("venue_detail", kwargs={"id": tpv[0].id}), 'Venue', tpv[1]
+        )
+
+        if tpv[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpv[0].id, tpv[1], id, tpv[0].id
+            )
+        if tpv[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpv[0].id, "-", id, tpv[1], tpv[0].id, id
+            )
+
+    for tpd in target_datasets:
+        ego_json += ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }} }}".format(
+            tpd[0].id, tpd[0].name, reverse("dataset_detail", kwargs={"id": tpd[0].id}), 'Dataset', tpd[1]
+        )
+
+        if tpd[2] == 'out':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }}}}".format(
+                id, '-', tpd[0].id, tpd[1], id, tpd[0].id
+            )
+        if tpd[2] == 'in':
+            ego_json += ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpd[0].id, "-", id, tpd[1], tpd[0].id, id
+            )
+
+    for tpe in target_people:
+        middleName = ''
+        # reformat middle name from string "['mn1', 'mn2', ...]" to array ['mn1', 'mn2', ...]
+        if tpe[0].middle_name != None:
+            middleNames = tpe[0].middle_name[1:-1].split(', ')
+            # concatenate middle names to get 'mn1 mn2 ...'
+            for i in range(len(middleNames)):
+                middleName = middleName + " " + middleNames[i][1:-1]
+
+        ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', href: '{}', " \
+                    "type: '{}', " \
+                    "label: '{}'}} }}".format(
+            tpe[0].id, tpe[0].first_name, middleName, tpe[0].last_name,
+            reverse("person_detail", kwargs={"id": tpe[0].id}), 'Person', tpe[1]
+        )
+
+        if tpe[2] == 'in':
+            ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                tpe[0].id, "-", id, tpe[1], tpe[0].id, id
+            )
+
+        if tpe[2] == 'out':
+            ego_json += ", {{data : {{id: '{}{}{}', label: '{}', source: '{}', target: '{}' }} }}".format(
+                id, "-", tpe[0].id, tpe[1], id, tpe[0].id
+            )
 
     return "[" + ego_json + "]"
 
@@ -297,7 +435,7 @@ def paper_find(request):
                 w for w in paper_title.split(" ") if not w in english_stopwords
             ]
             paper_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
             )
             query = (
                 "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
@@ -334,12 +472,12 @@ def paper_connect_venue(request, id):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -411,8 +549,122 @@ def paper_connect_venue(request, id):
 
 
 @login_required
-def paper_connect_author_selected(request, id, aid):
+def paper_add_to_collection_selected(request, id, cid):
 
+    message = None
+    print("In paper_add_to_collection_selected")
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        raise Http404
+
+    collection = get_object_or_404(Collection, pk=cid)
+    print("Found collection {}".format(collection))
+
+    if collection.owner == request.user:
+        # check if paper already exists in collection.
+        paper_in_collection = collection.papers.filter(paper_id=paper.id)
+        if paper_in_collection:
+            message = "Paper already exists in collection {}".format(collection.name)
+        else:
+            c_entry = CollectionEntry()
+            c_entry.collection = collection
+            c_entry.paper_id = id
+            c_entry.paper_title = paper.title
+            c_entry.save()
+            message = "Paper added to collection {}".format(collection.name)
+    else:
+        print("collection owner does not match user")
+
+    print(message)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id,}))
+
+
+@login_required
+def paper_add_to_collection(request, id):
+
+    print("In paper_add_to_collection")
+    message = None
+    # Get all collections that this person has created
+    collections = Collection.objects.filter(owner=request.user)
+
+    print("User has {} collections.".format(len(collections)))
+
+    if len(collections) > 0:
+        collection_urls = [
+            reverse(
+                "paper_add_to_collection_selected",
+                kwargs={"id": id, "cid": collection.id},
+            )
+            for collection in collections
+        ]
+
+        all_collections = zip(collections, collection_urls)
+    else:
+        all_collections = None
+
+    return render(
+        request,
+        "paper_add_to_collection.html",
+        {"collections": all_collections, "message": message},
+    )
+
+
+@login_required
+def paper_add_to_group_selected(request, id, gid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:  # go back to the paper index page
+        raise Http404
+
+    group = get_object_or_404(ReadingGroup, pk=gid)
+    group_entry = ReadingGroupEntry()
+    group_entry.reading_group = group
+    group_entry.proposed_by = request.user
+    group_entry.paper_id = id
+    group_entry.paper_title = paper.title
+    group_entry.save()
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id}))
+
+@login_required
+def paper_add_to_group(request, id):
+
+    message = None
+    # Get all reading groups that this person has created
+    # Note: This should be extended to allow user to propose
+    #       papers to group they belong to as well.
+    # groups = ReadingGroup.objects.filter(owner=request.user.id)
+    groups = ReadingGroup.objects.all()
+
+    group_urls = [
+        reverse(
+            "paper_add_to_group_selected",
+            kwargs={"id": id, "gid": group.id},
+        )
+        for group in groups
+    ]
+
+    all_groups = zip(groups, group_urls)
+
+    return render(
+        request,
+        "paper_add_to_group.html",
+        {"groups": all_groups, "message": message},
+    )
+
+
+@login_required
+def paper_connect_author_selected(request, id, aid):
     query = "MATCH (p:Paper), (a:Person) WHERE ID(p)={id} AND ID(a)={aid} MERGE (a)-[r:authors]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, aid=aid))
 
@@ -479,80 +731,155 @@ def paper_connect_author(request, id):
 
 
 @login_required
+def paper_connect_paper_selected(request, id, pid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper_source = all_papers[
+            0
+        ]  # since we search by id only one paper should have been returned.
+        print("Found source paper: {}".format(paper_source.title))
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=pid))
+        if len(results) > 0:
+            all_papers = [Paper.inflate(row[0]) for row in results]
+            paper_target = all_papers[
+                0
+            ]  # since we search by id only one paper should have been returned.
+            print("Found target paper: {}".format(paper_target.title))
+
+            # check if the papers are already connected with a cites link; if yes, then
+            # do nothing. Otherwise, add the link.
+            query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+            results, meta = db.cypher_query(
+                query,
+                dict(source_id=id, target_id=pid),
+            )
+            if len(results) == 0:
+                link_type = request.session["link_type"]
+                # papers are not linked so add the edge
+                print("Connection link not found, adding it!")
+                if link_type == 'cites':
+                    paper_source.cites.connect(paper_target)
+                elif link_type == 'uses':
+                    paper_source.uses.connect(paper_target)
+                elif link_type == 'extends':
+                    paper_source.extends.connect(paper_target)
+                messages.add_message(request, messages.INFO, "Connection Added!")
+            else:
+                print("Connection link found not adding it!")
+                messages.add_message(
+                    request, messages.INFO, "Papers are already linked!"
+                )
+    else:
+        print("Could not find paper!")
+        messages.add_message(
+            request, messages.INFO, "Could not find paper!"
+        )
+    return redirect("paper_detail", id=id)
+
+@login_required
 def paper_connect_paper(request, id):
     """
     View function for connecting a paper with another paper.
-
     :param request:
     :param id:
     :return:
     """
     message = None
     if request.method == "POST":
-        form = SearchPapersForm(request.POST)
+        form = PaperConnectionForm(request.POST)
         if form.is_valid():
             # search the db for the person
             # if the person is found, then link with paper and go back to paper view
             # if not, ask the user to create a new person
             paper_title_query = form.cleaned_data["paper_title"]
             papers_found = _find_paper(paper_title_query)
+            paper_connected = form.cleaned_data["paper_connection"]
 
             if len(papers_found) > 0:  # found more than one matching papers
                 print("Found {} papers that match".format(len(papers_found)))
                 for paper in papers_found:
                     print("\t{}".format(paper.title))
 
-                if len(papers_found) > 1:
+                    # for rid in relationship_ids:
+                    paper_connect_urls = [
+                        reverse(
+                            "paper_connect_paper_selected",
+                            kwargs={"id": id, "pid": paper.id},
+                        )
+                        for paper in papers_found
+                    ]
+                    print("paper connect urls")
+                    print(paper_connect_urls)
+
+                    papers = zip(papers_found, paper_connect_urls)
+
+                    request.session["link_type"] = paper_connected
+                    # ask the user to select one of them
                     return render(
                         request,
                         "paper_connect_paper.html",
-                        {
-                            "form": form,
-                            "papers": papers_found,
-                            "message": "Found more than one matching papers. Please narrow your search",
-                        },
+                        {"form": form, "papers": papers, "message": ""},
                     )
-                else:
-                    paper_target = papers_found[0]  # one person found
-                    print("Selected paper: {}".format(paper.title))
+             # if len(papers_found) > 1:
+                #     return render(
+                #         request,
+                #         "paper_connect_paper.html",
+                #         {
+                #             "form": form,
+                #             "papers": papers_found,
+                #             "message": "Found more than one matching papers. Please narrow your search",
+                #         },
+                #     )
+                # else:
+                #     paper_target = papers_found[0]  # one person found
+                #     print("Selected paper: {}".format(paper.title))
 
                 # retrieve the paper
-                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
-                results, meta = db.cypher_query(query, dict(id=id))
-                if len(results) > 0:
-                    all_papers = [Paper.inflate(row[0]) for row in results]
-                    paper_source = all_papers[
-                        0
-                    ]  # since we search by id only one paper should have been returned.
-                    print("Found paper: {}".format(paper_source.title))
-                    # check if the papers are already connected with a cites link; if yes, then
-                    # do nothing. Otherwise, add the link.
-                    query = "MATCH (q:Paper)<-[r:cites]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
-                    results, meta = db.cypher_query(
-                        query,
-                        dict(source_id=paper_source.id, target_id=paper_target.id),
-                    )
-                    if len(results) == 0:
-                        # papers are not linked so add the edge
-                        print("Citation link not found, adding it!")
-                        paper_source.cites.connect(paper_target)
-                        messages.add_message(request, messages.INFO, "Citation Added!")
-                    else:
-                        print("Citation link found not adding it!")
-                        messages.add_message(
-                            request, messages.INFO, "Citation Already Exists!"
-                        )
-                else:
-                    print("Could not find paper!")
-                    messages.add_message(
-                        request, messages.INFO, "Could not find paper!"
-                    )
-                return redirect("paper_detail", id=id)
+                # query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                # results, meta = db.cypher_query(query, dict(id=id))
+                # if len(results) > 0:
+                #     all_papers = [Paper.inflate(row[0]) for row in results]
+                #     paper_source = all_papers[
+                #         0
+                #     ]  # since we search by id only one paper should have been returned.
+                #     print("Found paper: {}".format(paper_source.title))
+                #     # check if the papers are already connected with a cites link; if yes, then
+                #     # do nothing. Otherwise, add the link.
+                #     query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+                #     results, meta = db.cypher_query(
+                #         query,
+                #         dict(source_id=paper_source.id, target_id=paper_target.id),
+                #     )
+                #     if len(results) == 0:
+                #         # papers are not linked so add the edge
+                #         print("Connection link not found, adding it!")
+                #         if paper_connected == 'cites':
+                #             paper_source.cites.connect(paper_target)
+                #         elif paper_connected == 'uses':
+                #             paper_source.uses.connect(paper_target)
+                #         elif paper_connected == 'extends':
+                #             paper_source.extends.connect(paper_target)
+                #         messages.add_message(request, messages.INFO, "Connection Added!")
+                #     else:
+                #         print("Connection link found not adding it!")
+                #         messages.add_message(
+                #             request, messages.INFO, "Connection Already Exists!"
+                #         )
+                # else:
+                #     print("Could not find paper!")
+                #     messages.add_message(
+                #         request, messages.INFO, "Could not find paper!"
+                #     )
+                # return redirect("paper_detail", id=id)
             else:
                 message = "No matching papers found"
 
     if request.method == "GET":
-        form = SearchPapersForm()
+        form = PaperConnectionForm()
 
     return render(
         request,
@@ -644,7 +971,6 @@ def paper_connect_dataset(request, id):
 
 @login_required
 def paper_connect_code_selected(request, id, cid):
-
     query = "MATCH (p:Paper), (c:Code) WHERE ID(p)={id} AND ID(c)={cid} MERGE (c)-[r:implements]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, cid=cid))
 
@@ -773,7 +1099,7 @@ def _find_paper(query_string):
         w for w in paper_title.split(" ") if not w in english_stopwords
     ]
     paper_query = (
-        "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
+            "(?i).*" + "+.*".join("(" + w + ")" for w in paper_title_tokens) + "+.*"
     )
     query = "MATCH (p:Paper) WHERE  p.title =~ { paper_query } RETURN p LIMIT 25"
     print("Cypher query string {}".format(query))
@@ -805,6 +1131,7 @@ def _add_author(author, paper=None):
         else:
             p.middle_name = None
         p.last_name = author_name[-1]
+        #print("**** Person {} ***".format(p))
         p.save()  # save to DB
         link_with_paper = True
     elif len(people_found) == 1:
@@ -851,28 +1178,29 @@ def paper_create(request):
                 form.save()  # store
                 # Now, add the authors and link each author to the paper with an "authors"
                 # type edge.
-                if request.session.get("from_arxiv", False):
-                    paper_authors = request.session["arxiv_authors"]
-                    for paper_author in paper_authors.split(","):
+                if request.session.get("from_external", False):
+                    paper_authors = request.session["external_authors"]
+                    for paper_author in reversed(paper_authors.split(",")):
                         print("Adding author {}".format(paper_author))
                         _add_author(paper_author, paper)
 
-                request.session["from_arxiv"] = False  # reset
+                request.session["from_external"] = False  # reset
                 # go back to paper index page.
                 # Should this redirect to the page of the new paper just added?
                 return HttpResponseRedirect(reverse("papers_index"))
     else:  # GET
         print("   GET")
-        # check if this is a redirect from paper_create_from_arxiv
-        # if so, then pre-populate the form with the data from arXiv,
+        # check if this is a redirect from paper_create_from_url
+        # if so, then pre-populate the form with the data from external source,
         # otherwise start with an empty form.
-        if request.session.get("from_arxiv", False) is True:
-            title = request.session["arxiv_title"]
-            abstract = request.session["arxiv_abstract"]
-            url = request.session["arxiv_url"]
+        if request.session.get("from_external", False) is True:
+            title = request.session["external_title"]
+            abstract = request.session["external_abstract"]
+            url = request.session["external_url"]
+            download_link = request.session["download_link"]
 
             form = PaperForm(
-                initial={"title": title, "abstract": abstract, "download_link": url}
+                initial={"title": title, "abstract": abstract, "download_link": download_link, "source_link": url}
             )
         else:
             form = PaperForm()
@@ -880,36 +1208,143 @@ def paper_create(request):
     return render(request, "paper_form.html", {"form": form, "message": message})
 
 
-def get_authors(bs4obj):
+# the two functions below are used to abstract author names from IEEE
+# to abstract the author name from a format of "name":"author_name"
+def find_author_from_IEEE_author_info(text):
+    i = text.find('''"name":''')
+    start = i + 8
+    i = i + 8
+    while text[i] != '''"''':
+        i = i + 1
+    author = text[start:i]
+    return author
+
+
+# to find the author names as a list
+def find_author_list_from_IEEE(bs4obj):
+    text = bs4obj.get_text()
+    # to find the string which stores information of authors, which is stored in a
+    # format of "authors":[{author 1 info},{author 2 info}]
+    i = text.find('''"authors":[''')
+    if i == -1:
+        return []
+    while text[i] != '[':
+        i = i + 1
+    i = i + 1
+    array_count = 1
+    bracket_count = 0
+    bracket_start = 0
+    author_list = []
+    while array_count != 0:
+        if text[i] == '{':
+            if bracket_count == 0:
+                bracket_start = i
+            bracket_count = bracket_count + 1
+        if text[i] == '}':
+            bracket_count = bracket_count - 1
+            if bracket_count == 0:
+                author_list.append(find_author_from_IEEE_author_info(text[bracket_start:i]))
+        if text[i] == ']':
+            array_count = array_count - 1
+        if text[i] == '[':
+            array_count = array_count + 1
+        i = i + 1
+    return author_list
+
+
+def get_authors(bs4obj, source_website):
     """
-    Extract authors from arXiv.org paper page
-    :param bs4obj:
+    Extract authors from the source website
+    :param bs4obj, source_website；
     :return: None or a string with comma separated author names from first to last name
     """
-    authorList = bs4obj.findAll("div", {"class": "authors"})
-    if authorList is not None:
-        if len(authorList) > 1:
-            # there should be just one but let's just take the first one
-            authorList = authorList[0]
+    if source_website == "arxiv":
+        authorList = bs4obj.findAll("div", {"class": "authors"})
+        if authorList:
+            if len(authorList) > 1:
+                # there should be just one but let's just take the first one
+                authorList = authorList[0]
+            # for author in authorList:
+            #     print("type of author {}".format(type(author)))
+            author_str = authorList[0].get_text()
+            if author_str.startswith("Authors:"):
+                author_str = author_str[8:]
+            return author_str
+    elif source_website == 'nips':
+        # authors are found to be list objects , so needs to join them to get the author string
+        authorList = bs4obj.findAll("li", {"class": "author"})
+        if authorList:
+            authorList = [author.text for author in authorList]
+            author_str = ','.join(authorList)
+            return author_str
+    elif source_website == "jmlr":
+        # in JMLR authors are found in the html tag "i"
+        authorList = bs4obj.findAll("i")
+        if authorList:
+            if len(authorList) >= 1:
+                author_str = authorList[0].text
+                return author_str
+    elif source_website == "ieee":
+        authorList = find_author_list_from_IEEE(bs4obj)
+        if authorList:
+            authorList = [author for author in authorList]
+            author_str = ','.join(authorList)
+            return author_str
+    elif source_website == "acm":
+        author_str = bs4obj.find("meta", {"name": "citation_authors"})
+        author_str = str(author_str)
+        # print("get_authors() downloaded author_str: {}".format(author_str))
+        start = author_str.find('"')
+        end = author_str.find('"', start + 1)
+        author_str = author_str[start + 1:end]
 
-        # for author in authorList:
-        # print("type of author {}".format(type(author)))
-        author_str = authorList[0].get_text()
-        if author_str.startswith("Authors:"):
-            author_str = author_str[8:]
+        author_str_rev = ""
+        for n in author_str.split(";"):
+            if len(author_str_rev) == 0:
+                author_str_rev = ", ".join(n.split(",")[::-1])
+            else:
+                author_str_rev = author_str_rev + "; " + ",".join(n.split(", ")[::-1])
+        #print("get_authors() author_str_rev: {}".format(author_str_rev))
+        author_str = author_str_rev.replace(",", "")
+        author_str = author_str.replace("; ", ",")
+        #print("get_authors() cleaned author_str: {}".format(author_str))
+        # names are last, first so reverse to first, last
         return author_str
-    # authorList is None so return None
+    # if source website is not supported or the autherlist is none , return none
     return None
 
 
-def get_title(bs4obj):
+def get_title(bs4obj, source_website):
     """
-    Extract paper title from arXiv.org paper page.
+    Extract paper title from the source web.
     :param bs4obj:
     :return:
     """
-    titleList = bs4obj.findAll("h1", {"class": "title"})
-    if titleList is not None:
+    if source_website == "arxiv":
+        titleList = bs4obj.findAll("h1", {"class": "title"})
+    elif source_website == 'nips':
+        titleList = bs4obj.findAll("title")
+    elif source_website == "jmlr":
+        titleList = bs4obj.findAll("h2")
+    elif source_website == "ieee":
+        title = bs4obj.find("title").get_text()
+        i = title.find("- IEEE")
+        if i != -1:
+            title = title[0:i]
+        return title
+    elif source_website == "acm":
+        titleList = bs4obj.find("meta", {"name": "citation_title"})
+        title = str(titleList)
+        start = title.find('"')
+        end = title.find('"', start + 1)
+        title = title[start + 1:end]
+        if title == "Non":
+            return None
+        return title
+    else:
+        titleList = []
+    # check the validity of the abstracted titlelist
+    if titleList:
         if len(titleList) == 0:
             return None
         else:
@@ -924,15 +1359,98 @@ def get_title(bs4obj):
     return None
 
 
-def get_abstract(bs4obj):
+# this function is used to find the abstract for a paper from IEEE
+def get_abstract_from_IEEE(bs4obj):
     """
-    Extract paper abstract from arXiv.org paper page.
-    :param bs4obj:
+        Extract paper abstract from the source website.
+        :param bs4obj:
+        :return: abstract
+    """
+    text = bs4obj.get_text()
+    i = text.find('''"abstract":"''')
+    start = None
+    count = 0
+    abstract = None
+    if text[i + 12:i + 16] == "true":
+        i = text.find('''"abstract":"''', i + 16)
+        start = i + 12
+        i = start
+        count = 1
+    while count != 0:
+        if text[i] == '''"''':
+            if text[i + 1] == "," and text[i + 2] == '''"''':
+                count = 0
+        i += 1
+        abstract = text[start:i]
+    return abstract
+
+
+# this function is used to find the abstract for a paper from IEEE
+def get_abstract_from_ACM(bs4obj):
+    """
+        Extract paper abstract from the source website.
+        :param bs4obj:
+        :return: abstract
+    """
+    abstract = bs4obj.find("div", {"style": "display:inline"})
+    if abstract:
+        abstract = abstract.get_text()
+    else:
+        abstract = bs4obj.find("meta", {"name": "citation_abstract_html_url"})
+        abstract_url = str(abstract)
+        start = abstract_url.find('"')
+        end = abstract_url.find('"', start + 1)
+        abstract_url = abstract_url[start + 1:end]
+        if abstract_url == "Non":
+            return None
+        abstract_url += "&preflayout=flat"
+        headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
+        req = Request(abstract_url, headers=headers)
+        html = urlopen(req)
+        bs4obj1 = BeautifulSoup(html,features="html.parser")
+        abstract = bs4obj1.findAll("div", {"style": "display:inline"})
+        abstract = abstract[0]
+        if abstract:
+            abstract = abstract.get_text()
+    return abstract
+
+
+def get_abstract(bs4obj, source_website):
+    """
+    Extract paper abstract from the source website.
+    :param bs4obj, source_website:
     :return:
     """
-    abstract = bs4obj.find("blockquote", {"class": "abstract"})
+    if source_website == "arxiv":
+        abstract = bs4obj.find("blockquote", {"class": "abstract"})
+        if abstract is not None:
+            abstract = " ".join(abstract.get_text().split(" ")[1:])
+    elif source_website == 'nips':
+        abstract = bs4obj.find("p", {"class": "abstract"})
+        if abstract is not None:
+            abstract = abstract.get_text()
+    elif source_website == "jmlr":
+        abstract = bs4obj.find("p", {"class": "abstract"})
+        if abstract is not None:
+            abstract = abstract.get_text()
+        else:
+            # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
+            abstract = bs4obj.find("h3")
+            if abstract is not None:
+                abstract = abstract.next_sibling
+    elif source_website == "ieee":
+        abstract = get_abstract_from_IEEE(bs4obj)
+    elif source_website == "acm":
+        abstract = get_abstract_from_ACM(bs4obj)
+    else:
+        abstract = None
+    # want to remove all the leading and ending white space and line breakers in the abstract
     if abstract is not None:
-        abstract = " ".join(abstract.get_text().split(" ")[1:])
+        abstract = abstract.strip()
+        if source_website != "arxiv":
+            abstract = abstract.replace('\r', '').replace('\n', '')
+        else:
+            abstract = abstract.replace('\n', ' ')
     return abstract
 
 
@@ -948,15 +1466,85 @@ def get_venue(bs4obj):
     return venue
 
 
-def get_paper_info(url):
+# this function is used to find the download_link for a paper from IEEE
+def get_ddl_from_IEEE(bs4obj):
+    text = bs4obj.get_text()
+    # the ddl link is stored in a format of "pdfUrl":"download_link"
+    i = text.find('''"pdfUrl":"''')
+    start = i + 10
+    i = start
+    count = 1
+    while count != 0:
+        if text[i] == '''"''':
+            count = 0
+        i += 1
+    ddl = text[start:i - 1]
+    ddl = "https://ieeexplore.ieee.org" + ddl
+    return ddl
+
+
+def get_download_link(bs4obj, source_website, url):
     """
-    Extract paper information, title, abstract, and authors, from arXiv.org
+    Extract download link from paper page1
+    :param bs4obj:
+    return: download link of paper
+    """
+    if url.endswith("/"):
+        url = url[:-1]
+    if source_website == "arxiv":
+        download_link = url.replace("/abs/", "/pdf/", 1) + ".pdf"
+    elif source_website == "nips":
+        download_link = url + ".pdf"
+    elif source_website == "jmlr":
+        download_link = bs4obj.find(href=re.compile("pdf"))['href']
+        print(download_link)
+        if download_link.startswith("/papers/"):
+            download_link = "http://www.jmlr.org" + download_link
+    elif source_website == "ieee":
+        download_link = get_ddl_from_IEEE(bs4obj)
+    elif source_website == "acm":
+        download_link = bs4obj.find("meta", {"name": "citation_pdf_url"})
+        download_link = str(download_link)
+        start = download_link.find('"')
+        end = download_link.find('"', start + 1)
+        download_link = download_link[start + 1:end]
+        return download_link
+    else:
+        download_link = None
+    return download_link
+
+
+def check_valid_paper_type_ieee(bs4obj):
+    text = bs4obj.get_text()
+    # the paper type is stored in a format of "xploreDocumentType":"paper_type"
+    i = text.find('''"xploreDocumentType":"''')
+    start = i + 22
+    i = start
+    count = 1
+    while count != 0:
+        if text[i] == '''"''':
+            count = 0
+        i += 1
+    paper_type = text[start:i - 1]
+    print(paper_type)
+    if paper_type == "Journals & Magazine":
+        return True
+    return False
+
+
+def get_paper_info(url, source_website):
+    """
+    Extract paper information, title, abstract, and authors, from source website
     paper page.
-    :param url:
+    :param url, source_website:
     :return:
     """
     try:
         # html = urlopen("http://pythonscraping.com/pages/page1.html")
+        url_copy = url
+        if source_website == "acm":
+            headers = {"User-Agent": "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"}
+            url = Request(url, headers=headers)
         html = urlopen(url)
     except HTTPError as e:
         print(e)
@@ -964,19 +1552,32 @@ def get_paper_info(url):
         print(e)
         print("The server could not be found.")
     else:
-        bs4obj = BeautifulSoup(html)
+        bs4obj = BeautifulSoup(html,features="html.parser")
+        if source_website == "ieee":
+            if check_valid_paper_type_ieee(bs4obj) == False:
+                return None, None, None, None
+        if source_website == "acm":
+            url = ""
+            if bs4obj.find("a", {"title": "Buy this Book"}) or bs4obj.find("a", {"ACM Magazines"}) \
+                    or bs4obj.find_all("meta", {"name": "citation_conference_title"}):
+                return None, None, None, None
         # Now, we can access individual element in the page
-        authors = get_authors(bs4obj)
-        title = get_title(bs4obj)
-        abstract = get_abstract(bs4obj)
+        authors = get_authors(bs4obj, source_website)
+        title = get_title(bs4obj, source_website)
+        abstract = get_abstract(bs4obj, source_website)
+        download_link = ""
+        if authors and title and abstract:
+            download_link = get_download_link(bs4obj, source_website, url)
+        if download_link == "Non":
+            download_link = url_copy
         # venue = get_venue(bs4obj)
-        return title, authors, abstract
+        return title, authors, abstract, download_link
 
-    return None, None, None
+    return None, None, None, None
 
 
 @login_required
-def paper_create_from_arxiv(request):
+def paper_create_from_url(request):
     user = request.user
 
     if request.method == "POST":
@@ -985,12 +1586,45 @@ def paper_create_from_arxiv(request):
         print("{}".format(request.POST["url"]))
         # get the data from arxiv
         url = request.POST["url"]
+        # check if a particular url starts with http , it is important as JMLR does not support https
+        if url.startswith("http://"):
+            url = url[7:]
         # check if url includes https, and if not add it
         if not url.startswith("https://"):
             url = "https://" + url
+        # check whether the url is from a supported website
+        # from arXiv.org
+        if url.startswith("https://arxiv.org"):
+            source_website = "arxiv"
+            print("source from arXiv")
+        # from NeurlIPS
+        elif url.startswith("https://papers.nips.cc/paper"):
+            source_website = "nips"
+            print("source from nips")
+        # for urls of JMLR, they do not support https , so we need to change it to http instead
+        elif url.startswith("https://www.jmlr.org/papers"):
+            url = "http://" + url[8:]
+            source_website = "jmlr"
+            print("source from jmlr")
+        # from IEEE
+        elif url.startswith("https://ieeexplore.ieee.org/document/"):
+            source_website = "ieee"
+            print("source from ieee")
+        # from ACM
+        elif url.startswith("https://dl.acm.org/"):
+            source_website = "acm"
+            print("source from acm")
+        # return error message if the website is not supported
+        else:
+            form = PaperImportForm()
+            return render(
+                request,
+                "paper_form.html",
+                {"form": form, "message": "Source website is not supported"},
+            )
         # retrieve paper info. If the information cannot be retrieved from remote
         # server, then we will return an error message and redirect to paper_form.html.
-        title, authors, abstract = get_paper_info(url)
+        title, authors, abstract, download_link = get_paper_info(url, source_website)
         if title is None or authors is None or abstract is None:
             form = PaperImportForm()
             return render(
@@ -999,19 +1633,20 @@ def paper_create_from_arxiv(request):
                 {"form": form, "message": "Invalid source, please try again."},
             )
 
-        request.session["from_arxiv"] = True
-        request.session["arxiv_title"] = title
-        request.session["arxiv_abstract"] = abstract
-        request.session["arxiv_url"] = url
+        request.session["from_external"] = True
+        request.session["external_title"] = title
+        request.session["external_abstract"] = abstract
+        request.session["external_url"] = url
+        request.session["download_link"] = download_link
         request.session[
-            "arxiv_authors"
+            "external_authors"
         ] = authors  # comma separate list of author names, first to last name
 
         print("Authors: {}".format(authors))
 
         return HttpResponseRedirect(reverse("paper_create"))
     else:  # GET
-        request.session["from_arxiv"] = False
+        request.session["from_external"] = False
         form = PaperImportForm()
 
     return render(request, "paper_form.html", {"form": form})
@@ -1122,10 +1757,10 @@ def _dataset_find(name, keywords):
     if len(dataset_keywords) > 0 and len(dataset_name_tokens) > 0:
         # Search using both the name and the keywords
         keyword_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
         )
         name_query = (
-            "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
+                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_name_tokens) + "+.*"
         )
         query = "MATCH (d:Dataset) WHERE  d.name =~ { name_query } AND d.keywords =~ { keyword_query} RETURN d LIMIT 25"
         results, meta = db.cypher_query(
@@ -1138,16 +1773,16 @@ def _dataset_find(name, keywords):
         if len(dataset_keywords) > 0:
             # only keywords given
             dataset_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in dataset_keywords) + "+.*"
             )
             query = "MATCH (d:Dataset) WHERE  d.keywords =~ { dataset_query } RETURN d LIMIT 25"
         else:
             # only name or nothing (will still return all datasets if name and
             # keywords fields are left empty and sumbit button is pressed.
             dataset_query = (
-                "(?i).*"
-                + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
-                + "+.*"
+                    "(?i).*"
+                    + "+.*".join("(" + w + ")" for w in dataset_name_tokens)
+                    + "+.*"
             )
             query = (
                 "MATCH (d:Dataset) WHERE  d.name =~ { dataset_query } RETURN d LIMIT 25"
@@ -1290,12 +1925,12 @@ def venues(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
@@ -1320,6 +1955,7 @@ def venues(request):
 
 
 def venue_detail(request, id):
+    papers_published_at_venue = None
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -1331,7 +1967,7 @@ def venue_detail(request, id):
         # we should be checking for > 1 and failing gracefully.
         all_venues = [Venue.inflate(row[0]) for row in results]
         venue = all_venues[0]
-    else:  # go back to the paper index page
+    else:  # go back to the venue index page
         return render(
             request,
             "venues.html",
@@ -1341,8 +1977,16 @@ def venue_detail(request, id):
     #
     # TO DO: Retrieve all papers published at this venue and list them
     #
+    query = "MATCH (p:Paper)-[r:was_published_at]->(v:Venue) where id(v)={id} return p"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        papers_published_at_venue = [Paper.inflate(row[0]) for row in results]
+        print("Number of papers published at this venue {}".format(len(papers_published_at_venue)))
+        for p in papers_published_at_venue:
+            print("Title: {}".format(p.title))
+
     request.session["last-viewed-venue"] = id
-    return render(request, "venue_detail.html", {"venue": venue})
+    return render(request, "venue_detail.html", {"venue": venue, "papers": papers_published_at_venue})
 
 
 def venue_find(request):
@@ -1365,12 +2009,12 @@ def venue_find(request):
                 w for w in venue_name.split(" ") if not w in english_stopwords
             ]
             venue_query = (
-                "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
+                    "(?i).*" + "+.*".join("(" + w + ")" for w in venue_name_tokens) + "+.*"
             )
             query = (
-                "MATCH (v:Venue) WHERE v.publication_date =~ '"
-                + venue_publication_year[0:4]
-                + ".*' AND v.name =~ { venue_query } RETURN v"
+                    "MATCH (v:Venue) WHERE v.publication_date =~ '"
+                    + venue_publication_year[0:4]
+                    + ".*' AND v.name =~ { venue_query } RETURN v"
             )
             results, meta = db.cypher_query(
                 query,
