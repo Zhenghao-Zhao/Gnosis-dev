@@ -1,4 +1,6 @@
 from datetime import datetime
+from django.db import models
+from django.contrib.auth.models import User
 from django_neomodel import DjangoNode
 from django.urls import reverse
 from neomodel import StringProperty, DateTimeProperty, DateProperty, UniqueIdProperty, \
@@ -199,3 +201,110 @@ class Code(DjangoNode):
 
     def get_absolute_url(self):
         return reverse('code_detail', args=[self.id])
+
+
+#
+# These are models for the SQL database
+#
+class ReadingGroup(models.Model):
+    """A ReadingGroup model"""
+
+    # Fields
+    name = models.CharField(max_length=100,
+                            help_text="Enter a name for your group.",
+                            blank=False)
+    description = models.TextField(help_text="Enter a description.",
+                                   blank=False)
+    keywords = models.CharField(max_length=100,
+                                help_text="Keywords describing the group.",
+                                blank=False)
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+    updated_at = models.DateField(null=True)
+    owner = models.ForeignKey(to=User,
+                              on_delete=models.CASCADE,
+                              related_name="reading_groups")
+
+    # Metadata
+    class Meta:
+        ordering = ['name', '-created_at']
+
+    # Methods
+    def get_absolute_url(self):
+        return reverse('group_detail', args=[str(self.id)])
+
+    def __str__(self):
+        return self.name
+
+
+class ReadingGroupEntry(models.Model):
+    """An entry, that is paper, in a reading group"""
+
+    # Fields
+    reading_group = models.ForeignKey(to=ReadingGroup,
+                                      on_delete=models.CASCADE,
+                                      related_name="papers")  # ReadingGroup.papers()
+
+    paper_id = models.IntegerField(null=False, blank=False)  # A paper in the Neo4j DB
+    paper_title = models.TextField(null=False, blank=False)  # The paper title to avoid extra DB calls
+    proposed_by = models.ForeignKey(to=User,
+                                    on_delete=models.CASCADE,
+                                    related_name="papers")  # User.papers()
+    date_discussed = models.DateField(null=True, blank=True)
+    date_proposed = models.DateField(auto_now_add=True, auto_now=False)
+
+    def get_absolute_url(self):
+        return reverse('group_detail', args=[str[self.id]])
+
+    def __str__(self):
+        return str(self.paper_id)
+
+
+# Collections are private folders for user to organise their papers
+class Collection(models.Model):
+    """A Collection model"""
+
+    # Fields
+    name = models.CharField(max_length=100,
+                            blank=False)
+    description = models.TextField(null=True,
+                                   blank=True)
+    keywords = models.CharField(max_length=100,
+                                null=True, blank=True)
+
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+    updated_at = models.DateField(null=True)
+
+    owner = models.ForeignKey(to=User,
+                              on_delete=models.CASCADE,
+                              related_name="collections")
+
+    # Metadata
+    class Meta:
+        ordering = ['name', '-created_at']
+
+    # Methods
+    def get_absolute_url(self):
+        return reverse('collection_detail', args=[str(self.id)])
+
+    def __str__(self):
+        return self.name
+
+
+class CollectionEntry(models.Model):
+    """An entry, that is paper, in a reading group"""
+
+    # Fields
+    collection = models.ForeignKey(to=Collection,
+                                   on_delete=models.CASCADE,
+                                   related_name="papers")  # Collection.papers()
+
+    paper_id = models.IntegerField(null=False, blank=False)  # A paper in the Neo4j DB
+    paper_title = models.TextField(null=False, blank=False)  # The paper title to avoid extra DB calls
+
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+
+    def get_absolute_url(self):
+        return reverse('collection_detail', args=[str[self.id]])
+
+    def __str__(self):
+        return str(self.paper_id)

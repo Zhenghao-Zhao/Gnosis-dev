@@ -8,7 +8,14 @@
 
             <h4>
                 <a href={{ paper.download_link }} class="btn btn-primary" role="button" target="_blank">Download</a>
-                {% if user.is_authenticated %}<a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
+                {% if user.is_authenticated %}
+                <a href="{% url 'paper_add_to_group' paper.id %}" class="btn btn-primary"
+                                                 role="button">
+                    Add to Group</a>
+                <a href="{% url 'paper_add_to_collection' paper.id %}" class="btn btn-primary"
+                                                 role="button">
+                    Add to Collection</a>
+                <a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
                                                  role="button">
                     Edit</a>
                 {% endif %}
@@ -16,7 +23,7 @@
         </div>
         <div class="card-body">
             <h5 class="text-left">
-                {{ authors }} {% if user.is_authenticated and user.is_superuser %}<a
+                {{ authors }} {% if user.is_authenticated and user.is_superuser and authors%}<a
                     href="{% url 'paper_authors' id=paper.id %}"
                     class="btn btn-danger btn-sm" role="button">
                 Edit</a>{% endif %}
