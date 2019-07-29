@@ -33,7 +33,7 @@ function toggle_relas() {
 function center() {
     cy.animate({
         center: cy.nodes(),
-        fit: {eles: cy.nodes(), padding: 50},
+        fit: {eles: cy.nodes()},
         duration: 50,
     });
 }
@@ -45,11 +45,6 @@ function reset_layout() {
         name: 'concentric',
     });
     layout.run();
-}
-
-// reset button
-function reset() {
-    reset_layout();
 }
 
 /************** dropdown menu **************/
