@@ -1,41 +1,22 @@
 {% extends "gnosis_theme.html" %}
-
 {% block content %}
 {% load el_pagination_tags %}
 
 <div class="card shadow-sm mt-3">
-    <div class="card-body text-center">
-        {% if message %}
-        <p class="bg-info">{{ message }}</p>
+    <div class="card-header">
+        <h4>Collections</h4>
+        {% if user.is_authenticated %}<a href="{% url 'collection_create' %}" class="btn btn-link float-right">Create Collection</a>
         {% endif %}
-        <form action="" method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            {{ field }}
-            {% endfor %}
-            <br>
-            <input type="submit" class="btn btn-primary btn-lg" value="Search People"/>
-        </form>
-    </div>
-</div>
 
-{% if people %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header"><h4>People</h4></div>
+    </div>
     <div class="card-body">
-        {% paginate people %}
-        {% for person in people %}
+        {% if collections %}
+        {% paginate collections %}
+        {% for collection in collections %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
-                {% if person.middel_name %}
-                <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}} {{
-                    person.last_name
-                    }}</a>
-                </p>
-                {% else %}
-                <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
-                {% endif %}
-                {% if person.affiliation %}<p>Affiliation: {{ person.affiliation }}</p>{% endif %}
+                <h4><a href="{{ collection.get_absolute_url }}">{{ collection.name }}</a></h4>
+                <p>{{ collection.description }}</p>
             </li>
         </ul>
         {% endfor %}
@@ -57,7 +38,9 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
+        {% else %}
+        You have not created any collections. <a href="{% url 'collection_create' %}">Create a Collection</a> to start organising your papers.
+        {% endif %}
     </div>
 </div>
-{% endif %}
 {% endblock %}

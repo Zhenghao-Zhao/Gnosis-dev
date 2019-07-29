@@ -17,6 +17,7 @@ urlpatterns += [
     path('paper/<int:id>/connect/author', views.paper_connect_author, name='paper_connect_author'),
     path('paper/<int:id>/connect/author/<int:aid>', views.paper_connect_author_selected, name='paper_connect_author_selected'),
     path('paper/<int:id>/connect/paper', views.paper_connect_paper, name='paper_connect_paper'),
+    path('paper/<int:id>/connect/paper/<int:pid>', views.paper_connect_paper_selected, name='paper_connect_paper_selected'),
     path('paper/<int:id>/connect/dataset', views.paper_connect_dataset, name='paper_connect_dataset'),
     path('paper/<int:id>/connect/code', views.paper_connect_code, name='paper_connect_code'),
     path('paper/<int:id>/connect/code/<int:cid>', views.paper_connect_code_selected, name='paper_connect_code_selected'),
@@ -25,6 +26,10 @@ urlpatterns += [
     path('paper/create/', views.paper_create, name='paper_create'),
     path('paper/import/', views.paper_create_from_url, name='paper_create_from_url'),
     path('paper/find/', views.paper_find, name='paper_find'),
+    path('paper/<int:id>/group/add', views.paper_add_to_group, name='paper_add_to_group'),
+    path('paper/<int:id>/group/add/<int:gid>', views.paper_add_to_group_selected, name='paper_add_to_group_selected'),
+    path('paper/<int:id>/collection/add', views.paper_add_to_collection, name='paper_add_to_collection'),
+    path('paper/<int:id>/collection/add/<int:cid>', views.paper_add_to_collection_selected, name='paper_add_to_collection_selected'),
 ]
 
 # for updating/creating a new Person node
@@ -72,4 +77,26 @@ urlpatterns += [
     path('code/<int:id>/', views.code_detail, name='code_detail'),
     path('code/<int:id>/update', views.code_update, name='code_update'),
     path('code/<int:id>/delete', views.code_delete, name='code_delete'),
+]
+
+# for updating/creating a ReadingGroup object
+urlpatterns += [
+    path('groups', views.groups, name='groups_index'),
+    path('group/create/', views.group_create, name='group_create'),
+    path('group/<int:id>', views.group_detail, name='group_detail'),
+    path('group/<int:id>/update', views.group_update, name='group_update'),
+    path('group/<int:id>/delete', views.group_delete, name='group_delete'),
+    path('group/<int:id>/entry/<int:eid>/update', views.group_entry_update, name='group_entry_update'),
+    path('group/<int:id>/entry/<int:eid>/remove', views.group_entry_remove, name='group_entry_remove'),
+]
+
+# for updating/creating a Collection
+urlpatterns += [
+    path('collections', views.collections, name='collections'),
+    path('collection/create/', views.collection_create, name='collection_create'),
+    path('collection/<int:id>', views.collection_detail, name='collection_detail'),
+    path('collection/<int:id>/update', views.collection_update, name='collection_update'),
+    path('collection/<int:id>/delete', views.collection_delete, name='collection_delete'),
+    # path('collection/<int:id>/entry/<int:eid>/update', views.collection_entry_update, name='collection_entry_update'),
+    path('collection/<int:id>/entry/<int:eid>/remove', views.collection_entry_remove, name='collection_entry_remove'),
 ]

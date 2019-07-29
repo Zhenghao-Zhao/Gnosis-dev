@@ -1,0 +1,25 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+<div class="card shadow-sm mt-5">
+    <div class="card-header">
+        {% if collection.name %}
+            <h3>Update {{ collection.name }} Collection</h3>
+        {% else %}
+            <h3>New Collection</h3>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form action="" method="post">
+            {% csrf_token %}
+            <table class="w-75">
+                {{ form }}
+            </table>
+            <br/>
+            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+        </form>
+        <p>*required</p>
+    </div>
+</div>
+
+{% endblock %}

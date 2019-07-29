@@ -1,7 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from catalog.models import ReadingGroup, ReadingGroupEntry
+from catalog.models import Collection, CollectionEntry
+
+
 from catalog.forms import (
     PaperForm,
     DatasetForm,
@@ -28,6 +33,7 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from catalog.views.views_codes import _code_find
 import re
+
 
 #
 # Paper Views
@@ -131,6 +137,7 @@ def papers(request):
 
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
+    relationship_ids = []
     paper = _get_paper_by_id(id)
     print("Retrieved paper with title {}".format(paper.title))
 
@@ -141,9 +148,10 @@ def paper_authors(request, id):
         relationship_ids = [row[1] for row in results]
     else:
         authors = []
+
+    num_authors = len(authors)
     print("paper author link ids {}".format(relationship_ids))
     print("Found {} authors for paper with id {}".format(len(authors), id))
-
     # for rid in relationship_ids:
     delete_urls = [
         reverse("paper_remove_author", kwargs={"id": id, "rid": rid})
@@ -154,7 +162,7 @@ def paper_authors(request, id):
 
     authors = zip(authors, delete_urls)
 
-    return render(request, "paper_authors.html", {"authors": authors, "paper": paper})
+    return render(request, "paper_authors.html", {"authors": authors, "paper": paper, "number_of_authors": num_authors})
 
 
 # should limit access to admin users only!!
@@ -534,6 +542,121 @@ def paper_connect_venue(request, id):
 
 
 @login_required
+def paper_add_to_collection_selected(request, id, cid):
+
+    message = None
+    print("In paper_add_to_collection_selected")
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        raise Http404
+
+    collection = get_object_or_404(Collection, pk=cid)
+    print("Found collection {}".format(collection))
+
+    if collection.owner == request.user:
+        # check if paper already exists in collection.
+        paper_in_collection = collection.papers.filter(paper_id=paper.id)
+        if paper_in_collection:
+            message = "Paper already exists in collection {}".format(collection.name)
+        else:
+            c_entry = CollectionEntry()
+            c_entry.collection = collection
+            c_entry.paper_id = id
+            c_entry.paper_title = paper.title
+            c_entry.save()
+            message = "Paper added to collection {}".format(collection.name)
+    else:
+        print("collection owner does not match user")
+
+    print(message)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id,}))
+
+
+@login_required
+def paper_add_to_collection(request, id):
+
+    print("In paper_add_to_collection")
+    message = None
+    # Get all collections that this person has created
+    collections = Collection.objects.filter(owner=request.user)
+
+    print("User has {} collections.".format(len(collections)))
+
+    if len(collections) > 0:
+        collection_urls = [
+            reverse(
+                "paper_add_to_collection_selected",
+                kwargs={"id": id, "cid": collection.id},
+            )
+            for collection in collections
+        ]
+
+        all_collections = zip(collections, collection_urls)
+    else:
+        all_collections = None
+
+    return render(
+        request,
+        "paper_add_to_collection.html",
+        {"collections": all_collections, "message": message},
+    )
+
+
+@login_required
+def paper_add_to_group_selected(request, id, gid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:  # go back to the paper index page
+        raise Http404
+
+    group = get_object_or_404(ReadingGroup, pk=gid)
+    group_entry = ReadingGroupEntry()
+    group_entry.reading_group = group
+    group_entry.proposed_by = request.user
+    group_entry.paper_id = id
+    group_entry.paper_title = paper.title
+    group_entry.save()
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": id}))
+
+@login_required
+def paper_add_to_group(request, id):
+
+    message = None
+    # Get all reading groups that this person has created
+    # Note: This should be extended to allow user to propose
+    #       papers to group they belong to as well.
+    # groups = ReadingGroup.objects.filter(owner=request.user.id)
+    groups = ReadingGroup.objects.all()
+
+    group_urls = [
+        reverse(
+            "paper_add_to_group_selected",
+            kwargs={"id": id, "gid": group.id},
+        )
+        for group in groups
+    ]
+
+    all_groups = zip(groups, group_urls)
+
+    return render(
+        request,
+        "paper_add_to_group.html",
+        {"groups": all_groups, "message": message},
+    )
+
+
+@login_required
 def paper_connect_author_selected(request, id, aid):
     query = "MATCH (p:Paper), (a:Person) WHERE ID(p)={id} AND ID(a)={aid} MERGE (a)-[r:authors]->(p) RETURN r"
     results, meta = db.cypher_query(query, dict(id=id, aid=aid))
@@ -601,6 +724,56 @@ def paper_connect_author(request, id):
 
 
 @login_required
+def paper_connect_paper_selected(request, id, pid):
+
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper_source = all_papers[
+            0
+        ]  # since we search by id only one paper should have been returned.
+        print("Found source paper: {}".format(paper_source.title))
+        query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=pid))
+        if len(results) > 0:
+            all_papers = [Paper.inflate(row[0]) for row in results]
+            paper_target = all_papers[
+                0
+            ]  # since we search by id only one paper should have been returned.
+            print("Found target paper: {}".format(paper_target.title))
+
+            # check if the papers are already connected with a cites link; if yes, then
+            # do nothing. Otherwise, add the link.
+            query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+            results, meta = db.cypher_query(
+                query,
+                dict(source_id=id, target_id=pid),
+            )
+            if len(results) == 0:
+                link_type = request.session["link_type"]
+                # papers are not linked so add the edge
+                print("Connection link not found, adding it!")
+                if link_type == 'cites':
+                    paper_source.cites.connect(paper_target)
+                elif link_type == 'uses':
+                    paper_source.uses.connect(paper_target)
+                elif link_type == 'extends':
+                    paper_source.extends.connect(paper_target)
+                messages.add_message(request, messages.INFO, "Connection Added!")
+            else:
+                print("Connection link found not adding it!")
+                messages.add_message(
+                    request, messages.INFO, "Papers are already linked!"
+                )
+    else:
+        print("Could not find paper!")
+        messages.add_message(
+            request, messages.INFO, "Could not find paper!"
+        )
+    return redirect("paper_detail", id=id)
+
+@login_required
 def paper_connect_paper(request, id):
     """
     View function for connecting a paper with another paper.
@@ -617,64 +790,84 @@ def paper_connect_paper(request, id):
             # if not, ask the user to create a new person
             paper_title_query = form.cleaned_data["paper_title"]
             papers_found = _find_paper(paper_title_query)
-            paper_connectted = form.cleaned_data["paper_connection"]
+            paper_connected = form.cleaned_data["paper_connection"]
 
             if len(papers_found) > 0:  # found more than one matching papers
                 print("Found {} papers that match".format(len(papers_found)))
                 for paper in papers_found:
                     print("\t{}".format(paper.title))
 
-                if len(papers_found) > 1:
+                    # for rid in relationship_ids:
+                    paper_connect_urls = [
+                        reverse(
+                            "paper_connect_paper_selected",
+                            kwargs={"id": id, "pid": paper.id},
+                        )
+                        for paper in papers_found
+                    ]
+                    print("paper connect urls")
+                    print(paper_connect_urls)
+
+                    papers = zip(papers_found, paper_connect_urls)
+
+                    request.session["link_type"] = paper_connected
+                    # ask the user to select one of them
                     return render(
                         request,
                         "paper_connect_paper.html",
-                        {
-                            "form": form,
-                            "papers": papers_found,
-                            "message": "Found more than one matching papers. Please narrow your search",
-                        },
+                        {"form": form, "papers": papers, "message": ""},
                     )
-                else:
-                    paper_target = papers_found[0]  # one person found
-                    print("Selected paper: {}".format(paper.title))
+             # if len(papers_found) > 1:
+                #     return render(
+                #         request,
+                #         "paper_connect_paper.html",
+                #         {
+                #             "form": form,
+                #             "papers": papers_found,
+                #             "message": "Found more than one matching papers. Please narrow your search",
+                #         },
+                #     )
+                # else:
+                #     paper_target = papers_found[0]  # one person found
+                #     print("Selected paper: {}".format(paper.title))
 
                 # retrieve the paper
-                query = "MATCH (a) WHERE ID(a)={id} RETURN a"
-                results, meta = db.cypher_query(query, dict(id=id))
-                if len(results) > 0:
-                    all_papers = [Paper.inflate(row[0]) for row in results]
-                    paper_source = all_papers[
-                        0
-                    ]  # since we search by id only one paper should have been returned.
-                    print("Found paper: {}".format(paper_source.title))
-                    # check if the papers are already connected with a cites link; if yes, then
-                    # do nothing. Otherwise, add the link.
-                    query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
-                    results, meta = db.cypher_query(
-                        query,
-                        dict(source_id=paper_source.id, target_id=paper_target.id),
-                    )
-                    if len(results) == 0:
-                        # papers are not linked so add the edge
-                        print("Connection link not found, adding it!")
-                        if paper_connectted == 'cites':
-                            paper_source.cites.connect(paper_target)
-                        elif paper_connectted == 'uses':
-                            paper_source.uses.connect(paper_target)
-                        elif paper_connectted == 'extends':
-                            paper_source.extends.connect(paper_target)
-                        messages.add_message(request, messages.INFO, "Connection Added!")
-                    else:
-                        print("Connection link found not adding it!")
-                        messages.add_message(
-                            request, messages.INFO, "Connection Already Exists!"
-                        )
-                else:
-                    print("Could not find paper!")
-                    messages.add_message(
-                        request, messages.INFO, "Could not find paper!"
-                    )
-                return redirect("paper_detail", id=id)
+                # query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+                # results, meta = db.cypher_query(query, dict(id=id))
+                # if len(results) > 0:
+                #     all_papers = [Paper.inflate(row[0]) for row in results]
+                #     paper_source = all_papers[
+                #         0
+                #     ]  # since we search by id only one paper should have been returned.
+                #     print("Found paper: {}".format(paper_source.title))
+                #     # check if the papers are already connected with a cites link; if yes, then
+                #     # do nothing. Otherwise, add the link.
+                #     query = "MATCH (q:Paper)<-[r]-(p:Paper) where id(p)={source_id} and id(q)={target_id} return p"
+                #     results, meta = db.cypher_query(
+                #         query,
+                #         dict(source_id=paper_source.id, target_id=paper_target.id),
+                #     )
+                #     if len(results) == 0:
+                #         # papers are not linked so add the edge
+                #         print("Connection link not found, adding it!")
+                #         if paper_connected == 'cites':
+                #             paper_source.cites.connect(paper_target)
+                #         elif paper_connected == 'uses':
+                #             paper_source.uses.connect(paper_target)
+                #         elif paper_connected == 'extends':
+                #             paper_source.extends.connect(paper_target)
+                #         messages.add_message(request, messages.INFO, "Connection Added!")
+                #     else:
+                #         print("Connection link found not adding it!")
+                #         messages.add_message(
+                #             request, messages.INFO, "Connection Already Exists!"
+                #         )
+                # else:
+                #     print("Could not find paper!")
+                #     messages.add_message(
+                #         request, messages.INFO, "Could not find paper!"
+                #     )
+                # return redirect("paper_detail", id=id)
             else:
                 message = "No matching papers found"
 
@@ -931,6 +1124,7 @@ def _add_author(author, paper=None):
         else:
             p.middle_name = None
         p.last_name = author_name[-1]
+        #print("**** Person {} ***".format(p))
         p.save()  # save to DB
         link_with_paper = True
     elif len(people_found) == 1:
@@ -979,7 +1173,7 @@ def paper_create(request):
                 # type edge.
                 if request.session.get("from_external", False):
                     paper_authors = request.session["external_authors"]
-                    for paper_author in paper_authors.split(","):
+                    for paper_author in reversed(paper_authors.split(",")):
                         print("Adding author {}".format(paper_author))
                         _add_author(paper_author, paper)
 
@@ -1092,11 +1286,22 @@ def get_authors(bs4obj, source_website):
     elif source_website == "acm":
         author_str = bs4obj.find("meta", {"name": "citation_authors"})
         author_str = str(author_str)
+        # print("get_authors() downloaded author_str: {}".format(author_str))
         start = author_str.find('"')
         end = author_str.find('"', start + 1)
         author_str = author_str[start + 1:end]
-        author_str = author_str.replace(",", "")
+
+        author_str_rev = ""
+        for n in author_str.split(";"):
+            if len(author_str_rev) == 0:
+                author_str_rev = ", ".join(n.split(",")[::-1])
+            else:
+                author_str_rev = author_str_rev + "; " + ",".join(n.split(", ")[::-1])
+        #print("get_authors() author_str_rev: {}".format(author_str_rev))
+        author_str = author_str_rev.replace(",", "")
         author_str = author_str.replace("; ", ",")
+        #print("get_authors() cleaned author_str: {}".format(author_str))
+        # names are last, first so reverse to first, last
         return author_str
     # if source website is not supported or the autherlist is none , return none
     return None
