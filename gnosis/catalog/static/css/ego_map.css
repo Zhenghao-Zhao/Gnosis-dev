@@ -18,11 +18,14 @@
 
 .dataset {
     background-color: #ff723d;
-
 }
 
 .code {
-    background: #59d143;
+    background-color: #59d143;
+}
+
+.comment {
+    background-color: #9D8B71;
 }
 
 

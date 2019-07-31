@@ -33,7 +33,7 @@ function toggle_relas() {
 function center() {
     cy.animate({
         center: cy.nodes(),
-        fit: {eles: cy.nodes()},
+        fit: {eles: cy.nodes(), padding: 20},
         duration: 50,
     });
 }
@@ -41,10 +41,7 @@ function center() {
 /************** reset and re-render layout **************/
 // reset layout (reload initial layout)
 function reset_layout() {
-    var layout = cy.layout({
-        name: 'concentric',
-    });
-    layout.run();
+    cy.layout(layout).run();
 }
 
 /************** dropdown menu **************/
@@ -79,7 +76,7 @@ cy.on('click', 'node', function (evt) {
     }
 })
 
-    // drawing tooltip upon mouseover
+// drawing tooltip upon mouseover
     .on('mouseover', 'node', function (evt) {
         var node = evt.target;
         node.style('opacity', 0.8);

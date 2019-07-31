@@ -9,21 +9,21 @@
             <h4>
                 <a href={{ paper.download_link }} class="btn btn-primary" role="button" target="_blank">Download</a>
                 {% if user.is_authenticated %}
-                <a href="{% url 'paper_add_to_group' paper.id %}" class="btn btn-primary"
-                                                 role="button">
-                    Add to Group</a>
-                <a href="{% url 'paper_add_to_collection' paper.id %}" class="btn btn-primary"
-                                                 role="button">
-                    Add to Collection</a>
-                <a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
-                                                 role="button">
-                    Edit</a>
+                    <a href="{% url 'paper_add_to_group' paper.id %}" class="btn btn-primary"
+                       role="button">
+                        Add to Group</a>
+                    <a href="{% url 'paper_add_to_collection' paper.id %}" class="btn btn-primary"
+                       role="button">
+                        Add to Collection</a>
+                    <a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
+                       role="button">
+                        Edit</a>
                 {% endif %}
             </h4>
         </div>
         <div class="card-body">
             <h5 class="text-left">
-                {{ authors }} {% if user.is_authenticated and user.is_superuser and authors%}<a
+                {{ authors }} {% if user.is_authenticated and user.is_superuser and authors %}<a
                     href="{% url 'paper_authors' id=paper.id %}"
                     class="btn btn-danger btn-sm" role="button">
                 Edit</a>{% endif %}
@@ -83,7 +83,7 @@
                 <button style="width: 165px" type="button"
                         class="btn btn-primary toggle ego-button"
                         data-toggle="button"
-                        aria-pressed="false" autocomplete="off" onclick="toggle_relas()">
+                        aria-pressed="false" onclick="toggle_relas()">
                     Hide relationships
                 </button>
 
@@ -110,7 +110,7 @@
                     <option value="evaluates on"> - evaluates on -</option>
                     <option value="published"> - published -</option>
                     <option value="implements"> - implements -</option>
-
+                    <option value="discusses"> - discusses -</option>
                 </select>
             </div>
 
@@ -123,6 +123,7 @@
                 <span class="color_legend venue"></span> Venue<br>
                 <span class="color_legend dataset"></span> Dataset<br>
                 <span class="color_legend code"></span> Code<br>
+                <span class="color_legend comment"></span> Comment
             </fieldset>
 
             <div id="cy">
@@ -158,321 +159,196 @@
                     {% endfor %}
             </div>
         </div>
-        </div>
     {% endif %}
 
     {% load static %}
 
-    <scrip type="text/javascript" src="graph-drawing.js"></scrip>
-
     <script>
         let paper_count = 50;
-        let data_count = 50;
-        let person_count = 50;
 
-        var cy = cytoscape({
+        // define layout options
+        let layout = {
+            name: 'concentric',
+            concentric: (node) => {
+                if (node.data('label') === "origin") return 1000;
+                return paper_count;
+            },
+            padding: 20,
+            startAngle: 2 * Math.PI,
+            minNodeSpacing: 30
+        };
+
+        let textMaxWidth = '80';
+
+        let defaultNodeStyle = {
+            'width': 20,
+            'height': 20,
+            'background-color': '#39acff',
+            'label': 'data(title)',
+            'text-opacity': 1,
+            'text-wrap': 'ellipsis',
+            'text-max-width': textMaxWidth,
+            'text-background-color': '#FFFFFF',
+            'text-outline-opacity': 1,
+            'text-outline-color': '#FFFFFF',
+            'text-outline-width': '1px',
+            'font-size': '10px',
+            'border-width': '1.5px',
+            'border-color': "#9d8b71",
+            'visibility': 'visible'
+        };
+
+        let defaultEdgeStyle = {
+            'width': 5,
+            'label': 'data(label)',
+            'line-color': '#2bd6ad',
+            'line-style': 'data(line)',
+            'curve-style': 'bezier',
+            'target-arrow-color': '#2bd6ad',
+            'target-arrow-shape': 'triangle',
+            'text-opacity': 1,
+            'text-outline-opacity': 1,
+            'text-outline-color': '#FFFFFF',
+            'text-outline-width': '1px',
+            'font-size': '9px',
+            'visibility': 'visible'
+
+        };
+
+        let cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
             wheelSensitivity: 0.2,
 
-            layout:
-                {
-                    name: 'concentric',
-                    concentric: (node) => {
-                        if (node.data('type') === 'Paper') {
-                            if (node.data('label') === "origin") return 1000;
-                            return paper_count;
-                        }
-                        if (node.data('type') === 'Dataset') {
-                            return data_count;
-                        }
-                        else {
-                            return person_count;
-                        }
-                    },
-
-                },
+            layout: layout,
 
             style: [ // styling the graph
                 {
                     selector: 'node[type="Paper"]',
                     style: {
-                        'width': 20,
-                        'height': 20,
+                        ...defaultNodeStyle,
                         'background-color': '#39acff',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71",
-                        'visibility': 'visible'
-
                     },
 
                 },
                 {
                     selector: 'node[label="origin"]',
                     style: {
+                        ...defaultNodeStyle,
                         'width': 30,
                         'height': 30,
                         'background-color': '#39acff',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71"
                     }
                 },
                 {
                     selector: 'node[type="Person"]',
                     style: {
-                        'width': 20,
-                        'height': 20,
+                        ...defaultNodeStyle,
                         'background-color': '#ffb836',
-                        'label': 'data(last_name)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71",
-                        'visibility': 'visible'
-
                     },
 
                 },
                 {
                     selector: 'node[type="Venue"]',
                     style: {
-                        'width': 20,
-                        'height': 20,
+                        ...defaultNodeStyle,
                         'background-color': '#d97fff',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71",
-                        'visibility': 'visible'
-
                     },
 
                 },
                 {
                     selector: 'node[type="Dataset"]',
                     style: {
-                        'width': 20,
-                        'height': 20,
+                        ...defaultNodeStyle,
                         'background-color': '#ff723d',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71",
-                        'visibility': 'visible'
-
                     },
 
                 },
                 {
                     selector: 'node[type="Code"]',
                     style: {
-                        'width': 20,
-                        'height': 20,
+                        ...defaultNodeStyle,
                         'background-color': '#59d143',
-                        'label': 'data(title)',
-                        'text-opacity': 1,
-                        'text-wrap': 'ellipsis',
-                        'text-max-width': '50',
-                        'text-background-color': '#FFFFFF',
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '10px',
-                        'border-width': '1.5px',
-                        'border-color': "#9d8b71",
-                        'visibility': 'visible'
-
                     },
 
                 },
                 {
+                    selector: 'node[type="Comment"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#9d8b71',
+                    }
+                },
+                {
                     selector: 'edge[label="cites"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#2bd6ad',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#2bd6ad',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="uses"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#4a8ee7',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#4a8ee7',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="extends"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#31c5ff',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#31c5ff',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="authors"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#ffb836',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#ffb836',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="evaluates on"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#ff723d',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#ff723d',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="published"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#ff607a',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#ff607a',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="was published at"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#d97fff',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#d97fff',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
                     }
                 },
                 {
                     selector: 'edge[label="implements"]',
                     style: {
-                        'width': 5,
-                        'label': 'data(label)',
+                        ...defaultEdgeStyle,
                         'line-color': '#59d143',
-                        'line-style': 'data(line)',
-                        'curve-style': 'bezier',
                         'target-arrow-color': '#59d143',
-                        'target-arrow-shape': 'triangle',
-                        'text-opacity': 1,
-                        'text-outline-opacity': 1,
-                        'text-outline-color': '#FFFFFF',
-                        'text-outline-width': '1px',
-                        'font-size': '9px',
-                        'visibility': 'visible'
-
+                    }
+                },
+                {
+                    selector: 'edge[label="discusses"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#9d8b71',
+                        'target-arrow-color': '#9d8b71',
                     }
                 }
             ],
