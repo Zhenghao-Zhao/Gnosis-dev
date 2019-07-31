@@ -435,6 +435,16 @@ def _get_node_ego_network(id, paper_title):
                         tc.id, "-", id, new_rela, tc.id, id, line
                     )
 
+                if label == 'Comment':
+                    tcm = Comment.inflate(row[0])
+                    ego_json += node_temp.format(
+                        tcm.id, 'Comment', reverse("comment_detail", kwargs={"id": tcm.id}), 'Comment', new_rela
+                    )
+
+                    ego_json += rela_temp.format(
+                        tcm.id, '-', id, new_rela, tcm.id, id, line
+                    )
+
     return "[" + ego_json + "]"
 
 
