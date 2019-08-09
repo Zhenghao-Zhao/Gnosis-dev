@@ -296,6 +296,7 @@ def _get_node_ego_network(id, paper_title):
     # Assort nodes and store them in arrays accordingly
     # 'out' refers to being from the paper to the object
     if len(results_all_out) > 0:
+        # line property for out
         line = "solid"
 
         for row in results_all_out:
@@ -322,9 +323,13 @@ def _get_node_ego_network(id, paper_title):
                     # reformat middle name from string "['mn1', 'mn2', ...]" to array ['mn1', 'mn2', ...]
                     if tpe.middle_name is not None:
                         middleNames = tpe.middle_name[1:-1].split(', ')
+                        print(middleNames)
                         # concatenate middle names to get 'mn1 mn2 ...'
                         for i in range(len(middleNames)):
                             middleName = middleName + " " + middleNames[i][1:-1]
+
+                    # When middle names have "'", like 'D'Angelo'
+                    middleName = middleName.replace("'", r"\'")
 
                     ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', href: '{}', " \
                                 "type: '{}', " \
@@ -371,6 +376,7 @@ def _get_node_ego_network(id, paper_title):
     if len(results_all_in) > 0:
         line = "dashed"
 
+        # configure in nodes
         for row in results_all_in:
             new_rela = row[1].replace("_", " ")
 
@@ -387,14 +393,16 @@ def _get_node_ego_network(id, paper_title):
 
                 if label == 'Person':
                     tpe = Person.inflate(row[0])
-                    middleName = ''
+                    middleName = ""
                     # reformat middle name from string "['mn1', 'mn2', ...]" to array ['mn1', 'mn2', ...]
                     if tpe.middle_name is not None:
                         middleNames = tpe.middle_name[1:-1].split(', ')
                         # concatenate middle names to get 'mn1 mn2 ...'
                         for i in range(len(middleNames)):
+
                             middleName = middleName + " " + middleNames[i][1:-1]
 
+                    middleName = middleName.replace("'", r"\'")
                     ego_json += ", {{data : {{id: '{}', first_name: '{}', middle_name: '{}', last_name: '{}', href: '{}', " \
                                 "type: '{}', " \
                                 "label: '{}'}} }}".format(
@@ -433,16 +441,6 @@ def _get_node_ego_network(id, paper_title):
 
                     ego_json += rela_temp.format(
                         tc.id, "-", id, new_rela, tc.id, id, line
-                    )
-
-                if label == 'Comment':
-                    tcm = Comment.inflate(row[0])
-                    ego_json += node_temp.format(
-                        tcm.id, 'Comment', reverse("comment_detail", kwargs={"id": tcm.id}), 'Comment', new_rela
-                    )
-
-                    ego_json += rela_temp.format(
-                        tcm.id, '-', id, new_rela, tcm.id, id, line
                     )
 
     return "[" + ego_json + "]"

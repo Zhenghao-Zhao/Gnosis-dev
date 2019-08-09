@@ -80,51 +80,70 @@
         <div class="card-header">
             <div style="display: inline-flex; width: 100%; justify-content: space-between">
                 <h4>Ego-graph</h4>
-                <button style="width: 165px" type="button"
-                        class="btn btn-primary toggle ego-button"
-                        data-toggle="button"
-                        aria-pressed="false" onclick="toggle_relas()">
-                    Hide relationships
-                </button>
 
-                <button type="button"
-                        class="btn btn-primary ego-button"
-                        onclick="center()">
-                    Center
-                </button>
+                <div>
+                    <button class="btn btn-primary" id="menu-button" title="Hide add-ons" onclick="toggle_options()">
+                        Hide
+                    </button>
 
-                <button type="button"
-                        class="btn btn-primary ego-button"
-                        onclick="reset_layout()">
-                    Reset
-                </button>
-                <label for="graphfilter"></label>
-                <select id="graphfilter"
-                        onchange="show_cites(this.value)">
-                    <option value="all relationships"> - all relationships -</option>
-                    <option value="cites"> - cites -</option>
-                    <option value="uses"> - uses -</option>
-                    <option value="extends"> - extends -</option>
-                    <option value="authors"> - authors -</option>
-                    <option value="was published at"> - was published at -</option>
-                    <option value="evaluates on"> - evaluates on -</option>
-                    <option value="published"> - published -</option>
-                    <option value="implements"> - implements -</option>
-                    <option value="discusses"> - discusses -</option>
-                </select>
+{#                    dropdown menu in header #}
+                    <label for="graphfilter"></label>
+                    <select id="graphfilter"
+                            onchange="show_cites(this.value)">
+                        <option value="all relationships"> mixed</option>
+                        <option value="cites"> cites</option>
+                        <option value="uses"> uses</option>
+                        <option value="extends"> extends</option>
+                        <option value="authors"> authors</option>
+                        <option value="was published at"> was published at</option>
+                        <option value="evaluates on"> evaluates on</option>
+                        <option value="published"> published</option>
+                        <option value="implements"> implements</option>
+                    </select>
+                </div>
             </div>
 
         </div>
 
         <div class="card-body">
-            <fieldset style="position: absolute; z-index: 1000; left: 20px;">
-                <span class="color_legend paper"></span> Paper <br>
-                <span class="color_legend person"></span> Person<br>
-                <span class="color_legend venue"></span> Venue<br>
-                <span class="color_legend dataset"></span> Dataset<br>
-                <span class="color_legend code"></span> Code<br>
-                <span class="color_legend comment"></span> Comment
-            </fieldset>
+            <div class="graph-adder">
+{#                legend #}
+                <fieldset style="position: absolute; z-index: 1000; left: 20px;">
+                    <span class="color_legend dataset"></span> Dataset <br>
+                    <span class="color_legend person"></span> Person <br>
+                    <span class="color_legend venue"></span> Venue <br>
+                    <span class="color_legend paper"></span> Paper <br>
+                    <span class="color_legend code"></span> Code <br>
+                </fieldset>
+
+{#                add-on buttons #}
+                <div style="position: absolute; z-index: 1000; right: 20px; display: inline-flex; flex-direction: column">
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Hide relationships"
+                            data-toggle="button"
+                            aria-pressed="false" onclick="toggle_relas()">
+                        <i class="material-icons" id="rela_toggle">
+                            visibility
+                        </i>
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Center"
+                            onclick="center()">
+                        <i class="material-icons">
+                            center_focus_strong
+                        </i>
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Reset"
+                            onclick="reset_layout()">
+                        <i class="material-icons">
+                            refresh
+                        </i>
+                    </button>
+                </div>
+            </div>
 
             <div id="cy">
             </div>
@@ -162,15 +181,16 @@
     {% endif %}
 
     {% load static %}
-
     <script>
-        let paper_count = 50;
+        // concentric level value
+        var paper_count = 50;
 
         // define layout options
-        let layout = {
+        var layout = {
             name: 'concentric',
             concentric: (node) => {
                 if (node.data('label') === "origin") return 1000;
+                // all levels have the same value => one big circle only
                 return paper_count;
             },
             padding: 20,
@@ -178,9 +198,10 @@
             minNodeSpacing: 30
         };
 
-        let textMaxWidth = '80';
+        // node title width
+        var textMaxWidth = '80';
 
-        let defaultNodeStyle = {
+        var defaultNodeStyle = {
             'width': 20,
             'height': 20,
             'background-color': '#39acff',
@@ -198,8 +219,8 @@
             'visibility': 'visible'
         };
 
-        let defaultEdgeStyle = {
-            'width': 5,
+        var defaultEdgeStyle = {
+            'width': 2,
             'label': 'data(label)',
             'line-color': '#2bd6ad',
             'line-style': 'data(line)',
@@ -215,7 +236,7 @@
 
         };
 
-        let cy = cytoscape({
+        cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
             wheelSensitivity: 0.2,

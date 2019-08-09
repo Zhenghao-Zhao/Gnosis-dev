@@ -1,3 +1,4 @@
+
 /************** resizable graph **************/
 // simulate stop resizing using timer
 var resizeTimer;
@@ -12,7 +13,7 @@ $(window).on('resize', function (e) {
 
 });
 
-/************** show/not show relationships **************/
+/************** show/hide relationships **************/
 // initial toggle state
 var hide_rela = false;
 
@@ -21,12 +22,35 @@ function toggle_relas() {
     hide_rela = !hide_rela;
     if (hide_rela) {
         cy.style().selector('edge').style('label', '').update();
-        $(".toggle").text("Show relationships");
+        $("#rela_toggle").text("visibility_off").attr("title", "Show relationships");
     } else {
         cy.style().selector('edge').style('label', 'data(label)').update();
-        $(".toggle").text("Hide relationships");
+        $("#rela_toggle").text("visibility").attr("title", "Hide relationships");
     }
 }
+
+/************** show/hide graph add-ons **************/
+var hide_opt = false;
+
+function toggle_options() {
+    hide_opt = !hide_opt;
+    if (hide_opt) {
+        $(".graph-adder").hide(300);
+        $("#menu-button").text("Show").attr("title", "Show add-ons");
+
+    } else {
+        $(".graph-adder").show(300);
+        $("#menu-button").text("Hide").attr("title", "Hide add-ons");
+    }
+}
+
+/************** double click toggle **************/
+// $(".graph-canvas").dblclick(
+//     function () {
+//         toggle_options();
+//     }
+// );
+
 
 /************** center graph **************/
 // center button
@@ -48,7 +72,6 @@ function reset_layout() {
 function show_cites(value) {
 
     var cat = value;
-    //document.write('node[label="'+cat+'"]');
     if (cat === "all relationships") {
         cy.style().selector('node').style('visibility', 'visible').update();
         cy.style().selector('edge').style('visibility', 'visible').update();

@@ -1,7 +1,11 @@
 .color_legend {
     display: inline-block;
-    width: 50px;
+    width: 30px;
     height: 20px;
+}
+
+.legend_label{
+    font-size: 100%;
 }
 
 .paper {
@@ -24,9 +28,20 @@
     background-color: #59d143;
 }
 
-.comment {
-    background-color: #9D8B71;
+.material-icons {
+    display: block;
 }
+
+.ego-button {
+    text-align: center;
+    margin: 2px;
+}
+
+#menu-button {
+    width: 65px;
+}
+
+
 
 
 
