@@ -1411,7 +1411,7 @@ def paper_create_from_url(request):
         # get the data from arxiv
         url = request.POST["url"]
 
-        validity,source_website = analysis_url(url)
+        validity,source_website,url = analysis_url(url)
         # return error message if the website is not supported
         if validity == False:
             form = PaperImportForm()
