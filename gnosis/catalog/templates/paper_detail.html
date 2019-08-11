@@ -191,6 +191,7 @@
             concentric: (node) => {
                 if (node.data('label') === "origin") return 1000;
                 // all levels have the same value => one big circle only
+                console.log(node.width());
                 return paper_count;
             },
             padding: 20,
@@ -217,6 +218,7 @@
             'border-width': '1.5px',
             'border-color': "#9d8b71",
             'visibility': 'visible'
+
         };
 
         var defaultEdgeStyle = {
@@ -242,6 +244,9 @@
             wheelSensitivity: 0.2,
 
             layout: layout,
+
+            // max zoom factor
+            maxZoom: 2.0,
 
             style: [ // styling the graph
                 {
