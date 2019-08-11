@@ -83,7 +83,7 @@ class PaperModelTest(TestCase):
         main_paper.download_link = "www.main.com"
         main_paper.save()
 
-        for i in range(5):
+        for i in range(20):
             venue = Venue()
             venue.name = "Venue " + str(i)
             venue.publisher = "Publisher"
@@ -94,7 +94,7 @@ class PaperModelTest(TestCase):
             venue.save()
             main_paper.was_published_at.connect(venue)
 
-        for i in range(10):
+        for i in range(50):
             paper = Paper()
             title = "Paper " + str(i)
             abstract = "Abstract " + str(i)
@@ -106,7 +106,7 @@ class PaperModelTest(TestCase):
             paper.save()
             paper.cites.connect(main_paper)
 
-        for i in range(5):
+        for i in range(30):
             code = Code()
             code.website = "www.DownloadLink" + str(i) + ".com"
             code.keywords = "Test code"
@@ -114,7 +114,7 @@ class PaperModelTest(TestCase):
             code.save()
             code.implements.connect(main_paper)
 
-        for i in range(5):
+        for i in range(30):
             dataset = Dataset()
             dataset.name = "Dataset " + str(i)
             dataset.description = "Description " + str(i)
@@ -123,7 +123,7 @@ class PaperModelTest(TestCase):
             dataset.save()
             main_paper.published.connect(dataset)
 
-        for i in range(5):
+        for i in range(30):
             person = Person()
             person.first_name = "FirstName"
             person.last_name = "Author " + str(i)

@@ -191,7 +191,6 @@
             concentric: (node) => {
                 if (node.data('label') === "origin") return 1000;
                 // all levels have the same value => one big circle only
-                console.log(node.width());
                 return paper_count;
             },
             padding: 20,
@@ -384,8 +383,8 @@
 
         });
 
-        // setting the minimum zoom factor to its initial zoom - 0.2
-        cy.minZoom(cy.zoom()-0.2);
+        // setting the minimum zoom factor to 80% of its initial zoom
+        cy.minZoom(cy.zoom()* 0.8);
 
     </script>
 

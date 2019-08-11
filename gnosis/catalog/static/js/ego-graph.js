@@ -89,6 +89,7 @@ function show_cites(value) {
 // interactivity with the ego graph
 // timeout for delaying tooltip
 var time_out = 1000;
+var hoverTimeout;
 cy.on('click', 'node', function (evt) {
     var node = evt.target;
     console.log('tapped ' + node.data('href'));
