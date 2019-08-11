@@ -241,7 +241,9 @@
         cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
-            wheelSensitivity: 0.2,
+
+            // mouse wheel sensitivity, used for zooming
+            wheelSensitivity: 0.1,
 
             layout: layout,
 
@@ -381,6 +383,9 @@
             ],
 
         });
+
+        // setting the minimum zoom factor to its initial zoom - 0.2
+        cy.minZoom(cy.zoom()-0.2);
 
     </script>
 
