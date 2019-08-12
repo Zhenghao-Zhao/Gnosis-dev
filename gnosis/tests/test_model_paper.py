@@ -69,13 +69,13 @@ class PaperModelTest(TestCase):
         else:
             assert False
 
-    # !!!!!!!!!!!! CAUTION THIS METHOD WILL RESET ALL LOCAL NEO4J DATABASE DATA !!!!!!!!!!!!
-    # def test_create_dummy_papers(self):
+    # !!!!!!!!! THIS TEST WILL REMOVE PREVIOUS DUMMY DATA AND ANYTHING ASSOCIATED WITH DUMMY PAPER 'MAIN' !!!!!!!
+    # def test_create_dummy_data(self):
     #     """
     #     create dummy papers for testing purposes
     #     """
-    #     # CAUTION - delete all local data
-    #     query = "MATCH (n) DETACH DELETE n"
+    #     query = "MATCH (s:Paper {title: 'main'}) -- (p) DETACH DELETE p, s"
+    #     # query = "MATCH (n) DETACH DELETE n"
     #     results, meta = db.cypher_query(query)
     #
     #     main_paper = Paper()
