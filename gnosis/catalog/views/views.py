@@ -1,3 +1,4 @@
+import requests
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -37,6 +38,9 @@ import re
 #
 # Paper Views
 #
+from gnosis import settings
+
+
 def get_paper_authors(paper):
     query = "MATCH (:Paper {title: {paper_title}})<--(a:Person) RETURN a"
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
@@ -2191,11 +2195,27 @@ def comment_create(request):
         comment.author = user.username
         form = CommentForm(instance=comment, data=request.POST)
         if form.is_valid():
+
+            ''' Begin reCAPTCHA validation '''
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+            data = {
+                'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_response
+            }
+            r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+            result = r.json()
+            ''' End reCAPTCHA validation '''
+
+            if result['success']:
+                form.save()
+                comment.discusses.connect(paper)
+                del request.session["last-viewed-paper"]
+                return redirect("paper_detail", id=paper_id)
+            else:
+                form = CommentForm()
+                print('Invalid reCAPTCHA')
+
             # add link from new comment to paper
-            form.save()
-            comment.discusses.connect(paper)
-            del request.session["last-viewed-paper"]
-            return redirect("paper_detail", id=paper_id)
     else:  # GET
         form = CommentForm()
 

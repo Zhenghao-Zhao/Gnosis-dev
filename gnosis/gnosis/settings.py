@@ -31,6 +31,13 @@ ALLOWED_HOSTS = []
 
 SESSION_SAVE_EVERY_REQUEST = True
 
+# ReCaptcha keys
+GOOGLE_RECAPTCHA_SECRET_KEY = '6Ld6z7IUAAAAAPgCXtYcOjFMKo4CSx_WY2YAxIaC'
+
+# ReCaptcha proxy
+RECAPTCHA_PROXY = {'http': 'http://127.0.0.1:8000', 'https': 'https://127.0.0.1:8000'}
+
+
 # Application definition
 
 INSTALLED_APPS = [
