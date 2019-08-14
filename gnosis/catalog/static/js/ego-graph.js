@@ -1,4 +1,3 @@
-
 /************** resizable graph **************/
 // simulate stop resizing using timer
 var resizeTimer;
@@ -44,44 +43,53 @@ function toggle_options() {
     }
 }
 
-/************** double click toggle **************/
-// $(".graph-canvas").dblclick(
-//     function () {
-//         toggle_options();
-//     }
-// );
+// /************** double click toggle **************/
+// // $(".graph-canvas").dblclick(
+// //     function () {
+// //         toggle_options();
+// //     }
+// // );
 
+
+// collection of all nodes in the graph currently
+var collection = cy.nodes();
 
 /************** center graph **************/
 // center button
 function center() {
     cy.animate({
-        center: cy.nodes(),
-        fit: {eles: cy.nodes(), padding: 20},
+        center: collection,
+        fit: {eles: collection, padding: 20},
         duration: 50,
     });
 }
 
 /************** reset and re-render layout **************/
-// reset layout (reload initial layout)
+// reset layout, all nodes return to initial positions
 function reset_layout() {
+    layout.fit = {eles: collection, padding: 20};
     cy.layout(layout).run();
 }
 
+
 /************** dropdown menu **************/
 function show_cites(value) {
-
     var cat = value;
+
     if (cat === "all relationships") {
+        collection = cy.nodes();
         cy.style().selector('node').style('visibility', 'visible').update();
         cy.style().selector('edge').style('visibility', 'visible').update();
     } else {
+        collection = cy.nodes('[label="' + cat + '"]');
         cy.style().selector('node').style('visibility', 'hidden').update();
         cy.style().selector('edge').style('visibility', 'hidden').update();
         cy.style().selector('node[label="' + cat + '"]').style('visibility', 'visible').update();
         cy.style().selector('edge[label="' + cat + '"]').style('visibility', 'visible').update();
         cy.style().selector('node[label="origin"]').style('visibility', 'visible').update();
     }
+
+    center();
 
 }
 
