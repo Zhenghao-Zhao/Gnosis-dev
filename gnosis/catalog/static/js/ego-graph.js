@@ -55,20 +55,19 @@ function toggle_options() {
 var collection = cy.nodes();
 
 /************** center graph **************/
-// center button
+// combines center and fit
 function center() {
     cy.animate({
         center: collection,
         fit: {eles: collection, padding: 20},
-        duration: 50,
+        duration: 0,
     });
 }
 
 /************** reset and re-render layout **************/
 // reset layout, all nodes return to initial positions
 function reset_layout() {
-    layout.fit = {eles: collection, padding: 20};
-    cy.layout(layout).run();
+    cy.layout(layout).run().then(center());
 }
 
 
@@ -84,8 +83,7 @@ function show_cites(value) {
         collection = cy.nodes('[label="' + cat + '"]');
         cy.style().selector('node').style('visibility', 'hidden').update();
         cy.style().selector('edge').style('visibility', 'hidden').update();
-        cy.style().selector('node[label="' + cat + '"]').style('visibility', 'visible').update();
-        cy.style().selector('edge[label="' + cat + '"]').style('visibility', 'visible').update();
+        cy.style().selector('[label="' + cat + '"]').style('visibility', 'visible').update();
         cy.style().selector('node[label="origin"]').style('visibility', 'visible').update();
     }
 
