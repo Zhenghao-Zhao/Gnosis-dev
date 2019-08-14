@@ -127,13 +127,13 @@
                         </i>
                     </button>
 
-                    <button type="button"
-                            class="btn btn-primary ego-button" title="Center"
-                            onclick="center()">
-                        <i class="material-icons">
-                            center_focus_strong
-                        </i>
-                    </button>
+{#                    <button type="button"#}
+{#                            class="btn btn-primary ego-button" title="Center"#}
+{#                            onclick="center()">#}
+{#                        <i class="material-icons">#}
+{#                            center_focus_strong#}
+{#                        </i>#}
+{#                    </button>#}
 
                     <button type="button"
                             class="btn btn-primary ego-button" title="Reset"
@@ -217,6 +217,7 @@
             'border-width': '1.5px',
             'border-color': "#9d8b71",
             'visibility': 'visible'
+
         };
 
         var defaultEdgeStyle = {
@@ -239,9 +240,14 @@
         cy = cytoscape({
             container: document.getElementById('cy'), // container to render in
             elements: {{ ego_network | safe }},
-            wheelSensitivity: 0.2,
+
+            // mouse wheel sensitivity, used for zooming
+            wheelSensitivity: 0.1,
 
             layout: layout,
+
+            // max zoom factor
+            maxZoom: 2.0,
 
             style: [ // styling the graph
                 {
@@ -376,6 +382,9 @@
             ],
 
         });
+
+        // setting the minimum zoom factor to 80% of its initial zoom
+        cy.minZoom(cy.zoom()* 0.8);
 
     </script>
 
