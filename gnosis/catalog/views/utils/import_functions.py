@@ -58,7 +58,8 @@ def analysis_url(url) :
         source_website = "jmlr"
         print("source from jmlr")
     # from IEEE
-    elif url.startswith("https://ieeexplore.ieee.org/document/"):
+    elif url.startswith("https://ieeexplore.ieee.org/document/") \
+            or url.startswith("https://ieeexplore.ieee.org/abstract/document/"):
         source_website = "ieee"
         print("source from ieee")
     # from ACM
