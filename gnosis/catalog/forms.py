@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code
+from .models import Paper, Person, Dataset, Venue, Comment, Code, Note
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -307,6 +307,18 @@ class VenueForm(ModelForm):
             "keywords",
             "website",
         ]
+
+
+class NoteCreateForm(forms.ModelForm):
+    class Meta:
+        model = Note
+        field = ['context']
+
+
+class NoteUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Note
+        field = ['context']
 
 
 class CommentForm(ModelForm):
