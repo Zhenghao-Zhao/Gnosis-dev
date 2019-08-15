@@ -309,16 +309,16 @@ class VenueForm(ModelForm):
         ]
 
 
-class NoteCreateForm(forms.ModelForm):
+class NoteCreateForm(ModelForm):
     class Meta:
         model = Note
-        field = ['context']
+        fields = ['text']
 
 
-class NoteUpdateForm(forms.ModelForm):
+class NoteUpdateForm(ModelForm):
     class Meta:
         model = Note
-        field = ['context']
+        fields = ['text']
 
 
 class CommentForm(ModelForm):
