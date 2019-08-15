@@ -9,6 +9,7 @@ from neomodel import StringProperty, DateTimeProperty, DateProperty, UniqueIdPro
 
 # Create your models here.
 class Paper(DjangoNode):
+
     uid = UniqueIdProperty()
 
     created = DateTimeProperty(default=datetime.now())
@@ -21,6 +22,7 @@ class Paper(DjangoNode):
     download_link = StringProperty(required=True)
     # added source link for a paper to record the source website which the information of paper is collected
     source_link = StringProperty(required=False)
+
 
     # Links
     cites = RelationshipTo("Paper", "cites")
@@ -46,6 +48,7 @@ class Paper(DjangoNode):
 
 
 class Person(DjangoNode):
+
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -66,6 +69,7 @@ class Person(DjangoNode):
         ordering = ['last_name', 'first_name', 'affiliation']
 
     def __str__(self):
+
         if self.middle_name is not None and len(self.middle_name) > 0:
             return '{} {} {}'.format(self.first_name, self.middle_name, self.last_name)
         return '{} {}'.format(self.first_name, self.last_name)
@@ -75,6 +79,7 @@ class Person(DjangoNode):
 
 
 class Dataset(DjangoNode):
+
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -114,6 +119,7 @@ class Dataset(DjangoNode):
 
 
 class Venue(DjangoNode):
+
     venue_types = (('J', 'Journal'),
                    ('C', 'Conference'),
                    ('W', 'Workshop'),
@@ -150,16 +156,17 @@ class Venue(DjangoNode):
 
 
 class Note(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     paper = models.CharField(max_length=100)
     text = models.TextField()
     date_posted = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'Private note on {self.paper} by {self.user.username}'
+        return f'Private note on {self.paper} by {self.author.username}'
 
 
 class Comment(DjangoNode):
+
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -184,6 +191,7 @@ class Comment(DjangoNode):
 
 
 class Code(DjangoNode):
+
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node

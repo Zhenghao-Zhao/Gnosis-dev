@@ -215,6 +215,8 @@ def paper_detail(request, id):
             "papers.html",
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
+    # print(paper.title+"@@@@@@@@@@@@")
+    # print(request.user.username + "@@@@@@@@@@@@")
 
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
