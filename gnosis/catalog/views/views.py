@@ -3,6 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from catalog.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 
@@ -215,8 +216,14 @@ def paper_detail(request, id):
             "papers.html",
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
-    # print(paper.title+"@@@@@@@@@@@@")
-    # print(request.user.username + "@@@@@@@@@@@@")
+    print(paper.title+"@@@@@@@@@@@@")
+    print(request.user.username + "@@@@@@@@@@@@")
+
+    notes = Note.objects.all()
+    print(notes)
+    # for(note in Note):
+    #     if note.author == request.user.username and note.paper == paper.title:
+    #         print(note.text)
 
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
@@ -258,6 +265,7 @@ def paper_detail(request, id):
             "paper": paper,
             "venue": venue,
             "authors": authors,
+            "notes": notes,
             "comments": comments,
             "codes": codes,
             "num_comments": num_comments,

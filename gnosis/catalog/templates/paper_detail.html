@@ -156,6 +156,9 @@
     {% else %}
         <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to comment</p>
     {% endif %}
+    {% for note in notes %}
+        <h2>{{ note.text }}</h2>
+    {% endfor %}
     {% if num_comments > 0 %}
         <div class="card shadow-sm mt-3">
             <div class="card-header">
