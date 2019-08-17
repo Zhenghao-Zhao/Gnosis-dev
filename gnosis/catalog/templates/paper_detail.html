@@ -198,9 +198,8 @@
                             <li class="list-group-item shadow-sm mt-1">
                                 <p>{{ note.text }}</p>
                                 <p class="text-right"><small>{{ note.date_posted }}</small></p>
-                                {% if note.author == user %}
-                                    <a href="{% url 'note_update' note.id %}">Edit</a>
-                                {% endif %}
+                                <a href="{% url 'note_update' note.id %}">Edit</a>
+                                <a href="{% url 'note_delete' note.id %}" > Delete</a>
                             </li>
                         {% endif %}
                     {% endfor %}

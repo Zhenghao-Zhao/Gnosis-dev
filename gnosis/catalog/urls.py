@@ -63,6 +63,7 @@ urlpatterns += [
 urlpatterns += [
     path('note/create/', views.note_create, name='note_create'),
     path('note/<int:id>/update', views.note_update, name='note_update'),
+    path('note/<int:id>/delete', views.note_delete, name='note_delete'),
 ]
 # for updating/creating a new Comment node
 urlpatterns += [
