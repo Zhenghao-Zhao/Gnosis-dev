@@ -17,3 +17,17 @@ def endorsement_create(request):
     user = request.user
 
     paper = request.paper
+    if request.method == "POST":
+        endorsement_entry = EndorsementEntry()
+        endorsement_entry.user = user
+        endorsement_entry.paper = paper
+
+        try:
+            endorsement = Endorsement.objects.get(pk=paper)
+            endorsement.endorsement_count += 1
+        except:
+            endorsement = Endorsement()
+            endorsement.endorsement_count = 1
+            endorsement.paper = paper
+        return HttpResponseRedirect(reverse("endorsement_create"))
+    return render(request, "paper_detail.html")
