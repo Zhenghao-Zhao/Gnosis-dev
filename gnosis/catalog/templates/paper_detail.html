@@ -150,16 +150,7 @@
         </div>
     </div>
 
-{#    private note part #}
-    {% if user.is_authenticated %}
-        {% for note in notes %}
-            {% if note.author == user and note.paper == paper.title %}
-                <h2>{{ note.text }}</h2>
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to comment</p>
-    {% endif %}
+
 
     <p>{% if user.is_authenticated %}
         <a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
@@ -195,6 +186,30 @@
             </div>
         </div>
     {% endif %}
+
+    {% if user.is_authenticated %}
+        <div class="card shadow-sm mt-3">
+        <div class="card-header">
+            <h3>Private Note</h3>
+        </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for note in notes %}
+                        {% if note.author == user and note.paper == paper.title %}
+                            <li class="list-group-item shadow-sm mt-1">
+                                <p>{{ note.text }}</p>
+                                <p><small>{{ note.date_posted }}</small></p>
+                                {% if note.author == user.id %}
+                                    <a href="#">Edit</a>
+                                {% endif %}
+                            </li>
+                        {% endif %}
+                        </ul>
+                    {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
 
     {% load static %}
     <script>

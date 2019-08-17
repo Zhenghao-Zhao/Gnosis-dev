@@ -216,9 +216,10 @@ def paper_detail(request, id):
             "papers.html",
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
-    print(paper.title + "@@@@@@@@@@@@")
-    print(request.user.username + "@@@@@@@@@@@@")
+
+    # Retrieve all notes in the database.
     notes = Note.objects.all()
+
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
     # authors is a list of strings so just concatenate the strings.
