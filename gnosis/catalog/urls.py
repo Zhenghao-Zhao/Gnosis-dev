@@ -60,11 +60,14 @@ urlpatterns += [
     path('venue/<int:id>/update', views.venue_update, name='venue_update'),
     path('venue/<int:id>/delete', views.venue_delete, name='venue_delete'),
 ]
+
+# for updating/creating/deleting a private note
 urlpatterns += [
     path('note/create/', views.note_create, name='note_create'),
     path('note/<int:id>/update', views.note_update, name='note_update'),
     path('note/<int:id>/delete', views.note_delete, name='note_delete'),
 ]
+
 # for updating/creating a new Comment node
 urlpatterns += [
     path('comments/', views.comments, name='comments_index'),
