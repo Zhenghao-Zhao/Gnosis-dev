@@ -46,7 +46,15 @@
                 {% endfor %}
             {% endif %}
 
-            <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
+            <h4 class="text-right">
+                
+                {% if not user.is_authenticated %}
+                <a href={% url 'login' %}> Endorse</a>{% endif %}
+                {% if user.is_authenticated %} Connect with:
+{#                    <a href="{% url 'endorsement_create' %}" class="btn btn-link float-right">Endorse</a>#}
+                    <button class="btn btn-primary" onclick="endorsement_create()">E</button>
+                
+                <a
                     href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
                 || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
                 <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
