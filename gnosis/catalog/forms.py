@@ -66,6 +66,7 @@ class SearchPapersForm(Form):
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
 
+
 class PaperConnectionForm(Form):
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
@@ -162,9 +163,9 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-    # the label will now appear in two lines break at the br label
+        # the label will now appear in two lines break at the br label
         # label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
-        label= mark_safe("Source URL*"),
+        label=mark_safe("Source URL*"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
@@ -315,10 +316,31 @@ class VenueForm(ModelForm):
 #         fields = ['text']
 #
 #
-# class NoteUpdateForm(ModelForm):
-#     class Meta:
-#         model = Note
-#         fields = ['text']
+class NoteForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        self.fields["text"].widget = forms.Textarea()
+        self.fields["text"].widget.attrs.update({"rows": "5"})
+        self.fields["text"].label = ""
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+            visible.field.widget.attrs.update({"style": "width:35em"})
+            print(visible.field.widget.attrs.items())
+
+    def clean_text(self):
+        return self.cleaned_data["text"]
+
+    def clean_publication_date(self):
+        return self.cleaned_data["publication_date"]
+
+    # def clean_author(self):
+    #     return self.cleaned_data['author']
+
+    class Meta:
+        model = Note
+        fields = ["text"]
 
 
 class CommentForm(ModelForm):

@@ -13,7 +13,7 @@ from catalog.forms import (
     VenueForm,
     CommentForm,
     PaperImportForm,
-)
+    NoteForm)
 from catalog.forms import (
     SearchVenuesForm,
     SearchPapersForm,
@@ -216,15 +216,9 @@ def paper_detail(request, id):
             "papers.html",
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
-    print(paper.title+"@@@@@@@@@@@@")
+    print(paper.title + "@@@@@@@@@@@@")
     print(request.user.username + "@@@@@@@@@@@@")
-
     notes = Note.objects.all()
-    print(notes)
-    # for(note in Note):
-    #     if note.author == request.user.username and note.paper == paper.title:
-    #         print(note.text)
-
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
     # authors is a list of strings so just concatenate the strings.
@@ -409,7 +403,6 @@ def _get_node_ego_network(id, paper_title):
                         middleNames = tpe.middle_name[1:-1].split(', ')
                         # concatenate middle names to get 'mn1 mn2 ...'
                         for i in range(len(middleNames)):
-
                             middleName = middleName + " " + middleNames[i][1:-1]
 
                     middleName = middleName.replace("'", r"\'")
@@ -2179,6 +2172,36 @@ def comment_detail(request, id):
     else:
         # other users are sent back to the papers index
         return HttpResponseRedirect(reverse("papers_index"))
+
+
+@login_required
+def note_create(request):
+    user = request.user
+
+    # Retrieve paper using paper id
+    paper_id = request.session["last-viewed-paper"]
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=paper_id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:  # just send him to the list of papers
+        HttpResponseRedirect(reverse("papers_index"))
+
+    if request.method == "POST":
+        note = Note()
+        note.author = user
+        note.paper = paper.title
+        form = NoteForm(instance=note, data=request.POST)
+        if form.is_valid():
+            # add link from new comment to paper
+            form.save()
+            del request.session["last-viewed-paper"]
+            return redirect("paper_detail", id=paper_id)
+    else:  # GET
+        form = NoteForm()
+
+    return render(request, "note_create.html", {"form": form})
 
 
 @login_required
