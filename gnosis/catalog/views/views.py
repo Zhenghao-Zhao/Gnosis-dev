@@ -2176,6 +2176,37 @@ def comment_detail(request, id):
 
 
 @login_required
+def comment_create(request):
+    user = request.user
+
+    # Retrieve paper using paper id
+    paper_id = request.session["last-viewed-paper"]
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=paper_id))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:  # just send him to the list of papers
+        HttpResponseRedirect(reverse("papers_index"))
+
+    if request.method == "POST":
+        comment = Comment()
+        comment.created_by = user.id
+        comment.author = user.username
+        form = CommentForm(instance=comment, data=request.POST)
+        if form.is_valid():
+            # add link from new comment to paper
+            form.save()
+            comment.discusses.connect(paper)
+            del request.session["last-viewed-paper"]
+            return redirect("paper_detail", id=paper_id)
+    else:  # GET
+        form = CommentForm()
+
+    return render(request, "comment_form.html", {"form": form})
+
+
+@login_required
 def note_create(request):
     user = request.user
 
@@ -2206,34 +2237,25 @@ def note_create(request):
 
 
 @login_required
-def comment_create(request):
-    user = request.user
-
-    # Retrieve paper using paper id
+def note_update(request, id):
+    note = Note.objects.filter(id=id).first()
     paper_id = request.session["last-viewed-paper"]
-    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
-    results, meta = db.cypher_query(query, dict(id=paper_id))
-    if len(results) > 0:
-        all_papers = [Paper.inflate(row[0]) for row in results]
-        paper = all_papers[0]
-    else:  # just send him to the list of papers
-        HttpResponseRedirect(reverse("papers_index"))
-
+    # if this is POST request then process the Form data
     if request.method == "POST":
-        comment = Comment()
-        comment.created_by = user.id
-        comment.author = user.username
-        form = CommentForm(instance=comment, data=request.POST)
+        form = NoteForm(request.POST)
         if form.is_valid():
-            # add link from new comment to paper
-            form.save()
-            comment.discusses.connect(paper)
+            note.text = form.cleaned_data["text"]
+            note.save()
             del request.session["last-viewed-paper"]
             return redirect("paper_detail", id=paper_id)
-    else:  # GET
-        form = CommentForm()
 
-    return render(request, "comment_form.html", {"form": form})
+    # GET request
+    else:
+        form = NoteForm(
+            initial={"text": note.text, "date_posted": note.date_posted}
+        )
+
+    return render(request, "note_update.html", {"form": form, "note": note})
 
 
 @login_required
