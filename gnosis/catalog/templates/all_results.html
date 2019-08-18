@@ -41,11 +41,11 @@
             {% for person in person_results %}
             <li class="list-group-item mt-1">
                 {% if person.middle_name %}
-                <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{person.middle_name}}
+                <p><a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.middle_name }}
                     {{ person.last_name }}</a>
                 </p>
                 {% else %}
-                <p><a href="{{ person.get_absolute_url }}">{{person.first_name}} {{ person.last_name }}</a></p>
+                <p><a href="{{ person.get_absolute_url }}">{{ person.first_name }} {{ person.last_name }}</a></p>
                 {% endif %}
             </li>
 
