@@ -9,6 +9,18 @@ from django.utils.safestring import mark_safe
 #
 # Search forms
 #
+
+class SearchAllForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_search_keywords(self):
+        return self.cleaned_data["search_keywords"]
+
+    search_keywords = forms.CharField(required=True)
+
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
