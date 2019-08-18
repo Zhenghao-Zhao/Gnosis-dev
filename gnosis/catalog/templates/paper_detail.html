@@ -1,0 +1,399 @@
+{% extends "gnosis_theme.html" %}
+
+{% block content %}
+
+    <div class="card shadow-sm mt-5">
+        <div class="card-header">
+            <h3>{{ paper.title }}</h3>
+
+            <h4>
+                <a href={{ paper.download_link }} class="btn btn-primary" role="button" target="_blank">Download</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'paper_add_to_group' paper.id %}" class="btn btn-primary"
+                       role="button">
+                        Add to Group</a>
+                    <a href="{% url 'paper_add_to_collection' paper.id %}" class="btn btn-primary"
+                       role="button">
+                        Add to Collection</a>
+                    <a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
+                       role="button">
+                        Edit</a>
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            <h5 class="text-left">
+                {{ authors }} {% if user.is_authenticated and user.is_superuser and authors %}<a
+                    href="{% url 'paper_authors' id=paper.id %}"
+                    class="btn btn-danger btn-sm" role="button">
+                Edit</a>{% endif %}
+            </h5>
+
+            <h5 class="text-right">
+                <small>keywords: {{ paper.keywords }}</small>
+            </h5>
+
+            <p><strong>Abstract:</strong> {{ paper.abstract }} </p>
+            {% if venue %}
+                <p>
+                    <small><strong>Venue:</strong> {{ venue }}</small>
+                </p>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="bg-success">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+
+            <h4 class="text-right">
+            `   {% if not user.is_authenticated %}
+                <a href={% url 'login' %}> Endorse</a>{% endif %}
+                {% if user.is_authenticated %} Connect with:
+{#                    <a href="{% url 'endorsement_create' %}" class="btn btn-link float-right">Endorse</a>#}
+                    <button class="btn btn-primary" onclick="endorsement_create()">E</button>
+                    <a
+                    href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
+                || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
+                <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
+                <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
+                <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
+        </div>
+    </div>
+    {% if user.is_authenticated and user.is_superuser %}
+        <div class="card text-left shadow-sm mb-3 mt-3">
+            <div class="card-header"><strong>Admin functions</strong></div>
+            <div class="card-body">
+                <a href="{% url 'paper_delete' paper.id %}" class="btn btn-danger btn-sm" role="button">Delete Paper</a>
+            </div>
+        </div>
+    {% endif %}
+    {% if codes %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header"><h4>Code</h4></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for code in codes %}
+                        <li class="list-group-item"><h6><a href="{{ code.get_absolute_url }}">{{ code.website }}</a>
+                        </h6></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card mt-3 shadow-sm">
+        <div class="card-header">
+            <div style="display: inline-flex; width: 100%; justify-content: space-between">
+                <h4>Ego-graph</h4>
+
+                <div>
+                    <button class="btn btn-primary" id="menu-button" title="Hide add-ons" onclick="toggle_options()">
+                        Hide
+                    </button>
+
+{#                    dropdown menu in header #}
+                    <label for="graphfilter"></label>
+                    <select id="graphfilter"
+                            onchange="show_cites(this.value)">
+                        <option value="all relationships"> mixed</option>
+                        <option value="cites"> cites</option>
+                        <option value="uses"> uses</option>
+                        <option value="extends"> extends</option>
+                        <option value="authors"> authors</option>
+                        <option value="was published at"> was published at</option>
+                        <option value="evaluates on"> evaluates on</option>
+                        <option value="published"> published</option>
+                        <option value="implements"> implements</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-body">
+            <div class="graph-adder">
+{#                legend #}
+                <fieldset style="position: absolute; z-index: 1000; left: 20px;">
+                    <span class="color_legend dataset"></span> Dataset <br>
+                    <span class="color_legend person"></span> Person <br>
+                    <span class="color_legend venue"></span> Venue <br>
+                    <span class="color_legend paper"></span> Paper <br>
+                    <span class="color_legend code"></span> Code <br>
+                </fieldset>
+
+{#                add-on buttons #}
+                <div style="position: absolute; z-index: 1000; right: 20px; display: inline-flex; flex-direction: column">
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Hide relationships"
+                            data-toggle="button"
+                            aria-pressed="false" onclick="toggle_relas()">
+                        <i class="material-icons" id="rela_toggle">
+                            visibility
+                        </i>
+                    </button>
+
+{#                    <button type="button"#}
+{#                            class="btn btn-primary ego-button" title="Center"#}
+{#                            onclick="center()">#}
+{#                        <i class="material-icons">#}
+{#                            center_focus_strong#}
+{#                        </i>#}
+{#                    </button>#}
+
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Reset"
+                            onclick="reset_layout()">
+                        <i class="material-icons">
+                            refresh
+                        </i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="cy">
+            </div>
+        </div>
+    </div>
+
+
+    <p>{% if user.is_authenticated %}<a href="{% url 'comment_create' %}" class="btn btn-info mt-3 btn-md">
+        <span class="glyphicon glyphicon-plus"></span> Add Comment</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to comment</p>
+    {% endif %}
+    {% if num_comments > 0 %}
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h3>{{ num_comments }} Comments</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for comment in comments %}
+                        <li class="list-group-item shadow-sm mt-1">
+                            <p><strong>{{ comment.author }}</strong> says:</p>
+                            <p>
+                                <small>{{ comment.publication_date }}</small>
+                            </p>
+                            <p>{{ comment.text }}</p>
+                            {% if comment.created_by == user.id %}
+                                <a href="{% url 'comment_update' comment.id %}">Edit</a>
+                            {% endif %}
+                        </li>
+                        </ul>
+                    {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% load static %}
+    <script>
+        // concentric level value
+        var paper_count = 50;
+
+        // define layout options
+        var layout = {
+            name: 'concentric',
+            concentric: (node) => {
+                if (node.data('label') === "origin") return 1000;
+                // all levels have the same value => one big circle only
+                return paper_count;
+            },
+            padding: 20,
+            startAngle: 2 * Math.PI,
+            minNodeSpacing: 30
+        };
+
+        // node title width
+        var textMaxWidth = '80';
+
+        var defaultNodeStyle = {
+            'width': 20,
+            'height': 20,
+            'background-color': '#39acff',
+            'label': 'data(title)',
+            'text-opacity': 1,
+            'text-wrap': 'ellipsis',
+            'text-max-width': textMaxWidth,
+            'text-background-color': '#FFFFFF',
+            'text-outline-opacity': 1,
+            'text-outline-color': '#FFFFFF',
+            'text-outline-width': '1px',
+            'font-size': '10px',
+            'border-width': '1.5px',
+            'border-color': "#9d8b71",
+            'visibility': 'visible'
+
+        };
+
+        var defaultEdgeStyle = {
+            'width': 2,
+            'label': 'data(label)',
+            'line-color': '#2bd6ad',
+            'line-style': 'data(line)',
+            'curve-style': 'bezier',
+            'target-arrow-color': '#2bd6ad',
+            'target-arrow-shape': 'triangle',
+            'text-opacity': 1,
+            'text-outline-opacity': 1,
+            'text-outline-color': '#FFFFFF',
+            'text-outline-width': '1px',
+            'font-size': '9px',
+            'visibility': 'visible'
+
+        };
+
+        cy = cytoscape({
+            container: document.getElementById('cy'), // container to render in
+            elements: {{ ego_network | safe }},
+
+            // mouse wheel sensitivity, used for zooming
+            wheelSensitivity: 0.1,
+
+            layout: layout,
+
+            // max zoom factor
+            maxZoom: 2.0,
+
+            style: [ // styling the graph
+                {
+                    selector: 'node[type="Paper"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#39acff',
+                    },
+
+                },
+                {
+                    selector: 'node[label="origin"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'width': 30,
+                        'height': 30,
+                        'background-color': '#39acff',
+                    }
+                },
+                {
+                    selector: 'node[type="Person"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#ffb836',
+                        'label': 'data(last_name)',
+                    },
+
+                },
+                {
+                    selector: 'node[type="Venue"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#d97fff',
+                    },
+
+                },
+                {
+                    selector: 'node[type="Dataset"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#ff723d',
+                    },
+
+                },
+                {
+                    selector: 'node[type="Code"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#59d143',
+                    },
+
+                },
+                {
+                    selector: 'node[type="Comment"]',
+                    style: {
+                        ...defaultNodeStyle,
+                        'background-color': '#9d8b71',
+                    }
+                },
+                {
+                    selector: 'edge[label="cites"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#2bd6ad',
+                        'target-arrow-color': '#2bd6ad',
+                    }
+                },
+                {
+                    selector: 'edge[label="uses"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#4a8ee7',
+                        'target-arrow-color': '#4a8ee7',
+                    }
+                },
+                {
+                    selector: 'edge[label="extends"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#31c5ff',
+                        'target-arrow-color': '#31c5ff',
+                    }
+                },
+                {
+                    selector: 'edge[label="authors"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#ffb836',
+                        'target-arrow-color': '#ffb836',
+                    }
+                },
+                {
+                    selector: 'edge[label="evaluates on"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#ff723d',
+                        'target-arrow-color': '#ff723d',
+                    }
+                },
+                {
+                    selector: 'edge[label="published"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#ff607a',
+                        'target-arrow-color': '#ff607a',
+                    }
+                },
+                {
+                    selector: 'edge[label="was published at"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#d97fff',
+                        'target-arrow-color': '#d97fff',
+                    }
+                },
+                {
+                    selector: 'edge[label="implements"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#59d143',
+                        'target-arrow-color': '#59d143',
+                    }
+                },
+                {
+                    selector: 'edge[label="discusses"]',
+                    style: {
+                        ...defaultEdgeStyle,
+                        'line-color': '#9d8b71',
+                        'target-arrow-color': '#9d8b71',
+                    }
+                }
+            ],
+
+        });
+
+        // setting the minimum zoom factor to 80% of its initial zoom
+        cy.minZoom(cy.zoom()* 0.8);
+
+    </script>
+
+    <script src="{% static "js/ego-graph.js" %}"></script>
+
+{% endblock %}
