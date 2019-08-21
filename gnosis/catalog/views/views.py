@@ -217,8 +217,12 @@ def paper_detail(request, id):
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
 
-    # Retrieve all notes in the database.
-    notes = Note.objects.all()
+    # Retrieve all notes that created by the current user and on current paper.
+    notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
+    num_notes = len(notes)
+    print("The note retrieved from data is")
+    print(notes)
+    print(len(notes))
 
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
@@ -263,6 +267,7 @@ def paper_detail(request, id):
             "notes": notes,
             "comments": comments,
             "codes": codes,
+            "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
         },
