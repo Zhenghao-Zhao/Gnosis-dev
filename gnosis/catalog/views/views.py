@@ -218,10 +218,10 @@ def paper_detail(request, id):
         )
 
     # Retrieve all notes that created by the current user and on current paper.
+    notes = []
     if request.user.is_authenticated:
         notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
-    else:
-        notes = []
+
     num_notes = len(notes)
     print("The note retrieved from data is")
     print(notes)
