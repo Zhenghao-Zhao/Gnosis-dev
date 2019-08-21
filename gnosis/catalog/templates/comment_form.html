@@ -1,6 +1,10 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
+
+    {% load static %}
+
+
     <div class="mt-5">
         <h3>Share your thoughts!</h3>
 
@@ -9,11 +13,12 @@
             {{ form }}
             <br/>
 
-            <!-- recapthca v2 tickbox -->
-            <div class="g-recaptcha" data-sitekey="6Ld6z7IUAAAAAC-qA5q5CC58YJx8Td_g6wPJs_Pk"></div>
+            <!-- recapthca v2 checkbox -->
+            <div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback"
+                 data-sitekey="6Ld6z7IUAAAAAC-qA5q5CC58YJx8Td_g6wPJs_Pk"></div>
             <!-- end -->
 
-            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+            <input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit" disabled/>
         </form>
     </div>
 {% endblock %}

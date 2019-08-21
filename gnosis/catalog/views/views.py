@@ -7,6 +7,7 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.views.utils.import_functions import *
+from .utils.antispam import *
 
 from catalog.forms import (
     PaperForm,
@@ -1993,15 +1994,8 @@ def comment_create(request):
         form = CommentForm(instance=comment, data=request.POST)
         if form.is_valid():
 
-            ''' Begin reCAPTCHA validation '''
-            recaptcha_response = request.POST.get('g-recaptcha-response')
-            data = {
-                'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
-                'response': recaptcha_response
-            }
-            r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
-            result = r.json()
-            ''' End reCAPTCHA validation '''
+            # validate captcha test result
+            result = captcha_validate(request)
 
             if result['success']:
                 form.save()
