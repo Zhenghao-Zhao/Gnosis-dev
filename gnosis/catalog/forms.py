@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code, Note
+from .models import Paper, Person, Dataset, Venue, Comment, Code
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -308,39 +308,6 @@ class VenueForm(ModelForm):
             "keywords",
             "website",
         ]
-
-
-# class NoteCreateForm(ModelForm):
-#     class Meta:
-#         model = Note
-#         fields = ['text']
-#
-#
-class NoteForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(ModelForm, self).__init__(*args, **kwargs)
-
-        self.fields["text"].widget = forms.Textarea()
-        self.fields["text"].widget.attrs.update({"rows": "5"})
-        self.fields["text"].label = ""
-
-        for visible in self.visible_fields():
-            visible.field.widget.attrs["class"] = "form-control"
-            visible.field.widget.attrs.update({"style": "width:35em"})
-            print(visible.field.widget.attrs.items())
-
-    def clean_text(self):
-        return self.cleaned_data["text"]
-
-    def clean_publication_date(self):
-        return self.cleaned_data["publication_date"]
-
-    # def clean_author(self):
-    #     return self.cleaned_data['author']
-
-    class Meta:
-        model = Note
-        fields = ["text"]
 
 
 class CommentForm(ModelForm):
