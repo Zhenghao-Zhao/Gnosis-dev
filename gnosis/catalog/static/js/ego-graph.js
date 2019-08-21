@@ -1,3 +1,4 @@
+
 /************** resizable graph **************/
 // simulate stop resizing using timer
 var resizeTimer;
@@ -43,16 +44,15 @@ function toggle_options() {
     }
 }
 
-// /************** double click toggle **************/
-// // $(".graph-canvas").dblclick(
-// //     function () {
-// //         toggle_options();
-// //     }
-// // );
+/************** double click toggle **************/
+// $(".graph-canvas").dblclick(
+//     function () {
+//         toggle_options();
+//     }
+// );
 
-
-// collection of all nodes in the graph currently
-var collection = cy.nodes();
+// collection of all elements (nodes + edges) in the graph currently
+var collection = cy.elements();
 
 /************** center graph **************/
 // combines center and fit
@@ -67,20 +67,24 @@ function center() {
 /************** reset and re-render layout **************/
 // reset layout, all nodes return to initial positions
 function reset_layout() {
-    cy.layout(layout).run().then(center());
+    cy.layout(layout).run();
+    center();
 }
-
 
 /************** dropdown menu **************/
 function show_cites(value) {
     var cat = value;
 
     if (cat === "all relationships") {
-        collection = cy.nodes();
+        collection = cy.elements();
         cy.style().selector('node').style('visibility', 'visible').update();
         cy.style().selector('edge').style('visibility', 'visible').update();
     } else {
-        collection = cy.nodes('[label="' + cat + '"]');
+        // get all elements currently on the graph
+        collection = cy.filter((element) => {
+            return element.data('label') === cat || element.data('label') === "origin"
+        });
+
         cy.style().selector('node').style('visibility', 'hidden').update();
         cy.style().selector('edge').style('visibility', 'hidden').update();
         cy.style().selector('[label="' + cat + '"]').style('visibility', 'visible').update();
@@ -88,7 +92,6 @@ function show_cites(value) {
     }
 
     center();
-
 }
 
 /************** tooltip **************/
