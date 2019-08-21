@@ -34,7 +34,6 @@ from django.contrib import messages
 from catalog.views.views_codes import _code_find
 import re
 
-
 #
 # Paper Views
 #
