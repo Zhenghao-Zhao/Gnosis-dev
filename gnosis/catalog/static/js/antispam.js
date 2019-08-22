@@ -5,3 +5,9 @@ function dataCallback() {
 function dataExpiredCallback() {
     $('.captcha-submit').attr('disabled', true);
 }
+
+function dataErrorCallback(){
+    $('.captcha-submit').attr('disabled', true);
+    window.alert("Network connectivity error, please retry reCaptcha.")
+}
+
