@@ -1,12 +1,12 @@
-from django import forms
 from django.forms import ModelForm, Form
 from .models import Paper, Person, Dataset, Venue, Comment, Code
 from .models import ReadingGroup, ReadingGroupEntry
-from .models import Collection, CollectionEntry
+from .models import Collection
 from django.utils.safestring import mark_safe
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
 
+from django import forms
+
+from captcha.forms import ReCaptchaField
 
 #
 # Search forms
@@ -330,6 +330,8 @@ class CommentForm(ModelForm):
     def clean_publication_date(self):
         return self.cleaned_data["publication_date"]
 
+    captcha_field = ReCaptchaField(label="")
+
     # def clean_author(self):
     #     return self.cleaned_data['author']
 
@@ -463,3 +465,7 @@ class CollectionForm(ModelForm):
     class Meta:
         model = Collection
         fields = ["name", "description", "keywords"]
+
+
+
+

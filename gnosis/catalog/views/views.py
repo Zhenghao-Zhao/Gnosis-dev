@@ -7,7 +7,6 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.views.utils.import_functions import *
-from .utils.antispam import *
 
 from catalog.forms import (
     PaperForm,
@@ -287,9 +286,9 @@ def _get_node_ego_network(id, paper_title):
 
     results_all_out, meta = db.cypher_query(query_all_out, dict(paper_title=paper_title))
 
-    print("Results out are: ", results_all_out)
-
-    print("Results in are: ", results_all_in)
+    # print("Results out are: ", results_all_out)
+    #
+    # print("Results in are: ", results_all_in)
 
     ego_json = "{{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}'}} }}".format(
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
@@ -404,7 +403,6 @@ def _get_node_ego_network(id, paper_title):
                         middleNames = tpe.middle_name[1:-1].split(', ')
                         # concatenate middle names to get 'mn1 mn2 ...'
                         for i in range(len(middleNames)):
-
                             middleName = middleName + " " + middleNames[i][1:-1]
 
                     middleName = middleName.replace("'", r"\'")
@@ -1297,6 +1295,7 @@ def get_title(bs4obj, source_website):
                 return title_text
     return None
 
+
 def get_abstract(bs4obj, source_website):
     """
     Extract paper abstract from the source website.
@@ -1380,6 +1379,7 @@ def get_download_link(bs4obj, source_website, url):
         download_link = None
     return download_link
 
+
 def get_paper_info(url, source_website):
     """
     Extract paper information, title, abstract, and authors, from source website
@@ -1435,7 +1435,7 @@ def paper_create_from_url(request):
         # get the data from arxiv
         url = request.POST["url"]
 
-        validity,source_website,url = analysis_url(url)
+        validity, source_website, url = analysis_url(url)
         # return error message if the website is not supported
         if validity == False:
             form = PaperImportForm()
@@ -1993,20 +1993,16 @@ def comment_create(request):
         comment.author = user.username
         form = CommentForm(instance=comment, data=request.POST)
         if form.is_valid():
+            # # validate captcha test result
+            form.save()
+            comment.discusses.connect(paper)
+            del request.session["last-viewed-paper"]
+            return redirect("paper_detail", id=paper_id)
+        else:
+            form = CommentForm()
+            print('Invalid reCAPTCHA')
 
-            # validate captcha test result
-            result = captcha_validate(request)
-
-            if result['success']:
-                form.save()
-                comment.discusses.connect(paper)
-                del request.session["last-viewed-paper"]
-                return redirect("paper_detail", id=paper_id)
-            else:
-                form = CommentForm()
-                print('Invalid reCAPTCHA')
-
-            # add link from new comment to paper
+        # add link from new comment to paper
     else:  # GET
         form = CommentForm()
 

@@ -11,12 +11,6 @@
         <form action="" method="post">
             {% csrf_token %}
             {{ form }}
-            <br/>
-
-            <!-- recapthca v2 checkbox -->
-            <div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback"
-                 data-error-callback="dataErrorCallback" data-sitekey="6Ld6z7IUAAAAAC-qA5q5CC58YJx8Td_g6wPJs_Pk"></div>
-            <!-- end -->
 
             <input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit" disabled/>
         </form>
