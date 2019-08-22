@@ -21,16 +21,14 @@ class ReCAPTCHA(forms.Widget):
         Returns this widget rendered as HTML.
         """
         return mark_safe(
-            '<br/><div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback"'
-            ' data-sitekey="%(sitekey)s"></div>' % {
+            '<br/><div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback" '
+            'data-error-callback="dataErrorCallback" data-sitekey="%(sitekey)s"></div>' % {
                 'sitekey': self.sitekey
             })
 
     def value_from_datadict(self, data, files, name):
-        print(data)
         """
-        Given a dictionary of data and this widget's name, returns the value
-        of this widget. Returns None if it's not provided.
+        If field g-recaptcha-response is not empty, client-side verification is successful, otherwise not.
         """
         return data.get('g-recaptcha-response', None)
 

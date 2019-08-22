@@ -56,7 +56,10 @@ class ReCaptchaField(forms.Field):
                     'response': value
                 }, timeout=self.timeout)
 
+            # raise an error if response is unsuccessful
             resp.raise_for_status()
+
+        # if it's connection error, raise error according to default settings
         except IOError:
             if self.pass_on_error:
                 return
@@ -65,6 +68,9 @@ class ReCaptchaField(forms.Field):
                                   code='captcha-error')
 
         resp = resp.json()
+
+        # see error code reference at
+        # https://developers.google.com/recaptcha/docs/verify
 
         if not resp['success']:
             if 'missing-input-response' in resp['error-codes'] \
