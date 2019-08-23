@@ -6,7 +6,7 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.models import Endorsement, EndorsementEntry
-# from bookmark.models import Bookmark, BookmarkEntry
+from bookmark.models import Bookmark, BookmarkEntry
 
 
 from catalog.forms import (
@@ -263,7 +263,6 @@ def paper_detail(request, id):
         num_endorsements = endorsement[0].endorsement_count
     else:
         num_endorsements = 0
-
 
     print("ego_network_json: {}".format(ego_network_json))
     return render(
@@ -628,6 +627,45 @@ def paper_add_to_collection(request, id):
         "paper_add_to_collection.html",
         {"collections": all_collections, "message": message},
     )
+
+
+@login_required
+def paper_add_to_bookmark(request, pid, bid):
+
+    """input:
+    pid: paper id
+    bid: bookmark id
+    """
+    print("In paper_add_to_bookmark")
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=pid))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        raise Http404
+
+    try:
+        bookmark = get_object_or_404(Bookmark, pk=bid)
+    except:
+        bookmark = Bookmark()
+        bookmark.owner = request.user
+
+    # if this is POST request then add the entry
+    if request.method == "POST" and bookmark.owner == request.user:
+        bookmark_entry = BookmarkEntry()
+        bookmark_entry.paper_id = pid
+        bookmark_entry.paper_title = paper.title
+        bookmark_entry.bookmark = bookmark
+
+        try:
+            BookmarkEntry.filter(bookmark=bookmark).filter(paper=pid)[0]
+        except:
+            bookmark_entry.save()
+    else:
+        print("bookmark owner does not match user")
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
+
 
 
 @login_required

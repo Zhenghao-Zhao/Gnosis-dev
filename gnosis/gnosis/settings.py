@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_registration',
     'el_pagination',
     'catalog.apps.CatalogConfig',
-    # 'bookmark.apps.BookmarkConfig',
+    'bookmark.apps.BookmarkConfig',
     'home.apps.HomeConfig',
     'django_nose',
 ]

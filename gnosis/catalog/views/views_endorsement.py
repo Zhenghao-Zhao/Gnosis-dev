@@ -13,7 +13,6 @@ from datetime import date
 
 @login_required
 def endorsement_create(request, paper_id):
-    print("AAAAAAAAAAAAAAAAAAAAAAAAA")
     """Create an endorsement of a paper, update both databases"""
     user = request.user
 
@@ -25,22 +24,19 @@ def endorsement_create(request, paper_id):
 
         try:
             endorsement = Endorsement.objects.filter(paper=paper_id)[0]
-            print("CCCCCCCCCCCCCCCCCCCCCCCCCCCC", endorsement)
             endorsement.endorsement_count += 1
         except:
             endorsement = Endorsement()
             endorsement.endorsement_count = 1
             endorsement.paper = paper_id
-            print("DDDDDDDDDDDDDDDDDDDDDDDDDDDD", endorsement)
         endorsement.save()
-        print("EEEEEEEEEEEEEEEEEEEEEEEEE", Endorsement.objects.filter(paper=paper_id))
+        # print("EEEEEEEEEEEEEEEEEEEEEEEEE", Endorsement.objects.filter(paper=paper_id))
         return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": paper_id}))
     return render(request, "paper_detail.html")
 
 
 @login_required
 def endorsement_undo(request, paper_id):
-    print("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
     """Undo an endorsement of a paper, update both databases"""
     user = request.user
     if request.method == "POST":
