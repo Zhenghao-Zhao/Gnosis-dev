@@ -15,7 +15,7 @@ class ReCaptchaField(forms.Field):
     }
 
     def __init__(self, sitekey=None, secretkey=None, timeout=None,
-                 pass_on_error=None, **kwargs):
+                 pass_on_error=None, name=None, **kwargs):
         self.sitekey = sitekey or getattr(settings, 'RECAPTCHA_SITEKEY')
         self.secretkey = secretkey or getattr(settings, 'RECAPTCHA_SECRETKEY')
 
@@ -30,15 +30,18 @@ class ReCaptchaField(forms.Field):
             pass_on_error = getattr(settings, 'RECAPTCHA_PASS_ON_ERROR')
         self.pass_on_error = pass_on_error
 
+        if name is None:
+            name = 'Submit'
+
         if 'widget' not in kwargs:
             recaptcha_widget = import_string(
                 getattr(settings, 'RECAPTCHA_WIDGET'))
-            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey)
+            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey, name=name)
         else:
             recaptcha_widget = import_string(
                 kwargs['widget']
             )
-            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey)
+            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey, name=name)
 
         super(ReCaptchaField, self).__init__(**kwargs)
 

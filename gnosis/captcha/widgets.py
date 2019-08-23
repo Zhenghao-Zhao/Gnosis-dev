@@ -8,13 +8,14 @@ class ReCAPTCHA(forms.Widget):
     (with "I'm not robot" checkbox)
     """
 
-    def __init__(self, sitekey):
+    def __init__(self, sitekey, name):
         """
         :param sitekey: site key (public key)
         """
         super(ReCAPTCHA, self).__init__()
 
         self.sitekey = sitekey
+        self.name = name
 
     def render(self, name, value, *args, **kwargs):
         """
@@ -23,7 +24,8 @@ class ReCAPTCHA(forms.Widget):
         return mark_safe(
             '<br/><div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback" '
             'data-error-callback="dataErrorCallback" data-sitekey="%(sitekey)s"></div>'
-            '<input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit" disabled/>' % {
+            '<input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="%(name)s" disabled/>' % {
+                'name': self.name,
                 'sitekey': self.sitekey
             })
 
@@ -47,7 +49,8 @@ class InvisibleReCAPTCHA(ReCAPTCHA):
         return mark_safe(
             '<br/><button class="g-recaptcha btn btn-primary btn-lg float-right" data-sitekey="%(sitekey)s"'
             ' data-callback="onSubmit" >'
-            'Submit</button>' % {
+            '%(name)s</button>' % {
+                'name': self.name,
                 'sitekey': self.sitekey
             }
         )
