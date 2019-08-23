@@ -5,6 +5,8 @@ from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
+from catalog.models import Endorsement, EndorsementEntry
+# from bookmark.models import Bookmark, BookmarkEntry
 
 
 from catalog.forms import (
@@ -251,6 +253,18 @@ def paper_detail(request, id):
 
     main_paper_id = paper.id
 
+    if EndorsementEntry.objects.filter(paper=paper.id, user=request.user):
+        endorsed = True
+    else:
+        endorsed = False
+
+    endorsement = Endorsement.objects.filter(paper=paper.id)
+    if endorsement:
+        num_endorsements = endorsement[0].endorsement_count
+    else:
+        num_endorsements = 0
+
+
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -264,6 +278,8 @@ def paper_detail(request, id):
             "num_comments": num_comments,
             "ego_network": ego_network_json,
             "main_paper_id": main_paper_id,
+            "endorsed": endorsed,
+            "num_endorsements": num_endorsements,
         },
     )
 
@@ -546,7 +562,6 @@ def paper_connect_venue(request, id):
         "paper_connect_venue.html",
         {"form": form, "venues": None, "message": message},
     )
-
 
 @login_required
 def paper_add_to_collection_selected(request, id, cid):

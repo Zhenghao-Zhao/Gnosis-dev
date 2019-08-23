@@ -100,3 +100,9 @@ urlpatterns += [
     # path('collection/<int:id>/entry/<int:eid>/update', views.collection_entry_update, name='collection_entry_update'),
     path('collection/<int:id>/entry/<int:eid>/remove', views.collection_entry_remove, name='collection_entry_remove'),
 ]
+
+# for updating/creating a Endorsement
+urlpatterns += [
+    path('paper/create/<int:paper_id>', views.endorsement_create, name='endorsement_create'),
+    path('paper/undo/<int:paper_id>', views.endorsement_undo, name='endorsement_undo'),
+]

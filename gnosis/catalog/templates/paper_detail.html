@@ -47,11 +47,21 @@
             {% endif %}
 
             <h4 class="text-right">
-            `   {% if not user.is_authenticated %}
-                <a href={% url 'login' %}> Endorse</a>{% endif %}
+                {% if not user.is_authenticated %}
+                <a href={% url 'login' %}>Endorse</a>{% endif %}
                 {% if user.is_authenticated %} Connect with:
-{#                    <a href="{% url 'endorsement_create' %}" class="btn btn-link float-right">Endorse</a>#}
-                    <button class="btn btn-primary" onclick="endorsement_create()">E</button>
+                   {% if not endorsed %}
+                        <form action="{% url 'endorsement_create' paper_id=paper.id%}" method="post">
+                            {% csrf_token %}
+                            <input id="endorsement_button" type="submit" class="btn btn-primary btn-lg float-right" value="Endorse"/>
+                        </form>
+                   {% else %}
+                        <form action="{% url 'endorsement_undo' paper_id=paper.id%}" method="post">
+                            {% csrf_token %}
+                            <input id="undo_button" type="submit" class="btn btn-pink btn-lg float-right" value="UnEndorse"/>
+                        </form>
+                    {% endif %}
+                    {{ num_endorsements }}
                     <a
                     href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
                 || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
@@ -188,6 +198,7 @@
 
     {% load static %}
     <script>
+
         // concentric level value
         var paper_count = 50;
 
