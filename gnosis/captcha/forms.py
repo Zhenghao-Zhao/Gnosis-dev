@@ -19,6 +19,7 @@ class ReCaptchaField(forms.Field):
         self.sitekey = sitekey or getattr(settings, 'RECAPTCHA_SITEKEY')
         self.secretkey = secretkey or getattr(settings, 'RECAPTCHA_SECRETKEY')
 
+
         if timeout is None:
             timeout = getattr(settings, 'RECAPTCHA_TIMEOUT')
 
@@ -33,8 +34,11 @@ class ReCaptchaField(forms.Field):
             recaptcha_widget = import_string(
                 getattr(settings, 'RECAPTCHA_WIDGET'))
             kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey)
-        elif isinstance(kwargs['widget'], type):
-            kwargs['widget'] = kwargs['widget'](sitekey=self.sitekey)
+        else:
+            recaptcha_widget = import_string(
+                kwargs['widget']
+            )
+            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey)
 
         super(ReCaptchaField, self).__init__(**kwargs)
 

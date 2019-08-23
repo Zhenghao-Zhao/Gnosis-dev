@@ -330,7 +330,11 @@ class CommentForm(ModelForm):
     def clean_publication_date(self):
         return self.cleaned_data["publication_date"]
 
+    # add recaptcha to form
     captcha_field = ReCaptchaField(label="")
+
+    # captcha_field = ReCaptchaField('6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
+    #                                widget='captcha.widgets.InvisibleReCAPTCHA', label="")
 
     # def clean_author(self):
     #     return self.cleaned_data['author']

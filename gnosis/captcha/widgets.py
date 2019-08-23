@@ -22,7 +22,8 @@ class ReCAPTCHA(forms.Widget):
         """
         return mark_safe(
             '<br/><div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback" '
-            'data-error-callback="dataErrorCallback" data-sitekey="%(sitekey)s"></div>' % {
+            'data-error-callback="dataErrorCallback" data-sitekey="%(sitekey)s"></div>'
+            '<input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit" disabled/>' % {
                 'sitekey': self.sitekey
             })
 
@@ -33,20 +34,20 @@ class ReCAPTCHA(forms.Widget):
         return data.get('g-recaptcha-response', None)
 
 
-# class InvisibleReCAPTCHA(ReCAPTCHA):
-#     """
-#     Invisible reCAPTCHA widget.
-#     """
-#
-#     def render(self, name, value, *args, **kwargs):
-#         """
-#         Returns this widget rendered as HTML.
-#         """
-#
-#         return mark_safe(
-#             '<button class="g-recaptcha" data-sitekey="%(sitekey)s">'
-#             '%(name)s</button>' % {
-#                 'name': name,
-#                 'sitekey': self.sitekey
-#             }
-#         )
+class InvisibleReCAPTCHA(ReCAPTCHA):
+    """
+    Invisible reCAPTCHA widget.
+    """
+
+    def render(self, name, value, *args, **kwargs):
+        """
+        Returns this widget rendered as HTML.
+        """
+
+        return mark_safe(
+            '<br/><button class="g-recaptcha btn btn-primary btn-lg float-right" data-sitekey="%(sitekey)s"'
+            ' data-callback="onSubmit" >'
+            'Submit</button>' % {
+                'sitekey': self.sitekey
+            }
+        )
