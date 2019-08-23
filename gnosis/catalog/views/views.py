@@ -1315,14 +1315,7 @@ def get_abstract(bs4obj, source_website):
         if abstract is not None:
             abstract = abstract.get_text()
     elif source_website == "jmlr":
-        abstract = bs4obj.find("p", {"class": "abstract"})
-        if abstract is not None:
-            abstract = abstract.get_text()
-        else:
-            # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
-            abstract = bs4obj.find("h3")
-            if abstract is not None:
-                abstract = abstract.next_sibling
+        abstract = get_abstract_from_jmlr(bs4obj)
     elif source_website == "pmlr":
         abstract = bs4obj.find("div", {"id":"abstract"}).get_text().strip()
     elif source_website == "ieee":

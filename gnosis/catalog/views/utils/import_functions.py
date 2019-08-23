@@ -147,6 +147,19 @@ def get_abstract_from_ACM(bs4obj):
             abstract = abstract.get_text()
     return abstract
 
+def get_abstract_from_jmlr(bs4obj):
+    abstract = bs4obj.find("p", {"class": "abstract"})
+    if abstract is not None:
+        abstract = abstract.get_text()
+    else:
+        # for some papers from JMLR , the abstract is stored without a tag,so this will find the abstract
+        abstract = bs4obj.find("h3")
+        if abstract is not None:
+            abstract = abstract.next_sibling
+        if abstract.strip() is "":
+            abstract = abstract.next_sibling.text
+    return abstract
+
 def get_authors_from_arxiv(bs4obj):
     authorList = bs4obj.findAll("div", {"class": "authors"})
     if authorList:
