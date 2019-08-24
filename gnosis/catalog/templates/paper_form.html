@@ -11,13 +11,13 @@
         <p class="bg-info text-center">{{ message }}</p>
         {% endif %}
 
-        <form action="" method="post">
+        <form id="paper-form" action="" method="post">
             {% csrf_token %}
             <table class="w-75">
                 {{ form }}
             </table>
             <br/>
-            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+{#            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>#}
         </form>
           <h5><br/>*required</h5>
     </div>

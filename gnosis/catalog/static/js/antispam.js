@@ -11,9 +11,18 @@ function dataErrorCallback() {
     window.alert("Network connectivity error, please retry reCaptcha.")
 }
 
-function onSubmit(token) {
+// an example submit function. Its name must be unique.
+function onSubmitComment(token) {
+    // trigger submit on a unique form
     document.getElementById("comment-form").submit();
 }
+
+function onSubmitPaper(token) {
+    // trigger submit on a unique form
+    document.getElementById("paper-form").submit();
+}
+
+
 
 
 

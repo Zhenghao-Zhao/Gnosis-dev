@@ -2000,7 +2000,7 @@ def comment_create(request):
             return redirect("paper_detail", id=paper_id)
         else:
             form = CommentForm()
-            print('Invalid reCAPTCHA')
+            print('Invalid form!')
 
         # add link from new comment to paper
     else:  # GET

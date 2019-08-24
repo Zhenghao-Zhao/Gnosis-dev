@@ -8,7 +8,7 @@ class ReCAPTCHA(forms.Widget):
     (with "I'm not robot" checkbox)
     """
 
-    def __init__(self, sitekey, name):
+    def __init__(self, sitekey, name, submitfun):
         """
         :param sitekey: site key (public key)
         """
@@ -16,6 +16,7 @@ class ReCAPTCHA(forms.Widget):
 
         self.sitekey = sitekey
         self.name = name
+        self.submitfun = submitfun
 
     def render(self, name, value, *args, **kwargs):
         """
@@ -31,7 +32,7 @@ class ReCAPTCHA(forms.Widget):
 
     def value_from_datadict(self, data, files, name):
         """
-        If field g-recaptcha-response is not empty, client-side verification is successful, otherwise not.
+        Get the value of recaptcha, either has value in g-recaptcha-response or None
         """
         return data.get('g-recaptcha-response', None)
 
@@ -47,10 +48,11 @@ class InvisibleReCAPTCHA(ReCAPTCHA):
         """
 
         return mark_safe(
-            '<br/><button class="g-recaptcha btn btn-primary btn-lg float-right" data-sitekey="%(sitekey)s"'
-            ' data-callback="onSubmit" >'
+            '<br/><button class="g-recaptcha btn btn-primary btn-lg float-right captcha-submit" data-sitekey="%(sitekey)s"'
+            ' data-callback="%(submitfun)s">'
             '%(name)s</button>' % {
                 'name': self.name,
-                'sitekey': self.sitekey
+                'sitekey': self.sitekey,
+                'submitfun': self.submitfun
             }
         )

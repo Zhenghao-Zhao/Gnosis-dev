@@ -171,6 +171,9 @@ class PaperImportForm(Form):
         widget=forms.TextInput(attrs={"size": 60}),
     )
 
+    captcha_field = ReCaptchaField('onSubmitPaper', '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
+                                   widget='captcha.widgets.InvisibleReCAPTCHA', label="")
+
 
 class PersonForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -334,7 +337,10 @@ class CommentForm(ModelForm):
     captcha_field = ReCaptchaField(label="")
 
     # add recaptcha v2 invisible to form
-    # captcha_field = ReCaptchaField('6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
+    # param:
+    # required: submit function name
+    # have default: both keys, widget
+    # captcha_field = ReCaptchaField('onSubmitComment', '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
     #                                widget='captcha.widgets.InvisibleReCAPTCHA', label="")
 
     # def clean_author(self):
