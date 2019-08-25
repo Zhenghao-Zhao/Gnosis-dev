@@ -8,6 +8,7 @@ from django import forms
 
 from captcha.forms import ReCaptchaField
 
+
 #
 # Search forms
 #
@@ -67,6 +68,7 @@ class SearchPapersForm(Form):
     paper_title = forms.CharField(
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
+
 
 class PaperConnectionForm(Form):
     def __init__(self, *args, **kwargs):
@@ -164,15 +166,17 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-    # the label will now appear in two lines break at the br label
+        # the label will now appear in two lines break at the br label
         # label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
-        label= mark_safe("Source URL*"),
+        label=mark_safe("Source URL*"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
 
     captcha_field = ReCaptchaField('capt_2', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
-                                   widget='captcha.widgets.InvisibleReCAPTCHA', label="")
+                                   label="")
+
+    # widget='captcha.widgets.InvisibleReCAPTCHA'
 
 
 class PersonForm(ModelForm):
@@ -334,7 +338,7 @@ class CommentForm(ModelForm):
         return self.cleaned_data["publication_date"]
 
     captcha_field = ReCaptchaField('capt_1', '6Ld6z7IUAAAAAPgCXtYcOjFMKo4CSx_WY2YAxIaC',
-                                     label="")
+                                   label="")
 
     # def clean_author(self):
     #     return self.cleaned_data['author']
@@ -469,7 +473,3 @@ class CollectionForm(ModelForm):
     class Meta:
         model = Collection
         fields = ["name", "description", "keywords"]
-
-
-
-

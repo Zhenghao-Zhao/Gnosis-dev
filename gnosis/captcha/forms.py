@@ -29,11 +29,14 @@ class ReCaptchaField(forms.Field):
             pass_on_error = getattr(settings, 'RECAPTCHA_PASS_ON_ERROR')
         self.pass_on_error = pass_on_error
 
-        if 'widget' not in kwargs:
-            recaptcha_widget = import_string(
-                getattr(settings, 'RECAPTCHA_WIDGET'))
-        else:
-            recaptcha_widget = import_string(kwargs['widget'])
+        recaptcha_widget = import_string(
+            getattr(settings, 'RECAPTCHA_WIDGET'))
+
+        # if 'widget' not in kwargs:
+        #     recaptcha_widget = import_string(
+        #         getattr(settings, 'RECAPTCHA_WIDGET'))
+        # else:
+        #     recaptcha_widget = import_string(kwargs['widget'])
 
         kwargs['widget'] = recaptcha_widget(widget_id=widget_id)
 

@@ -31,19 +31,19 @@ class ReCAPTCHA(forms.Widget):
         return data.get('g-recaptcha-response', None)
 
 
-class InvisibleReCAPTCHA(ReCAPTCHA):
-    """
-    Invisible reCAPTCHA widget.
-    """
-
-    def render(self, name, value, *args, **kwargs):
-        """
-        Returns this widget rendered as HTML.
-        """
-
-        return mark_safe(
-            '<div id="%(id)s"></div> '
-            '<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>'
-            % {
-                'id': self.widget_id
-            })
+# class InvisibleReCAPTCHA(ReCAPTCHA):
+#     """
+#     Invisible reCAPTCHA widget.
+#     """
+#
+#     def render(self, name, value, *args, **kwargs):
+#         """
+#         Returns this widget rendered as HTML.
+#         """
+#
+#         return mark_safe(
+#             '<div id="%(id)s"></div> '
+#             '<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>'
+#             % {
+#                 'id': self.widget_id
+#             })
