@@ -8,26 +8,20 @@ class ReCAPTCHA(forms.Widget):
     (with "I'm not robot" checkbox)
     """
 
-    def __init__(self, sitekey, name, submitfun):
-        """
-        :param sitekey: site key (public key)
-        """
+    def __init__(self, widget_id):
+
         super(ReCAPTCHA, self).__init__()
 
-        self.sitekey = sitekey
-        self.name = name
-        self.submitfun = submitfun
+        self.widget_id = widget_id
 
     def render(self, name, value, *args, **kwargs):
         """
         Returns this widget rendered as HTML.
         """
         return mark_safe(
-            '<br/><div class="g-recaptcha" data-callback="dataCallback" data-expired-callback="dataExpiredCallback" '
-            'data-error-callback="dataErrorCallback" data-sitekey="%(sitekey)s"></div>'
-            '<input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="%(name)s" disabled/>' % {
-                'name': self.name,
-                'sitekey': self.sitekey
+            '<div id="%(id)s"></div> '
+            '<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>' % {
+                'id': self.widget_id
             })
 
     def value_from_datadict(self, data, files, name):
@@ -48,11 +42,8 @@ class InvisibleReCAPTCHA(ReCAPTCHA):
         """
 
         return mark_safe(
-            '<br/><button class="g-recaptcha btn btn-primary btn-lg float-right captcha-submit" data-sitekey="%(sitekey)s"'
-            ' data-callback="%(submitfun)s">'
-            '%(name)s</button>' % {
-                'name': self.name,
-                'sitekey': self.sitekey,
-                'submitfun': self.submitfun
-            }
-        )
+            '<div id="%(id)s"></div> '
+            '<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>'
+            % {
+                'id': self.widget_id
+            })

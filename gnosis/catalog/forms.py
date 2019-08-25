@@ -171,7 +171,7 @@ class PaperImportForm(Form):
         widget=forms.TextInput(attrs={"size": 60}),
     )
 
-    captcha_field = ReCaptchaField('onSubmitPaper', '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
+    captcha_field = ReCaptchaField('capt_2', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
                                    widget='captcha.widgets.InvisibleReCAPTCHA', label="")
 
 
@@ -333,15 +333,8 @@ class CommentForm(ModelForm):
     def clean_publication_date(self):
         return self.cleaned_data["publication_date"]
 
-    # add recaptcha v2 checkbox to form
-    captcha_field = ReCaptchaField(label="")
-
-    # add recaptcha v2 invisible to form
-    # param:
-    # required: submit function name
-    # have default: both keys, widget
-    # captcha_field = ReCaptchaField('onSubmitComment', '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24', '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw',
-    #                                widget='captcha.widgets.InvisibleReCAPTCHA', label="")
+    captcha_field = ReCaptchaField('capt_1', '6Ld6z7IUAAAAAPgCXtYcOjFMKo4CSx_WY2YAxIaC',
+                                     label="")
 
     # def clean_author(self):
     #     return self.cleaned_data['author']

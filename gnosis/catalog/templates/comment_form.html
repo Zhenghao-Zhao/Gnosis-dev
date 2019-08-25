@@ -4,6 +4,19 @@
 
     {% load static %}
 
+    <script>
+
+        var onloadCallback = function () {
+            grecaptcha.render('capt_1', {
+                'sitekey': '6Ld6z7IUAAAAAC-qA5q5CC58YJx8Td_g6wPJs_Pk',
+                'size': 'normal',
+                'callback': dataCallback,
+                'expired-callback': dataExpiredCallback
+            });
+
+        };
+
+    </script>
 
     <div class="mt-5">
         <h3>Share your thoughts!</h3>
@@ -11,7 +24,10 @@
         <form id="comment-form" action="" method="post">
             {% csrf_token %}
             {{ form }}
-{#            <input type="submit" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit"/>#}
+            <br/>
+            <input type="submit" id="action" class="btn btn-primary btn-lg float-right captcha-submit" value="Submit"
+                   disabled/>
         </form>
     </div>
+
 {% endblock %}

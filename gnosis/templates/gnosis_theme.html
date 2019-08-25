@@ -10,15 +10,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.3.3/cytoscape.min.js"></script>
-    <script src='https://www.google.com/recaptcha/api.js'></script>
+
+    {% load static %}
+
+    <script src="{% static 'js/antispam.js' %}"></script>
+
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
 
-    {% load static %}
-    <script src="{% static 'js/antispam.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/gnosis_theme.css' %}">
     <link rel="stylesheet" href="{% static 'css/ego_map.css' %}">
 </head>
@@ -27,6 +29,7 @@
         max-width: 1024px;
     }
 </style>
+
 <body>
 
 <nav id="big" class="navbar navbar-expand-sm mb-2 shadow bg-white navbar-light sticky-top">

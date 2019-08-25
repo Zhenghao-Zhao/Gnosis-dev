@@ -14,9 +14,9 @@ class ReCaptchaField(forms.Field):
             'reCAPTCHA cannot be checked due configuration problem.'),
     }
 
-    def __init__(self, submitfun=None, sitekey=None, secretkey=None, timeout=None,
-                 pass_on_error=None, name=None, **kwargs):
-        self.sitekey = sitekey or getattr(settings, 'RECAPTCHA_SITEKEY')
+    def __init__(self, widget_id=None, secretkey=None, timeout=None,
+                 pass_on_error=None, **kwargs):
+
         self.secretkey = secretkey or getattr(settings, 'RECAPTCHA_SECRETKEY')
 
         if timeout is None:
@@ -29,18 +29,13 @@ class ReCaptchaField(forms.Field):
             pass_on_error = getattr(settings, 'RECAPTCHA_PASS_ON_ERROR')
         self.pass_on_error = pass_on_error
 
-        if name is None:
-            name = 'Submit'
-
         if 'widget' not in kwargs:
             recaptcha_widget = import_string(
                 getattr(settings, 'RECAPTCHA_WIDGET'))
-            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey, name=name, submitfun=submitfun)
         else:
-            recaptcha_widget = import_string(
-                kwargs['widget']
-            )
-            kwargs['widget'] = recaptcha_widget(sitekey=self.sitekey, name=name, submitfun=submitfun)
+            recaptcha_widget = import_string(kwargs['widget'])
+
+        kwargs['widget'] = recaptcha_widget(widget_id=widget_id)
 
         super(ReCaptchaField, self).__init__(**kwargs)
 

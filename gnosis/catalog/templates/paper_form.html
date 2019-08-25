@@ -1,31 +1,65 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-<div class="card shadow-sm mt-3">
-    <div class="card-header">
-        <h3>Import Paper</h3>
-    </div>
-    <div class="card-body">
 
-        {% if message %}
-        <p class="bg-info text-center">{{ message }}</p>
-        {% endif %}
+    <script>
+        var captWidgetId;
 
-        <form id="paper-form" action="" method="post">
-            {% csrf_token %}
-            <table class="w-75">
-                {{ form }}
-            </table>
-            <br/>
-{#            <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>#}
-        </form>
-          <h5><br/>*required</h5>
-    </div>
-    <div class="card-footer">
-                <p>You can import papers from the following websites, arXiv.org, papers.nips.cc, jmlr.org, ieeexplore.ieee.org, and dl.acm.org.</p>
-        <p>For all websites, please, provide the URL with the paper abstract, e.g, https://arxiv.org/abs/1607.00653.</p>
+        function onSubmitPaper(token) {
+            // trigger submit on a unique form
+            document.getElementById("paper-form").submit();
+        }
 
+        var onloadCallback = function () {
+            captWidgetId = grecaptcha.render('capt_2', {
+                'sitekey': '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24',
+                'size': 'invisible',
+                'callback': onSubmitPaper,
+            });
+        };
+
+        function validate(e) {
+            e.preventDefault();
+            grecaptcha.execute(captWidgetId);
+        }
+
+        function onload() {
+            var element = document.getElementById("actionPaper");
+            element.onclick = validate;
+        }
+
+    </script>
+
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-header">
+            <h3>Import Paper</h3>
+        </div>
+        <div class="card-body">
+
+            {% if message %}
+                <p class="bg-info text-center">{{ message }}</p>
+            {% endif %}
+
+            <form id="paper-form" action="" method="post">
+                {% csrf_token %}
+                <table class="w-75">
+                    {{ form }}
+                </table>
+                <br/>
+                <input id="actionPaper" type="submit" class="btn btn-primary btn-lg float-right"
+                       value="Submit"/>
+            </form>
+            <h5><br/>*required</h5>
+        </div>
+        <div class="card-footer">
+            <p>You can import papers from the following websites, arXiv.org, papers.nips.cc, jmlr.org,
+                ieeexplore.ieee.org, and dl.acm.org.</p>
+            <p>For all websites, please, provide the URL with the paper abstract, e.g,
+                https://arxiv.org/abs/1607.00653.</p>
+
+        </div>
     </div>
-</div>
+    <script>onload();</script>
 
 {% endblock %}
