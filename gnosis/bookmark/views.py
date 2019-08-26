@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, get_object_or_404
-from .models import Bookmark, BookmarkEntry
+from bookmark.models import Bookmark, BookmarkEntry
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-
 
 
 @login_required
@@ -51,4 +51,3 @@ def bookmark_entry_remove(request, id, eid):
                 print("Bookmark does not belong to user.")
 
     return HttpResponseRedirect(reverse("bookmark"))
-
