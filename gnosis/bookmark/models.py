@@ -4,21 +4,18 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 
-# Bookmarks are private folders to provide fast access to user-stored entities
+# Create your models here.
+# Bookmarks are private folders for user to store their findings so that they have fast access to them.
 class Bookmark(models.Model):
     """A Bookmark model"""
 
     # Fields
-    created_at = models.DateField(auto_now_add=True, auto_now=False)
+
     updated_at = models.DateField(null=True)
 
     owner = models.ForeignKey(to=User,
                               on_delete=models.CASCADE,
                               related_name="bookmarks")
-
-    # Metadata
-    class Meta:
-        ordering = ['-created_at']
 
     # Methods
     def get_absolute_url(self):
@@ -26,7 +23,7 @@ class Bookmark(models.Model):
 
 
 class BookmarkEntry(models.Model):
-    """An entry, that is paper, in a bookmark"""
+    """An entry, that is paper or code."""
 
     # Fields
     bookmark = models.ForeignKey(to=Bookmark,
