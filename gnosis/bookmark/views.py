@@ -5,7 +5,6 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 
 
-<<<<<<< HEAD
 # @login_required
 # def bookmark(request):
 #
@@ -21,13 +20,10 @@ from django.http import HttpResponseRedirect
 #     return render(
 #         request, "bookmark.html", {"bookmark": bookmark, "message": message}
 #     )
-=======
->>>>>>> 42d415e6501159e4a0555db8f5cb6e572bcc0ddf
 
 
 @login_required
 def bookmark(request):
-<<<<<<< HEAD
 
     bookmark = Bookmark.objects.filter(owner = request.user)
 
@@ -41,21 +37,6 @@ def bookmark(request):
     if user_bookmark.owner == request.user:
         papers = user_bookmark.papers.order_by('-created_at')
 
-=======
-
-    bookmark = Bookmark.objects.filter(owner = request.user)
-
-    if not bookmark:
-        user_bookmark = Bookmark()
-        user_bookmark.owner = request.user
-        user_bookmark.save()
-    else:
-        user_bookmark = bookmark[0]
-
-    if user_bookmark.owner == request.user:
-        papers = user_bookmark.papers.order_by('-created_at')
-
->>>>>>> 42d415e6501159e4a0555db8f5cb6e572bcc0ddf
         return render(request, "bookmark.html", {"bookmark": user_bookmark,
                                                             "papers": papers, })
 
