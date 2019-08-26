@@ -5,6 +5,11 @@ from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
 
+from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV2Invisible, ReCaptchaV2Checkbox
+
+from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV
+
 
 #
 # Search forms
@@ -20,6 +25,7 @@ class SearchAllForm(Form):
         return self.cleaned_data["search_keywords"]
 
     search_keywords = forms.CharField(required=True)
+
 
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
@@ -77,6 +83,7 @@ class SearchPapersForm(Form):
     paper_title = forms.CharField(
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
+
 
 class PaperConnectionForm(Form):
     def __init__(self, *args, **kwargs):
@@ -174,9 +181,9 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-    # the label will now appear in two lines break at the br label
+        # the label will now appear in two lines break at the br label
         # label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
-        label= mark_safe("Source URL*"),
+        label=mark_safe("Source URL*"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
@@ -341,7 +348,28 @@ class CommentForm(ModelForm):
         return self.cleaned_data["publication_date"]
 
     # def clean_author(self):
-    #     return self.cleaned_data['author']
+    #      return self.cleaned_data['author']
+
+    # recaptcha checkbox
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-size': 'compact',
+                'data-callback': 'dataCallback',
+                'data-expired-callback': 'dataExpiredCallback',
+                'data-error-callback': 'dataErrorCallback'
+            }
+        ),
+        label=''
+    )
+
+    # recaptcha invisible
+    # captcha = ReCaptchaField(
+    #     public_key=RECAPTCHA_PUBLIC_KEY_INV,
+    #     private_key=RECAPTCHA_PRIVATE_KEY_INV,
+    #     widget=ReCaptchaV2Invisible,
+    #     label=''
+    # )
 
     class Meta:
         model = Comment

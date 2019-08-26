@@ -31,6 +31,13 @@ ALLOWED_HOSTS = []
 
 SESSION_SAVE_EVERY_REQUEST = True
 
+# keys for reCaptcha v2 checkbox
+RECAPTCHA_PUBLIC_KEY = '6Ld6z7IUAAAAAC-qA5q5CC58YJx8Td_g6wPJs_Pk'
+RECAPTCHA_PRIVATE_KEY = '6Ld6z7IUAAAAAPgCXtYcOjFMKo4CSx_WY2YAxIaC'
+
+RECAPTCHA_PUBLIC_KEY_INV = '6LdbXLQUAAAAAGynHciK-BML9CthUvtrUm_Aim24'
+RECAPTCHA_PRIVATE_KEY_INV = '6LdbXLQUAAAAACLkjt-f0tZ0mY1aXR6jghMg2tBw'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,6 +53,8 @@ INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
     'home.apps.HomeConfig',
     'django_nose',
+    'recaptcha',
+    'captcha'
 ]
 
 MIDDLEWARE = [
