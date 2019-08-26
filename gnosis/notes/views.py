@@ -41,7 +41,7 @@ def note_create(request):
     else:  # GET
         form = NoteForm()
 
-    return render(request, "note_create.html", {"form": form})
+    return render(request, "notes/note_create.html", {"form": form})
 
 
 @login_required
@@ -63,7 +63,7 @@ def note_update(request, id):
             initial={"text": note.text, "date_posted": note.date_posted}
         )
 
-    return render(request, "note_update.html", {"form": form, "note": note})
+    return render(request, "notes/note_update.html", {"form": form, "note": note})
 
 
 @login_required()
