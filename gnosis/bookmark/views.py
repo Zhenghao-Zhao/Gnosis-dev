@@ -1,53 +1,55 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, get_object_or_404
-from bookmark.models import Bookmark, BookmarkEntry
+from .models import Bookmark, BookmarkEntry
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+
+
 
 
 @login_required
 def bookmark(request):
 
-    bookmark = Bookmark.objects.filter(owner=request.user)
+    bookmark = Bookmark.objects.filter(owner = request.user)
 
-    message = None
-    print("Bookmark view!")
-    return render(
-        request, "bookmark.html", {"bookmark": bookmark, "message": message}
-    )
+    if not bookmark:
+        user_bookmark = Bookmark()
+        user_bookmark.owner = request.user
+        user_bookmark.save()
+    else:
+        user_bookmark = bookmark[0]
 
+    if user_bookmark.owner == request.user:
+        papers = user_bookmark.papers.order_by('-created_at')
 
-@login_required
-def bookmark_detail(request, id):
-
-    bookmark = get_object_or_404(Bookmark, pk=id)
-
-    if bookmark.owner == request.user:
-        papers = bookmark.papers.order_by('-created_at')
-        print(papers)
-
-        return render(request, "bookmark_detail.html", {"bookmark": bookmark,
-                                                          "papers": papers, })
+        return render(request, "bookmark.html", {"bookmark": user_bookmark,
+                                                            "papers": papers, })
 
     return HttpResponseRedirect(reverse("bookmark"))
 
 
+
+
 @login_required
-def bookmark_entry_remove(request, id, eid):
+def bookmark_entry_remove(request, pid):
     """Delete view"""
-    print("WARNING: Deleting bookmark entry with id {}".format(eid))
+    print("WARNING: Deleting bookmark entry with pid {}".format(pid))
 
-    bookmark = get_object_or_404(Bookmark, pk=id)
-    if bookmark:
-            if bookmark.owner == request.user:
-                print("Found bookmark")
-                b_entry = get_object_or_404(BookmarkEntry, pk=eid)
-                # c_entry = collection.papers.filter(id=eid)
-                b_entry.delete()
-                print("   ==> Deleted bookmark entry.")
-                return HttpResponseRedirect(reverse("bookmark_detail", kwargs={"id": id}))
-            else:
-                print("Bookmark does not belong to user.")
+    # check if the bookmark for the user exists, if not, create one
+    try:
+        bookmark = Bookmark.objects.filter(owner = request.user)[0]
+        print("  ==> bookmark found")
+    except:
+        bookmark = Bookmark()
+        bookmark.owner = request.user
+        bookmark.save()
 
-    return HttpResponseRedirect(reverse("bookmark"))
+
+    try:
+        b_entry = bookmark.papers.filter(paper_id=pid)[0]
+        print("   ==> entry found")
+        b_entry.delete()
+    except:
+        print("   ==> No such entry.")
+
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
