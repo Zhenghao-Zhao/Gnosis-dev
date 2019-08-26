@@ -16,6 +16,7 @@ def endorsement_create(request, paper_id):
     """Create an endorsement of a paper, update both databases"""
     user = request.user
 
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAA", request.method)
     if request.method == "POST":
         endorsement_entry = EndorsementEntry()
         endorsement_entry.user = user
@@ -31,8 +32,7 @@ def endorsement_create(request, paper_id):
             endorsement.paper = paper_id
         endorsement.save()
         # print("EEEEEEEEEEEEEEEEEEEEEEEEE", Endorsement.objects.filter(paper=paper_id))
-        return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": paper_id}))
-    return render(request, "paper_detail.html")
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": paper_id}))
 
 
 @login_required

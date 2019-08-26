@@ -264,6 +264,15 @@ def paper_detail(request, id):
     else:
         num_endorsements = 0
 
+    try:
+        bookmark = Bookmark.objects.filter(owner=request.user)[0]
+        print("bookmark found:", request.user)
+        b = bookmark.papers.filter(paper_id = paper.id)[0]
+        print("entry found:", paper.id)
+        bookmarked = True
+    except:
+        bookmarked = False
+
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -279,6 +288,7 @@ def paper_detail(request, id):
             "main_paper_id": main_paper_id,
             "endorsed": endorsed,
             "num_endorsements": num_endorsements,
+            "bookmarked": bookmarked,
         },
     )
 
@@ -630,11 +640,10 @@ def paper_add_to_collection(request, id):
 
 
 @login_required
-def paper_add_to_bookmark(request, pid, bid):
+def paper_add_to_bookmark(request, pid):
 
     """input:
     pid: paper id
-    bid: bookmark id
     """
     print("In paper_add_to_bookmark")
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
@@ -646,25 +655,24 @@ def paper_add_to_bookmark(request, pid, bid):
         raise Http404
 
     try:
-        bookmark = get_object_or_404(Bookmark, pk=bid)
+        bookmark = Bookmark.objects.filter(owner=request.user)[0]
     except:
         bookmark = Bookmark()
         bookmark.owner = request.user
+        bookmark.save()
 
     # if this is POST request then add the entry
-    if request.method == "POST" and bookmark.owner == request.user:
-        bookmark_entry = BookmarkEntry()
-        bookmark_entry.paper_id = pid
-        bookmark_entry.paper_title = paper.title
-        bookmark_entry.bookmark = bookmark
-
+    if request.method == "POST":
         try:
-            BookmarkEntry.filter(bookmark=bookmark).filter(paper=pid)[0]
+            x = bookmark.papers.filter(paper_id=pid)[0]
         except:
+            print("  ==> creating entry")
+            bookmark_entry = BookmarkEntry()
+            bookmark_entry.paper_id = pid
+            bookmark_entry.paper_title = paper.title
+            bookmark_entry.bookmark = bookmark
             bookmark_entry.save()
-    else:
-        print("bookmark owner does not match user")
-    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid,}))
 
 
 
