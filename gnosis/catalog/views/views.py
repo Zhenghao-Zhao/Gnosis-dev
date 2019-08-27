@@ -253,9 +253,13 @@ def paper_detail(request, id):
 
     main_paper_id = paper.id
 
-    if EndorsementEntry.objects.filter(paper=paper.id, user=request.user):
-        endorsed = True
-    else:
+    # catch the case when the user is not logged in
+    try:
+        if EndorsementEntry.objects.filter(paper=paper.id, user=request.user):
+            endorsed = True
+        else:
+            endorsed = False
+    except:
         endorsed = False
 
     endorsement = Endorsement.objects.filter(paper=paper.id)

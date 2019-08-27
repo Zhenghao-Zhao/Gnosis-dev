@@ -311,7 +311,7 @@ class CollectionEntry(models.Model):
 
 
 class Endorsement(models.Model):
-    """An endorsement model for papers"""
+    """An endorsement model for papers, mainly records the time of the latest endorsement, endorsement counts etc"""
 
     # Fields
     paper = models.IntegerField(null=False, blank=False)

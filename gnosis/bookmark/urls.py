@@ -3,5 +3,5 @@ from . import views
 
 # for updating/creating a Endorsement
 urlpatterns = [
-    path('bookmark', views.bookmark, name='bookmarks'),
+    path('', views.bookmark, name='bookmarks'),
 ]
