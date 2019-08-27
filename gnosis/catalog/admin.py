@@ -7,3 +7,4 @@ admin.site.register(ReadingGroup)
 admin.site.register(ReadingGroupEntry)
 admin.site.register(Collection)
 admin.site.register(CollectionEntry)
+

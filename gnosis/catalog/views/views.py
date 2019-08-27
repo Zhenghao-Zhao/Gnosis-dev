@@ -3,6 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.views.utils.import_functions import *
@@ -12,7 +13,7 @@ from catalog.forms import (
     DatasetForm,
     VenueForm,
     CommentForm,
-    PaperImportForm,
+    PaperImportForm
 )
 from catalog.forms import (
     SearchVenuesForm,
@@ -219,6 +220,15 @@ def paper_detail(request, id):
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
 
+    # Retrieve all notes that created by the current user and on current paper.
+    notes = []
+    if request.user.is_authenticated:
+        notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
+
+    num_notes = len(notes)
+    print("The note retrieved from data is")
+    print(notes)
+
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
     # authors is a list of strings so just concatenate the strings.
@@ -259,8 +269,10 @@ def paper_detail(request, id):
             "paper": paper,
             "venue": venue,
             "authors": authors,
+            "notes": notes,
             "comments": comments,
             "codes": codes,
+            "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
         },
@@ -402,7 +414,6 @@ def _get_node_ego_network(id, paper_title):
                         middleNames = tpe.middle_name[1:-1].split(', ')
                         # concatenate middle names to get 'mn1 mn2 ...'
                         for i in range(len(middleNames)):
-
                             middleName = middleName + " " + middleNames[i][1:-1]
 
                     middleName = middleName.replace("'", r"\'")

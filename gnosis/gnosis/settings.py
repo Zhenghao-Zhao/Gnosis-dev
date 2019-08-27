@@ -28,7 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 SESSION_SAVE_EVERY_REQUEST = True
 
 # Application definition
@@ -71,7 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.request', ## For EL-pagination
+                'django.template.context_processors.request',  ## For EL-pagination
             ],
         },
     },
@@ -92,7 +91,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
@@ -111,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
@@ -124,7 +121,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
@@ -150,3 +146,6 @@ NOSE_ARGS = [
     '--cover-package=catalog',
     '--cover-html',
 ]
+
+# Add notes app
+INSTALLED_APPS += ['notes.apps.NotesConfig', ]
