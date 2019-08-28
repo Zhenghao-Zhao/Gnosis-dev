@@ -4,7 +4,7 @@
     height: 20px;
 }
 
-.legend_label{
+.legend_label {
     font-size: 100%;
 }
 
@@ -35,6 +35,16 @@
 .ego-button {
     text-align: center;
     margin: 2px;
+}
+
+.ego-button-container {
+    position: absolute;
+    z-index: 1000;
+    right: 20px;
+    display: inline-flex;
+    height: 80px;
+    justify-content: space-evenly;
+    flex-direction: column
 }
 
 #menu-button {
