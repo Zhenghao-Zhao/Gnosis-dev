@@ -117,7 +117,7 @@
                 </fieldset>
 
 {#                add-on buttons #}
-                <div style="position: absolute; z-index: 1000; right: 20px; display: inline-flex; flex-direction: column">
+                <div class="ego-button-container">
                     <button type="button"
                             class="btn btn-primary ego-button" title="Hide relationships"
                             data-toggle="button"
@@ -218,17 +218,18 @@
         var layout = {
             name: 'concentric',
             concentric: (node) => {
-                if (node.data('label') === "origin") return 1000;
+                if (node.data('label') === "origin") return paper_count + 50;
                 // all levels have the same value => one big circle only
                 return paper_count;
             },
             padding: 20,
             startAngle: 2 * Math.PI,
-            minNodeSpacing: 30
+            minNodeSpacing: 25,
+            nodeDimensionsIncludeLabels: true,
         };
 
         // node title width
-        var textMaxWidth = '80';
+        var textMaxWidth = '100';
 
         var defaultNodeStyle = {
             'width': 20,
