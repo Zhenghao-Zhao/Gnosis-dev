@@ -189,7 +189,7 @@
         var layout = {
             name: 'concentric',
             concentric: (node) => {
-                if (node.data('label') === "origin") return 1000;
+                if (node.data('label') === "origin") return paper_count + 50;
                 // all levels have the same value => one big circle only
                 return paper_count;
             },
