@@ -4,7 +4,7 @@ from django.test import TestCase
 import datetime as dt
 
 # Create your tests here.
-# To run this test, use command: py -3 manage.py test tests.test_form_paper
+# To run this test, use command: py -3 manage.py test tests.test_form
 
 
 #

@@ -7,7 +7,8 @@
             <h3>{{ paper.title }}</h3>
 
             <h4>
-                <a href={{ paper.download_link }} class="btn btn-primary" role="button" target="_blank">Download</a>
+                <div style="display: flex; align-content: space-between; justify-content: space-between">
+                    <div><a href={{ paper.download_link }} class="btn btn-primary" role="button" target="_blank">Download</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'paper_add_to_group' paper.id %}" class="btn btn-primary"
                        role="button">
@@ -18,13 +19,58 @@
                     <a href="{% url 'paper_update' paper.id %}" class="btn btn-danger btn-sm"
                        role="button">
                         Edit</a>
+                    </div>
+
+                    <div style="display: flex;align-content: space-between; justify-content: space-between; width: 22%;">
+
+                    {% if not endorsed %}
+{#                        <form action="{% url 'endorsement_create' paper_id=paper.id%}" method="post">#}
+{#                            {% csrf_token %}#}
+{#                            <input id="endorsement_button" type="submit" class="btn btn-primary  float-right" value="Endorse {{ num_endorsements }}"/>#}
+{#                        </form>#}
+                        <form action="{% url 'endorsement_create' paper_id=paper.id%}" method = "post">
+                            {% csrf_token %}
+                            <button name="endorse" value="endorse" style="border: none; outline: none !important;
+                            background: none;"><img src="https://img.icons8.com/ultraviolet/50/000000/blunt-bulb.png">{{ num_endorsements }}</button>
+                        </form>
+
+                    {% else %}
+                        <form action="{% url 'endorsement_undo' paper_id=paper.id%}" method="post">
+                            {% csrf_token %}
+                            <button name="undo_endorse" value="endorse" style="border: none; outline: none !important;
+                            background: none;"><img src="https://img.icons8.com/officel/50/000000/blunt-bulb.png">{{ num_endorsements }}</button>
+                        </form>
+                    {% endif %}
+
+                    {% if not bookmarked %}
+                        <form action="{% url 'paper_add_to_bookmark' pid=paper.id%}" method="post">
+                            {% csrf_token %}
+                        <button name="add_bookmark_button" value="endorse" style="border: none;outline: none !important;
+                            background: none;"><img src="https://img.icons8.com/ios/50/000000/add-bookmark.png"></button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'bookmark_entry_remove' pid=paper.id%}" method="post">
+                            {% csrf_token %}
+                        <button name="undo_bookmark" value="endorse" style="border: none;outline: none !important;
+                            background: none;"><img src="https://img.icons8.com/ios-filled/50/000000/remove-bookmark.png"></button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <form action="{% url 'login'%}" method = "post">
+                        {% csrf_token %}
+                        <button name="endorse" value="endorse" style="border: none; outline: none !important;
+                            background: none;"><img src="https://img.icons8.com/ultraviolet/50/000000/blunt-bulb.png">{{ num_endorsements }}</button>
+                    </form>
                 {% endif %}
+                    </div>
+                    </div>
             </h4>
         </div>
         <div class="card-body">
             <h5 class="text-left">
                 {{ authors }} {% if user.is_authenticated and user.is_superuser and authors %}<a
-                    href="#"
+                                                                                                 
+                    href="{% url 'paper_authors' id=paper.id %}"
                     class="btn btn-danger btn-sm" role="button">
                 Edit</a>{% endif %}
             </h5>
@@ -46,12 +92,26 @@
                 {% endfor %}
             {% endif %}
 
-            <h4 class="text-right">{% if user.is_authenticated %} Connect with: <a
+            <h4 class="text-right">
+                {% if not user.is_authenticated %}
+                <a href={% url 'login' %}>Endorse</a>{% endif %}
+                {% if user.is_authenticated %}
+
+                    <div >
+                    <div>Connect with:
+                    <a
                     href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
                 || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
                 <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
                 <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
-                <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>{% endif %}</h4>
+                <a href="{% url 'paper_connect_code' paper.id %}">Code Repo</a>
+</div>
+
+
+
+
+                    </div>
+                    {% endif %}</h4>
         </div>
     </div>
     {% if user.is_authenticated and user.is_superuser %}
@@ -117,6 +177,7 @@
                 </fieldset>
 
 {#                add-on buttons #}
+
                 <div class="ego-button-container">
                     <button type="button"
                             class="btn btn-primary ego-button" title="Hide relationships"

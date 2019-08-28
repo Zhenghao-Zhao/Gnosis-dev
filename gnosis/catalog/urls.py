@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from bookmark.views import bookmark_entry_remove
 
 urlpatterns = [
     path('', views.papers),
@@ -30,6 +31,7 @@ urlpatterns += [
     path('paper/<int:id>/group/add/<int:gid>', views.paper_add_to_group_selected, name='paper_add_to_group_selected'),
     path('paper/<int:id>/collection/add', views.paper_add_to_collection, name='paper_add_to_collection'),
     path('paper/<int:id>/collection/add/<int:cid>', views.paper_add_to_collection_selected, name='paper_add_to_collection_selected'),
+    path('paper/<int:id>/bookmark/add', views.paper_add_to_bookmark, name='paper_add_to_bookmark'),
 ]
 
 # for updating/creating a new Person node
@@ -100,4 +102,16 @@ urlpatterns += [
     path('collection/<int:id>/delete', views.collection_delete, name='collection_delete'),
     # path('collection/<int:id>/entry/<int:eid>/update', views.collection_entry_update, name='collection_entry_update'),
     path('collection/<int:id>/entry/<int:eid>/remove', views.collection_entry_remove, name='collection_entry_remove'),
+]
+
+# for updating/creating a Endorsement
+urlpatterns += [
+    path('endorsement/create/<int:paper_id>', views.endorsement_create, name='endorsement_create'),
+    path('endorsement/undo/<int:paper_id>', views.endorsement_undo, name='endorsement_undo'),
+]
+
+# for updating/creating a Bookmark
+urlpatterns += [
+    path('bookmark/entry/<int:pid>', views.paper_add_to_bookmark, name='paper_add_to_bookmark'),
+    path('bookmark/paper/<int:pid>/remove', bookmark_entry_remove, name='bookmark_entry_remove'),
 ]

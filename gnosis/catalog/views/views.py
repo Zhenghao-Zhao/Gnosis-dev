@@ -6,6 +6,9 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
+from catalog.models import Endorsement, EndorsementEntry
+from bookmark.models import Bookmark, BookmarkEntry
+
 from catalog.views.utils.import_functions import *
 
 from catalog.forms import (
@@ -261,6 +264,32 @@ def paper_detail(request, id):
 
     ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
+    main_paper_id = paper.id
+
+    # catch the case when the user is not logged in
+    try:
+        if EndorsementEntry.objects.filter(paper=paper.id, user=request.user):
+            endorsed = True
+        else:
+            endorsed = False
+    except:
+        endorsed = False
+
+    endorsement = Endorsement.objects.filter(paper=paper.id)
+    if endorsement:
+        num_endorsements = endorsement[0].endorsement_count
+    else:
+        num_endorsements = 0
+
+    try:
+        bookmark = Bookmark.objects.filter(owner=request.user)[0]
+        print("bookmark found:", request.user)
+        b = bookmark.papers.filter(paper_id = paper.id)[0]
+        print("entry found:", paper.id)
+        bookmarked = True
+    except:
+        bookmarked = False
+
     print("ego_network_json: {}".format(ego_network_json))
     return render(
         request,
@@ -275,6 +304,10 @@ def paper_detail(request, id):
             "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
+            "main_paper_id": main_paper_id,
+            "endorsed": endorsed,
+            "num_endorsements": num_endorsements,
+            "bookmarked": bookmarked,
         },
     )
 
@@ -584,7 +617,6 @@ def paper_connect_venue(request, id):
         {"form": form, "venues": None, "message": message},
     )
 
-
 @login_required
 def paper_add_to_collection_selected(request, id, cid):
     message = None
@@ -648,6 +680,43 @@ def paper_add_to_collection(request, id):
         "paper_add_to_collection.html",
         {"collections": all_collections, "message": message},
     )
+
+
+@login_required
+def paper_add_to_bookmark(request, pid):
+
+    """input:
+    pid: paper id
+    """
+    print("In paper_add_to_bookmark")
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=pid))
+    if len(results) > 0:
+        all_papers = [Paper.inflate(row[0]) for row in results]
+        paper = all_papers[0]
+    else:
+        raise Http404
+
+    try:
+        bookmark = Bookmark.objects.filter(owner=request.user)[0]
+    except:
+        bookmark = Bookmark()
+        bookmark.owner = request.user
+        bookmark.save()
+
+    # if this is POST request then add the entry
+    if request.method == "POST":
+        try:
+            x = bookmark.papers.filter(paper_id=pid)[0]
+        except:
+            print("  ==> creating entry")
+            bookmark_entry = BookmarkEntry()
+            bookmark_entry.paper_id = pid
+            bookmark_entry.paper_title = paper.title
+            bookmark_entry.bookmark = bookmark
+            bookmark_entry.save()
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid,}))
+
 
 
 @login_required
