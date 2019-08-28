@@ -63,6 +63,7 @@ urlpatterns += [
     path('venue/<int:id>/delete', views.venue_delete, name='venue_delete'),
 ]
 
+
 # for updating/creating a new Comment node
 urlpatterns += [
     path('comments/', views.comments, name='comments_index'),

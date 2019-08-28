@@ -1,7 +1,11 @@
 .color_legend {
     display: inline-block;
-    width: 50px;
+    width: 30px;
     height: 20px;
+}
+
+.legend_label {
+    font-size: 100%;
 }
 
 .paper {
@@ -18,12 +22,36 @@
 
 .dataset {
     background-color: #ff723d;
-
 }
 
 .code {
-    background: #59d143;
+    background-color: #59d143;
 }
+
+.material-icons {
+    display: block;
+}
+
+.ego-button {
+    text-align: center;
+    margin: 2px;
+}
+
+.ego-button-container {
+    position: absolute;
+    z-index: 1000;
+    right: 20px;
+    display: inline-flex;
+    height: 80px;
+    justify-content: space-evenly;
+    flex-direction: column
+}
+
+#menu-button {
+    width: 65px;
+}
+
+
 
 
 
