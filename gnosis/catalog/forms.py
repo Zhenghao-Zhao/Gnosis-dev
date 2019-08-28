@@ -6,9 +6,9 @@ from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
 
 from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Invisible, ReCaptchaV2Checkbox
+from captcha.widgets import ReCaptchaV2Invisible, ReCaptchaV2Checkbox, ReCaptchaV3
 
-from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV
+from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV, RECAPTCHA_PUBLIC_KEY_V3, RECAPTCHA_PRIVATE_KEY_V3
 
 
 #
@@ -350,11 +350,10 @@ class CommentForm(ModelForm):
     # def clean_author(self):
     #      return self.cleaned_data['author']
 
-    # recaptcha checkbox
+    # recaptcha checkbox, by default it uses checkbox keys at settings.py
     captcha = ReCaptchaField(
         widget=ReCaptchaV2Checkbox(
             attrs={
-                'data-size': 'compact',
                 'data-callback': 'dataCallback',
                 'data-expired-callback': 'dataExpiredCallback',
                 'data-error-callback': 'dataErrorCallback'
@@ -368,6 +367,18 @@ class CommentForm(ModelForm):
     #     public_key=RECAPTCHA_PUBLIC_KEY_INV,
     #     private_key=RECAPTCHA_PRIVATE_KEY_INV,
     #     widget=ReCaptchaV2Invisible,
+    #     label=''
+    # )
+
+    # recaptcha v3
+    # captcha = ReCaptchaField(
+    #     public_key=RECAPTCHA_PUBLIC_KEY_V3,
+    #     private_key=RECAPTCHA_PRIVATE_KEY_V3,
+    #     widget=ReCaptchaV3(
+    #         attrs={
+    #             'required_score': 0.5,
+    #         }
+    #     ),
     #     label=''
     # )
 
