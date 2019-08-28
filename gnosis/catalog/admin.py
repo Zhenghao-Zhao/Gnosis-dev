@@ -10,3 +10,4 @@ admin.site.register(Collection)
 admin.site.register(CollectionEntry)
 admin.site.register(Endorsement)
 admin.site.register(EndorsementEntry)
+
