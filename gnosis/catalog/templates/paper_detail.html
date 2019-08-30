@@ -163,50 +163,110 @@
     {% endif %}
 
 
-    {% if num_comments > 0 %}
-        <div class="card shadow-sm mt-3">
-            <div class="card-header">
-                <h3>{{ num_comments }} Comments</h3>
-            </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    {% for comment in comments %}
-                        <li class="list-group-item shadow-sm mt-1">
-                            <p><strong>{{ comment.author }}</strong> says:</p>
-                            <p>
-                                <small>{{ comment.publication_date }}</small>
-                            </p>
-                            <p>{{ comment.text }}</p>
-                            {% if comment.created_by == user.id %}
-                                <a href="{% url 'comment_update' comment.id %}">Edit</a>
-                            {% endif %}
-                        </li>
-                        </ul>
-                    {% endfor %}
-            </div>
+{#    {% if num_comments > 0 %}#}
+{#        <div class="card shadow-sm mt-3">#}
+{#            <div class="card-header">#}
+{#                <h3>{{ num_comments }} Comments</h3>#}
+{#            </div>#}
+{#            <div class="card-body">#}
+{#                <ul class="list-group">#}
+{#                    {% for comment in comments %}#}
+{#                        <li class="list-group-item shadow-sm mt-1">#}
+{#                            <p><strong>{{ comment.author }}</strong> says:</p>#}
+{#                            <p>#}
+{#                                <small>{{ comment.publication_date }}</small>#}
+{#                            </p>#}
+{#                            <p>{{ comment.text }}</p>#}
+{#                            {% if comment.created_by == user.id %}#}
+{#                                <a href="{% url 'comment_update' comment.id %}">Edit</a>#}
+{#                            {% endif %}#}
+{#                        </li>#}
+{#                        </ul>#}
+{#                    {% endfor %}#}
+{#            </div>#}
+{#        </div>#}
+{#    {% endif %}#}
+{##}
+{#    {% if num_notes > 0 %}#}
+{#        {% if user.is_authenticated %}#}
+{#            <div class="card shadow-sm mt-3">#}
+{#            <div class="card-header">#}
+{#                <h3>Private Note</h3>#}
+{#            </div>#}
+{#                <div class="card-body">#}
+{#                    <ul class="list-group">#}
+{#                        {% for note in notes %}#}
+{#                                <li class="list-group-item shadow-sm mt-1">#}
+{#                                    <p>{{ note.text }}</p>#}
+{#                                    <p class="text-right"><small>{{ note.date_posted }}</small></p>#}
+{#                                    <a href="{% url 'note_update' note.id %}">Edit</a>#}
+{#                                    <a href="{% url 'note_delete' note.id %}" > Delete</a>#}
+{#                                </li>#}
+{#                        {% endfor %}#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </div>#}
+{#        {% endif %}#}
+{#    {% endif %}#}
+    {% if num_notes != 0 or num_comments != 0 %}
+    <div class="card shadow-sm mt-5">
+        <div class="card-header">
+            {% if user.is_authenticated %}
+                <h3>Comments/Notes</h3>
+            {% else %}
+                <h3>Comments</h3>
+            {% endif %}
         </div>
-    {% endif %}
-
-    {% if num_notes > 0 %}
-        {% if user.is_authenticated %}
-            <div class="card shadow-sm mt-3">
-            <div class="card-header">
-                <h3>Private Note</h3>
-            </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for note in notes %}
-                                <li class="list-group-item shadow-sm mt-1">
-                                    <p>{{ note.text }}</p>
-                                    <p class="text-right"><small>{{ note.date_posted }}</small></p>
-                                    <a href="{% url 'note_update' note.id %}">Edit</a>
-                                    <a href="{% url 'note_delete' note.id %}" > Delete</a>
-                                </li>
+        <div class="card-body">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-comment-tab" data-toggle="tab" href="#navcomment"
+                       role="tab" aria-controls="navcomment" aria-selected="true">Comments</a>
+                    {% if user.is_authenticated %}
+                    <a class="nav-item nav-link" id="nav-note-tab" data-toggle="tab" href="#navnote" role="tab"
+                       aria-controls="navnote" aria-selected="false">Notes</a>
+                    {% endif %}
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="navcomment" role="tabpanel"
+                     aria-labelledby="nav-comment-tab">
+                    {% if num_comments > 0 %}
+                    <ul class="list-group list-group-flush">
+                        {% for comment in comments %}
+                        <li class="list-group-item shadow-sm mt-1">
+                                <p><strong>{{ comment.author }}</strong> says:</p>
+                                <p>
+                                    <small>{{ comment.publication_date }}</small>
+                                </p>
+                                <p>{{ comment.text }}</p>
+                                {% if comment.created_by == user.id %}
+                                    <a href="{% url 'comment_update' comment.id %}">Edit</a>
+                                {% endif %}
+                            </li>
                         {% endfor %}
                     </ul>
+                    {% endif %}
+                </div>
+                <div class="tab-pane fade" id="navnote" role="tabpanel" aria-labelledby="nav-note-tab">
+                    {% if user.is_authenticated %}
+                        {% if num_notes > 0 %}
+                        <ul class="list-group list-group-flush">
+                            {% for note in notes %}
+                            <li class="list-group-item shadow-sm mt-1">
+                                            <p>{{ note.text }}</p>
+                                            <p class="text-right"><small>{{ note.date_posted }}</small></p>
+                                            <a href="{% url 'note_update' note.id %}">Edit</a>
+                                            <a href="{% url 'note_delete' note.id %}" > Delete</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
-        {% endif %}
+        </div>
+    </div>
     {% endif %}
 
     {% load static %}
