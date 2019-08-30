@@ -1,5 +1,27 @@
-/* callback functions for when different errors happen at client side verification */
+/* functions to control interactions between recaptcha and submit button */
+var widget = "invisible";
 
+function setWidget(w) {
+    widget = w;
+}
+
+// if submit button id is not provided, it will use class 'captcha-submit instead.
+// if recaptcha is checkbox, set it to disable.
+function setButton(id) {
+    var button_id = '.captcha-submit';
+
+    if (id !== undefined) {
+        button_id = '#' + id;
+    }
+
+    $(button_id).prop('disabled', false);
+
+    if (widget === "checkbox"){
+        $(button_id).prop('disabled', true);
+    }
+}
+
+/* callback functions for when different errors happen at client side verification */
 // when receive data (meaning client side verification is successful), allow submit button to work properly.
 function dataCallback() {
     $('.captcha-submit').removeAttr('disabled');

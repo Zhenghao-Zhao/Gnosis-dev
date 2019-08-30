@@ -351,16 +351,16 @@ class CommentForm(ModelForm):
     #      return self.cleaned_data['author']
 
     # recaptcha checkbox, by default it uses checkbox keys at settings.py
-    captcha = ReCaptchaField(
-        widget=ReCaptchaV2Checkbox(
-            attrs={
-                'data-callback': 'dataCallback',
-                'data-expired-callback': 'dataExpiredCallback',
-                'data-error-callback': 'dataErrorCallback'
-            }
-        ),
-        label=''
-    )
+    # captcha = ReCaptchaField(
+    #     widget=ReCaptchaV2Checkbox(
+    #         attrs={
+    #             'data-callback': 'dataCallback',
+    #             'data-expired-callback': 'dataExpiredCallback',
+    #             'data-error-callback': 'dataErrorCallback'
+    #         }
+    #     ),
+    #     label=''
+    # )
 
     # recaptcha invisible
     # captcha = ReCaptchaField(
