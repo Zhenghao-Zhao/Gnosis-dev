@@ -258,7 +258,7 @@ def paper_detail(request, id):
 
     print("ego_network_json: {}".format(ego_network_json))
 
-    # Retrieve venue where paper was published.
+    # Note form
     if request.method == "POST":
         note = Note()
         note.author = request.user
@@ -267,7 +267,6 @@ def paper_detail(request, id):
         if form.is_valid():
             # add link from new comment to paper
             form.save()
-            del request.session["last-viewed-paper"]
             return redirect("paper_detail", id=id)
     else:  # GET
         form = NoteForm()
