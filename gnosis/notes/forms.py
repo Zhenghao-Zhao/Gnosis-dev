@@ -13,7 +13,7 @@ class NoteForm(ModelForm):
 
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
-            visible.field.widget.attrs.update({"style": "width:35em"})
+            visible.field.widget.attrs.update({"style": "width:100%"})
             print(visible.field.widget.attrs.items())
 
     def clean_text(self):

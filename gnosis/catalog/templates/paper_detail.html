@@ -220,6 +220,10 @@
                         <h3>Comments</h3>
                     {% endif %}
                 </div>
+
+
+
+
                 <div class="card-body">
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -262,6 +266,17 @@
                             <div class="tab-pane fade" id="navnote" role="tabpanel" aria-labelledby="nav-note-tab">
                         {% endif %}
                             {% if user.is_authenticated %}
+
+                                <div class="mt-2">
+                                    <form action="" method="post">
+                                        {% csrf_token %}
+                                        {{ form }}
+                                        <input type="submit" class="btn btn-info mt-3 btn-md" value="Post a note"/>
+                                        <small class="mt-2 float-right">* Notes are private and only visible to the creator</small>
+                                    </form>
+
+                                </div>
+                                <br/>
                                 {% if num_notes > 0 %}
                                 <ul class="list-group list-group-flush">
                                     {% for note in notes %}

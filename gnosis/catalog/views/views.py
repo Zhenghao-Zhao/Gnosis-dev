@@ -3,6 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from notes.forms import NoteForm
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
@@ -221,10 +222,7 @@ def paper_detail(request, id):
     notes = []
     if request.user.is_authenticated:
         notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
-
     num_notes = len(notes)
-    print("The note retrieved from data is")
-    print(notes)
 
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
@@ -259,6 +257,21 @@ def paper_detail(request, id):
     ego_network_json = _get_node_ego_network(paper.id, paper.title)
 
     print("ego_network_json: {}".format(ego_network_json))
+
+    # Retrieve venue where paper was published.
+    if request.method == "POST":
+        note = Note()
+        note.author = request.user
+        note.paper = paper.title
+        form = NoteForm(instance=note, data=request.POST)
+        if form.is_valid():
+            # add link from new comment to paper
+            form.save()
+            del request.session["last-viewed-paper"]
+            return redirect("paper_detail", id=id)
+    else:  # GET
+        form = NoteForm()
+
     return render(
         request,
         "paper_detail.html",
@@ -272,6 +285,7 @@ def paper_detail(request, id):
             "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
+            "form": form,
         },
     )
 
