@@ -257,12 +257,14 @@
                     <ul class="list-group list-group-flush">
                         {% for comment in comments %}
                         <li class="list-group-item shadow-sm mt-1">
-                                <p><strong>{{ comment.author }}</strong> says:</p>
-                                <p><small>{{ comment.publication_date }}</small></p>
+                                <p><strong>{{ comment.author }}</strong>
+                                    <small class="ml-3 text-muted">{{ comment.publication_date|date:"F d, Y" }}</small>
+                                    {% if comment.created_by == user.id %}
+                                    <a class="ml-3" href="{% url 'comment_update' comment.id %}">Edit</a>
+                                    {% endif %}
+                                </p>
                                 <p>{{ comment.text }}</p>
-                                {% if comment.created_by == user.id %}
-                                    <a href="{% url 'comment_update' comment.id %}">Edit</a>
-                                {% endif %}
+
                             </li>
                         {% endfor %}
                     </ul>
