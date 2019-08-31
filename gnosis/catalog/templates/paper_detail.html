@@ -241,8 +241,14 @@
                             <form action="" method="post">
                                 {% csrf_token %}
                                 {{ commmentform }}
-                                <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
-                                <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
+                                {% if user.is_authenticated %}
+                                    <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
+                                    <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
+                                {% else %}
+                                    <br/>
+                                    <h3>Sign up or <a href="{% url 'login' %}?next={{ request.path }}">login</a> to leave a comment</h3>
+                                {% endif %}
+
                             </form>
                         </div>
                     <br/>
