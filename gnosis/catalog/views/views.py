@@ -261,18 +261,33 @@ def paper_detail(request, id):
 
     print("ego_network_json: {}".format(ego_network_json))
 
-    # Note form
+    # Comment / Note form
     if request.method == "POST":
+        user = request.user
         note = Note()
-        note.author = request.user
+        note.author = user
         note.paper = paper.title
-        form = NoteForm(instance=note, data=request.POST)
-        if form.is_valid():
-            # add link from new comment to paper
-            form.save()
+        noteform = NoteForm(instance=note, data=request.POST)
+
+        comment = Comment()
+        comment.created_by = user.id
+        comment.author = user.username
+        commmentform = CommentForm(instance=comment, data=request.POST)
+
+        success = False
+
+        if 'comment_form' in request.POST and commmentform.is_valid():
+            commmentform.save()
+            comment.discusses.connect(paper)
+            success = True
+        if 'note_form' in request.POST and noteform.is_valid():
+            noteform.save()
+            success = True
+        if success:
             return redirect("paper_detail", id=id)
     else:  # GET
-        form = NoteForm()
+        commmentform = CommentForm()
+        noteform = NoteForm()
 
     return render(
         request,
@@ -287,7 +302,8 @@ def paper_detail(request, id):
             "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
-            "form": form,
+            "noteform": noteform,
+            "commmentform": commmentform,
         },
     )
 

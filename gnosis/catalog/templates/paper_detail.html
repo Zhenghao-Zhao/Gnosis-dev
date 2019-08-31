@@ -208,21 +208,14 @@
 {#            </div>#}
 {#        {% endif %}#}
 {#    {% endif %}#}
-    {% if num_notes != 0 or num_comments != 0 %}
-        {% if user.is_authenticated or num_comment != 0 %}
             <div class="card shadow-sm mt-5">
                 <div class="card-header">
-                    {% if user.is_authenticated and num_notes != 0 and num_comments != 0%}
+                    {% if user.is_authenticated %}
                         <h3>Comments / Notes</h3>
-                    {% elif user.is_authenticated and num_notes != 0 and num_comments == 0%}
-                        <h3>Notes</h3>
                     {% else %}
                         <h3>Comments</h3>
                     {% endif %}
                 </div>
-
-
-
 
                 <div class="card-body">
                     <nav>
@@ -244,6 +237,17 @@
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="navcomment" role="tabpanel"
                              aria-labelledby="nav-comment-tab">
+
+
+                                <div class="mt-2">
+                                    <form action="" method="post">
+                                        {% csrf_token %}
+                                        {{ commmentform }}
+                                        <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
+                                        <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
+                                    </form>
+                                </div>
+
                             {% if num_comments > 0 %}
                             <ul class="list-group list-group-flush">
                                 {% for comment in comments %}
@@ -270,8 +274,8 @@
                                 <div class="mt-2">
                                     <form action="" method="post">
                                         {% csrf_token %}
-                                        {{ form }}
-                                        <input type="submit" class="btn btn-info mt-3 btn-md" value="Post a note"/>
+                                        {{ noteform }}
+                                        <input type="submit" name="note_form"class="btn btn-info mt-3 btn-md" value="Post a note"/>
                                         <small class="mt-2 float-right">* Notes are private and only visible to the creator</small>
                                     </form>
 
@@ -294,8 +298,6 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-    {% endif %}
 
     {% load static %}
     <script>
