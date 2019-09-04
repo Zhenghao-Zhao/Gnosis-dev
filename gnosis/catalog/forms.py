@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code, Flagged_Item
+from .models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedItem
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -492,5 +492,8 @@ class FlaggedItemForm(ModelForm):
         return self.cleaned_data["description"]
 
     class Meta:
-        model = Flagged_Item
+        model = FlaggedItem
         fields = ['violation', 'description']
+        # widgets = {
+        #     'violation': forms.RadioSelect
+        # }

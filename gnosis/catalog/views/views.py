@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, Flagged_Item
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedItem
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
@@ -294,7 +294,7 @@ def paper_detail(request, id):
     # if a flagging form is submitted
     user = request.user
     if request.method == "POST":
-        flagged_item = Flagged_Item()
+        flagged_item = FlaggedItem()
         flagged_item.owner = user
         form = FlaggedItemForm(instance=flagged_item, data=request.POST)
         if form.is_valid():
