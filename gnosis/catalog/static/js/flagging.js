@@ -14,9 +14,5 @@ function toggle_more(ele) {
 
 function open_dialog() {
     $('.popup').attr('hidden', true);
-    $('.cover').attr('hidden', false).css({
-        "background-color": "grey",
-        "opacity": 0.5,
-
-    })
+    $('.cover').attr('hidden', false);
 }

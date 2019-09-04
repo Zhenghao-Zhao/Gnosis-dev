@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code
+from .models import Paper, Person, Dataset, Venue, Comment, Code, Flagged_Item
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -476,29 +476,21 @@ class CollectionForm(ModelForm):
         fields = ["name", "description", "keywords"]
 
 
-# class FlaggedItemForm(ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super(ModelForm, self).__init__(*args, **kwargs)
-#
-#         VIOLATION_CHOICES = [
-#             ('spam comments', 'Unwanted commercial content or spam'),
-#             ('porn', 'Pornography or sexually explicit material'),
-#             ('child abuse', 'Child abuse'),
-#             ('hate or violence', 'Hate speech or graphic violence'),
-#             ('harassment or bullying', 'Harassment or bullying')
-#         ]
-#
-#         self.fields["violation"].widget = forms.RadioSelect(choices=VIOLATION_CHOICES)
-#         # self.fields["violation"].widget.attrs.update({"rows"})
-#         self.fields["description"].widget = forms.Textarea()
-#         self.fields["description"].widget.attrs.update({"rows": "5"})
-#
-#     def clean_description(self):
-#         return self.cleaned_data["description"]
-#
-#     def clean_violation(self):
-#         return self.cleaned_data["violation"]
-#
-#     class Meta:
-#         model = Flagged_Item
-#         fields = ['violation', 'description']
+class FlaggedItemForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        # self.fields["violation"].widget = forms.RadioSelect
+        # self.fields["violation"].widget.attrs.update({"rows"})
+        self.fields["description"].widget = forms.Textarea()
+        self.fields["description"].widget.attrs.update({"rows": "5"})
+
+    def clean_violation(self):
+        return self.cleaned_data["violation"]
+
+    def clean_description(self):
+        return self.cleaned_data["description"]
+
+    class Meta:
+        model = Flagged_Item
+        fields = ['violation', 'description']

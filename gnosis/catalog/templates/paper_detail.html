@@ -281,15 +281,14 @@
 
         <div class="cover popup" hidden>
             <div id="flag_dialog">
-                <label class="container">One
-                    <input type="checkbox" checked="checked">
-                    <span class="checkmark"></span>
-                </label>
-
-                <label class="container">Two
-                    <input type="checkbox">
-                    <span class="checkmark"></span>
-                </label>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <table class="w-75">
+                        {{ flagging_form }}
+                    </table>
+                    <br/>
+                    <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+                </form>
             </div>
         </div>
     {% endif %}
@@ -530,5 +529,5 @@
 
     </script>
 
-    <script src="{% static "js/ego-graph.js" %}"></script>
+    <script src="{% static "js/ego_graph.js" %}"></script>
 {% endblock %}

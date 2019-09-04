@@ -10,7 +10,6 @@ from django import forms
 
 # Create your models here.
 class Paper(DjangoNode):
-
     uid = UniqueIdProperty()
 
     created = DateTimeProperty(default=datetime.now())
@@ -23,7 +22,6 @@ class Paper(DjangoNode):
     download_link = StringProperty(required=True)
     # added source link for a paper to record the source website which the information of paper is collected
     source_link = StringProperty(required=False)
-
 
     # Links
     cites = RelationshipTo("Paper", "cites")
@@ -49,7 +47,6 @@ class Paper(DjangoNode):
 
 
 class Person(DjangoNode):
-
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -70,7 +67,6 @@ class Person(DjangoNode):
         ordering = ['last_name', 'first_name', 'affiliation']
 
     def __str__(self):
-
         if self.middle_name is not None and len(self.middle_name) > 0:
             return '{} {} {}'.format(self.first_name, self.middle_name, self.last_name)
         return '{} {}'.format(self.first_name, self.last_name)
@@ -80,7 +76,6 @@ class Person(DjangoNode):
 
 
 class Dataset(DjangoNode):
-
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -120,7 +115,6 @@ class Dataset(DjangoNode):
 
 
 class Venue(DjangoNode):
-
     venue_types = (('J', 'Journal'),
                    ('C', 'Conference'),
                    ('W', 'Workshop'),
@@ -157,7 +151,6 @@ class Venue(DjangoNode):
 
 
 class Comment(DjangoNode):
-
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -182,7 +175,6 @@ class Comment(DjangoNode):
 
 
 class Code(DjangoNode):
-
     uid = UniqueIdProperty()
     created = DateTimeProperty(default=datetime.now())
     created_by = IntegerProperty()  # The uid of the user who created this node
@@ -203,20 +195,30 @@ class Code(DjangoNode):
     def get_absolute_url(self):
         return reverse('code_detail', args=[self.id])
 
+    #
+    # These are models for the SQL database
+    #
 
-#
-# These are models for the SQL database
-#
 
-# class Flagged_Item(models.Model):
-#     item_id = models.IntegerField()
-#
-#     violation = forms.ChoiceField(blank=False)
-#     description = models.TextField()
-#     created_at = models.DateField(auto_now_add=True, auto_now=False)
-#
-#     class Meta:
-#         ordering = ['violation', '-created_at']
+class Flagged_Item(models.Model):
+    VIOLATION_CHOICES = [
+        ('spam comments', 'Unwanted commercial content or spam'),
+        ('porn', 'Pornography or sexually explicit material'),
+        ('child abuse', 'Child abuse'),
+        ('hate or violence', 'Hate speech or graphic violence'),
+        ('harassment or bullying', 'Harassment or bullying')
+    ]
+    violation = models.CharField(max_length=100, choices=VIOLATION_CHOICES)
+    description = models.TextField()
+    created_at = models.DateField(auto_now_add=True, auto_now=False)
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="flagged_item")
+
+    class Meta:
+        ordering = ['violation', '-created_at']
+
+    # Methods
+    def get_absolute_url(self):
+        return reverse('paper_detail', args=[str(self.id)])
 
 
 class ReadingGroup(models.Model):
