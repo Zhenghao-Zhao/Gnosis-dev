@@ -208,15 +208,15 @@ class Code(DjangoNode):
 # These are models for the SQL database
 #
 
-class Flagged_Item(models.Model):
-    item_id = models.IntegerField()
-
-    violation = forms.ChoiceField(blank=False)
-    description = models.TextField()
-    created_at = models.DateField(auto_now_add=True, auto_now=False)
-
-    class Meta:
-        ordering = ['violation', '-created_at']
+# class Flagged_Item(models.Model):
+#     item_id = models.IntegerField()
+#
+#     violation = forms.ChoiceField(blank=False)
+#     description = models.TextField()
+#     created_at = models.DateField(auto_now_add=True, auto_now=False)
+#
+#     class Meta:
+#         ordering = ['violation', '-created_at']
 
 
 class ReadingGroup(models.Model):
