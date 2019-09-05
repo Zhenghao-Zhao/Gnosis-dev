@@ -12,7 +12,18 @@ function toggle_more(ele) {
     $(ele).siblings('.popup').attr('hidden', !hidden);
 }
 
-function open_dialog() {
+function open_dialog(id) {
     $('.popup').attr('hidden', true);
     $('.cover').attr('hidden', false);
+
+    // add comment id to te form
+    $("<input />").attr("type", "hidden")
+          .attr("name", "comment_id")
+          .attr("value", id)
+          .appendTo("#flag_form");
+}
+
+function cancel_form(){
+    $('#flag_form').trigger('reset');
+    $('.popup').attr('hidden', true);
 }

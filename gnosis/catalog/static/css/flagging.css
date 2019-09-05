@@ -48,3 +48,11 @@
     margin-top: -140px;
     z-index: 3000;
 }
+
+.form_buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 50%;
+    margin-left: 50%;
+}

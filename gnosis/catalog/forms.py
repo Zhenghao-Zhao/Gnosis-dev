@@ -492,6 +492,3 @@ class FlaggedCommentForm(ModelForm):
     class Meta:
         model = FlaggedComment
         fields = ['violation', 'description']
-        # widgets = {
-        #     'violation': forms.RadioSelect
-        # }

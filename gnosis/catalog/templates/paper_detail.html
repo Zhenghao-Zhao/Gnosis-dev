@@ -241,13 +241,14 @@
                     {% for comment in comments %}
                         <li class="list-group-item shadow-sm mt-1">
 
+                            <!-- start-flagging -->
                             <div style="float: right; text-align: right;">
                                 <i class="material-icons more_vert" onclick="toggle_more(this)">
                                     more_vert
                                 </i>
                                 <div class="popup" hidden>
                                     <div class="more_menu">
-                                        <div class="opt_container" onclick="open_dialog()">
+                                        <div class="opt_container" onclick="open_dialog({{ comment.id }})">
                                             <i class="material-icons menu_item">
                                                 outlined_flag
                                             </i>
@@ -264,6 +265,7 @@
 
                                 </div>
                             </div>
+                            <!-- end-flagging -->
 
                             <p><strong>{{ comment.author }}</strong> says:</p>
                             <p>
@@ -274,23 +276,38 @@
                                 <a href="{% url 'comment_update' comment.id %}">Edit</a>
                             {% endif %}
                         </li>
-                        </ul>
                     {% endfor %}
+                </ul>
             </div>
         </div>
 
+        <!-- start-flagging -->
         <div class="cover popup" hidden>
             <div id="flag_dialog">
-                <form action="" method="post">
+                <form id="flag_form" action="" method="post">
                     {% csrf_token %}
                     <table class="w-75">
                         {{ flag_form }}
                     </table>
                     <br/>
-                    <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+{#                    style="display: flex; flex-direction: row; justify-content: space-between; width: 50%; margin-left: 50%"#}
+                    <div class="form_buttons">
+                        <button type="button" class="btn btn-primary btn-lg float-right" onclick="cancel_form()">
+                            Cancel
+                        </button>
+                        <input type="submit" class="btn btn-primary btn-lg float-right" value="Submit"/>
+                    </div>
                 </form>
             </div>
         </div>
+
+        <!-- if form is valid show the form in the popup window -->
+        {% if flag_form.has_changed %}
+            <script>$('.cover').attr('hidden', false);</script>
+        {% endif %}
+
+        <!-- end-flagging -->
+
     {% endif %}
 
     {% if num_notes > 0 %}

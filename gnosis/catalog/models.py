@@ -226,6 +226,9 @@ class FlaggedComment(models.Model):
     def get_absolute_url(self):
         return reverse('paper_detail', args=[str(self.id)])
 
+    def __str__(self):
+        return self.description
+
 
 class ReadingGroup(models.Model):
     """A ReadingGroup model"""
