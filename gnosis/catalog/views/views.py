@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedItem
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
@@ -17,7 +17,7 @@ from catalog.forms import (
     VenueForm,
     CommentForm,
     PaperImportForm,
-    FlaggedItemForm,
+    FlaggedCommentForm,
 )
 from catalog.forms import (
     SearchVenuesForm,
@@ -291,17 +291,17 @@ def paper_detail(request, id):
     except:
         bookmarked = False
 
-    # if a flagging form is submitted
     user = request.user
+    # if a flagging form is submitted
     if request.method == "POST":
-        flagged_item = FlaggedItem()
-        flagged_item.owner = user
-        form = FlaggedItemForm(instance=flagged_item, data=request.POST)
+        flagged_comment = FlaggedComment()
+        flagged_comment.proposed_by = user
+        form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse("paper_detail"))
     else:
-        form = FlaggedItemForm()
+        form = FlaggedCommentForm()
 
     print("ego_network_json: {}".format(ego_network_json))
     return render(
@@ -321,7 +321,7 @@ def paper_detail(request, id):
             "endorsed": endorsed,
             "num_endorsements": num_endorsements,
             "bookmarked": bookmarked,
-            "flagging_form": form,
+            "flag_form": form,
         },
     )
 

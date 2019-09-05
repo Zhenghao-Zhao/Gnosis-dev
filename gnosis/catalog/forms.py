@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedItem
+from .models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -476,12 +476,10 @@ class CollectionForm(ModelForm):
         fields = ["name", "description", "keywords"]
 
 
-class FlaggedItemForm(ModelForm):
+class FlaggedCommentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
 
-        # self.fields["violation"].widget = forms.RadioSelect
-        # self.fields["violation"].widget.attrs.update({"rows"})
         self.fields["description"].widget = forms.Textarea()
         self.fields["description"].widget.attrs.update({"rows": "5"})
 
@@ -492,7 +490,7 @@ class FlaggedItemForm(ModelForm):
         return self.cleaned_data["description"]
 
     class Meta:
-        model = FlaggedItem
+        model = FlaggedComment
         fields = ['violation', 'description']
         # widgets = {
         #     'violation': forms.RadioSelect

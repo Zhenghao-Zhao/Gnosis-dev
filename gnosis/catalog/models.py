@@ -199,8 +199,7 @@ class Code(DjangoNode):
     # These are models for the SQL database
     #
 
-
-class FlaggedItem(models.Model):
+class FlaggedComment(models.Model):
     VIOLATION_CHOICES = [
         ('spam comments', 'Unwanted commercial content or spam'),
         ('porn', 'Pornography or sexually explicit material'),
@@ -208,13 +207,17 @@ class FlaggedItem(models.Model):
         ('hate or violence', 'Hate speech or graphic violence'),
         ('harassment or bullying', 'Harassment or bullying')
     ]
-    item_id = models.IntegerField(null=False, blank=False)  # id of the flagged item
+
+    comment_id = models.IntegerField(null=False, blank=False)  # id of the flagged comment
+
     violation = models.CharField(max_length=100, choices=VIOLATION_CHOICES)
     description = models.TextField()
     created_at = models.DateField(auto_now_add=True, auto_now=False)
 
-    # owner of the flagged item
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="accused_items")
+    # user who flags the item
+    proposed_by = models.ForeignKey(to=User,
+                                    on_delete=models.CASCADE,
+                                    related_name="flagged_items")
 
     class Meta:
         ordering = ['violation', '-created_at']
@@ -222,26 +225,6 @@ class FlaggedItem(models.Model):
     # Methods
     def get_absolute_url(self):
         return reverse('paper_detail', args=[str(self.id)])
-
-
-class FlaggedComment(FlaggedItem):
-    VIOLATION_CHOICES = [
-        ('spam comments', 'Unwanted commercial content or spam'),
-        ('porn', 'Pornography or sexually explicit material'),
-        ('child abuse', 'Child abuse'),
-        ('hate or violence', 'Hate speech or graphic violence'),
-        ('harassment or bullying', 'Harassment or bullying')
-    ]
-
-
-class FlaggedItemEntry(models.Model):
-
-    flagged_item = models.ForeignKey(to=FlaggedItem, on_delete=models.CASCADE, related_name="flagged")
-
-    # user who flags the item
-    proposed_by = models.ForeignKey(to=User,
-                                    on_delete=models.CASCADE,
-                                    related_name="flagged_items")
 
 
 class ReadingGroup(models.Model):
