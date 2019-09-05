@@ -40,6 +40,11 @@
                                             href="{% url 'collections' %}">Collections</a></li>
                     </li>
                 {% endif %}
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link"
+                                        href="{% url 'bookmarks' %}">Bookmarks</a></li>
+                </li>
+                {% endif %}
             </ul>
 
             <ul class="nav navbar-nav">
