@@ -7,9 +7,9 @@ class NoteForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
 
-        self.fields["text"].widget = forms.Textarea()
-        self.fields["text"].widget.attrs.update({"rows": "5"})
-        self.fields["text"].label = ""
+        self.fields["note_content"].widget = forms.Textarea()
+        self.fields["note_content"].widget.attrs.update({"rows": "5"})
+        self.fields["note_content"].label = ""
 
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
@@ -27,4 +27,4 @@ class NoteForm(ModelForm):
 
     class Meta:
         model = Note
-        fields = ["text"]
+        fields = ["note_content"]

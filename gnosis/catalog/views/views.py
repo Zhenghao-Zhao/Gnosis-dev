@@ -9,6 +9,7 @@ from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.models import Endorsement, EndorsementEntry
 from bookmark.models import Bookmark, BookmarkEntry
+from datetime import datetime
 
 from catalog.views.utils.import_functions import *
 
@@ -227,7 +228,7 @@ def paper_detail(request, id):
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
     if request.user.is_authenticated:
-        notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
+        notes = Note.objects.filter(paper_id=id, created_by=request.user)
     num_notes = len(notes)
 
     # Retrieve the paper's authors
@@ -294,8 +295,9 @@ def paper_detail(request, id):
     if request.method == "POST":
         user = request.user
         note = Note()
-        note.author = user
-        note.paper = paper.title
+        note.created_by = user
+        note.paper_id = id
+        note.created_at = datetime.now()
         noteform = NoteForm(instance=note, data=request.POST)
 
         comment = Comment()
