@@ -220,6 +220,7 @@ class FlaggedComment(models.Model):
 
     class Meta:
         ordering = ['violation', '-created_at']
+        verbose_name = "comment flag"
 
     # Methods
     def get_absolute_url(self):

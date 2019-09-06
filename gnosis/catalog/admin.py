@@ -32,10 +32,18 @@ delete_comment.short_description = "Delete marked flags and their comments"
 
 # define customized interface for flagged comment
 class FlaggedCommentAdmin(admin.ModelAdmin):
-    exclude = ('comment_id',)
+    exclude = ('comment_id', "proposed_by")
     list_display = ['violation', 'get_comment']
     ordering = ['violation']
     actions = [delete_comment]
+
+    readonly_fields = ['violation', 'description', 'created_at']
+
+    # 'violation', 'description', 'proposed_by', 'created_at', 'comment'
+    # fieldsets = (
+    #     (None, {'fields': ['violation', 'description', 'proposed_by']}),
+    #     ('Date information', {'fields': ['created_at']})
+    # )
 
     def get_comment(self, obj):
         query = "MATCH (a:Comment) WHERE ID(a)={id} RETURN a"
