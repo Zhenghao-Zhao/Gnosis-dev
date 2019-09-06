@@ -21,6 +21,7 @@ function open_dialog(id) {
           .attr("name", "comment_id")
           .attr("value", id)
           .appendTo("#flag_form");
+    console.log(id)
 }
 
 function cancel_form(){

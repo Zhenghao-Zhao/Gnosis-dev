@@ -5,7 +5,6 @@ from django_neomodel import DjangoNode
 from django.urls import reverse
 from neomodel import StringProperty, DateTimeProperty, DateProperty, UniqueIdProperty, \
     IntegerProperty, RelationshipTo
-from django import forms
 
 
 # Create your models here.
