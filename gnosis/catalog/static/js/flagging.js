@@ -1,11 +1,12 @@
 $(document).click(function (e) {
     var container = $(".popup");
-    // if the target of the click isn't the container nor a descendant of the container
+    // if the target of the click isn't the container nor a descendant of the container.
     if (!$(".more_vert").is(e.target) && container.has(e.target).length === 0) {
         container.attr('hidden', true);
     }
 });
 
+// toggles more button: shows/hides popup menu.
 function toggle_more(ele) {
     var hidden = $(ele).siblings('.popup').attr('hidden');
     $('.popup').attr('hidden', true);
@@ -17,34 +18,15 @@ function open_dialog(comment_id) {
     $('.popup').attr('hidden', true);
     $('.cover').attr('hidden', false);
 
-    // add comment id to te form
+    // add comment id to the form
     $("<input />").attr("type", "hidden")
         .attr("name", "comment_id")
         .attr("value", comment_id)
         .appendTo("#flag_form");
 }
 
+// hide popup form and reset its text.
 function cancel_form() {
     $('#flag_form').trigger('reset');
     $('.popup').attr('hidden', true);
 }
-
-// jQuery plugin to prevent double submission of forms
-jQuery.fn.preventDoubleSubmission = function () {
-    $(this).on('submit', function (e) {
-        var $form = $(this);
-
-        if ($form.data('submitted')) {
-            // Previously submitted - don't submit again
-            e.preventDefault();
-        } else {
-            // Mark it so that the next submit can be ignored
-            $form.data('submitted', true);
-        }
-    });
-
-    // Keep chainability
-    return this;
-};
-
-$('form').preventDoubleSubmission();
