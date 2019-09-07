@@ -247,19 +247,30 @@
                                     </i>
                                     <div class="popup" hidden>
                                         <div class="more_menu">
-                                            <div class="opt_container" onclick="open_dialog({{ comment.id }}, {{ user.is_authenticated }})">
-                                                <i class="material-icons menu_item">
-                                                    outlined_flag
-                                                </i>
-                                                <span class="menu_item">Report</span>
-                                            </div>
+                                            {% if user.is_authenticated %}
+                                                <div class="opt_container" onclick="open_dialog({{ comment.id }})">
+                                                    <i class="material-icons menu_item">
+                                                        outlined_flag
+                                                    </i>
+                                                    <span class="menu_item">Report</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="opt_container">
+                                                    <a class="icon_link" href="{% url 'login' %}?next={{ request.path }}" style="text-decoration: none; color: black">
+                                                        <i class="material-icons menu_item">
+                                                            outlined_flag
+                                                        </i>
+                                                        <span class="menu_item">Report</span>
+                                                    </a>
+                                                </div>
+                                            {% endif %}
 
-                                            <div class="opt_container">
-                                                <i class="material-icons menu_item">
-                                                    delete
-                                                </i>
-                                                <span class="menu_item">Delete</span>
-                                            </div>
+{#                                            <div class="opt_container">#}
+{#                                                <i class="material-icons menu_item">#}
+{#                                                    delete#}
+{#                                                </i>#}
+{#                                                <span class="menu_item">Delete</span>#}
+{#                                            </div>#}
                                         </div>
 
                                     </div>

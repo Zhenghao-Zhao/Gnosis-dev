@@ -12,19 +12,16 @@ function toggle_more(ele) {
     $(ele).siblings('.popup').attr('hidden', !hidden);
 }
 
-function open_dialog(id, authenticated) {
-    if (authenticated) {
-        $('.popup').attr('hidden', true);
-        $('.cover').attr('hidden', false);
 
-        // add comment id to te form
-        $("<input />").attr("type", "hidden")
-            .attr("name", "comment_id")
-            .attr("value", id)
-            .appendTo("#flag_form");
-    }else{
+function open_dialog(comment_id) {
+    $('.popup').attr('hidden', true);
+    $('.cover').attr('hidden', false);
 
-    }
+    // add comment id to te form
+    $("<input />").attr("type", "hidden")
+        .attr("name", "comment_id")
+        .attr("value", comment_id)
+        .appendTo("#flag_form");
 }
 
 function cancel_form() {

@@ -222,6 +222,8 @@ def paper_detail(request, id):
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
 
+    print("ids are:", id, paper.id)
+
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
     if request.user.is_authenticated:

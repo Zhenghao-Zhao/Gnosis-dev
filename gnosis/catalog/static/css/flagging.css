@@ -28,6 +28,7 @@
     background-color: lightgray;
 }
 
+
 .cover {
     position: fixed;
     top: 0;
@@ -59,3 +60,4 @@
     width: 50%;
     margin-left: 50%;
 }
+
