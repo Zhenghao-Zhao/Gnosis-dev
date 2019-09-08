@@ -65,16 +65,16 @@ function center() {
 
 /************** reset and re-render layout **************/
 // reset layout, all nodes return to initial positions
-// function reset_layout() {
-//     cy.layout(layout).run();
-//     center();
-// }
+function reset_layout() {
+    cy.layout(layout).run();
+    center();
+}
 
 function reset_nodes() {
     collection = cy.elements();
     cy.style().selector('node').style('visibility', 'visible').update();
     cy.style().selector('edge').style('visibility', 'visible').update();
-    center();
+    reset_layout();
 
     // sync select menu option to 'all'
     $('#graphfilter').val('all');
@@ -101,6 +101,22 @@ function show_cites(label, type) {
     }
 
     center();
+}
+
+// stores state of the collapse target
+var hidden = false;
+
+function collapse_toggle(ele, that) {
+    hidden = !hidden;
+    if (hidden) {
+        $(that).children('.drop_indicator').text('arrow_drop_down');
+        $('#' + ele).hide(200);
+
+    } else {
+        $(that).children('.drop_indicator').text('arrow_drop_up');
+        $('#' + ele).show(200);
+
+    }
 }
 
 

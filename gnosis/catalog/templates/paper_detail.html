@@ -145,78 +145,89 @@
     {% endif %}
 
     <div class="card mt-3 shadow-sm">
-        <div class="card-header">
-            <div style="display: inline-flex; width: 100%; justify-content: space-between">
-                <h4>Ego-graph</h4>
+        <div id="ego-header" class="card-header" onclick="collapse_toggle('ego-graph-content', this)"
+             style="display: flex; flex-direction: row; justify-content: space-between">
+            <h4>Ego-graph</h4>
 
-                {#                <div>#}
-                {#                    <button class="btn btn-primary" id="menu-button" title="Hide add-ons" onclick="toggle_options()">#}
-                {#                        Hide#}
-                {#                    </button>#}
+            {#                <div>#}
+            {#                    <button class="btn btn-primary" id="menu-button" title="Hide add-ons" onclick="toggle_options()">#}
+            {#                        Hide#}
+            {#                    </button>#}
 
-            </div>
+            <i class="material-icons drop_indicator">
+                arrow_drop_up
+            </i>
 
         </div>
 
-        <div class="ego-button-container">
-            <div class="flex_layout_row legend_container">
-                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Dataset')"><span class="color_legend dataset"></span>
-                    Dataset
+        <div id="ego-graph-content">
+
+            <div class="ego-button-container">
+                <div class="flex_layout_row legend_container">
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Dataset')"><span
+                            class="color_legend dataset"></span>
+                        Dataset
+                    </div>
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Person')"><span
+                            class="color_legend person"></span> Person
+                    </div>
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Venue')"><span
+                            class="color_legend venue"></span> Venue
+                    </div>
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Paper')"><span
+                            class="color_legend paper"></span> Paper
+                    </div>
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Code')"><span
+                            class="color_legend code"></span> Code
+                    </div>
                 </div>
-                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Person')"><span class="color_legend person"></span> Person
-                </div>
-                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Venue')"><span class="color_legend venue"></span> Venue
-                </div>
-                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Paper')"><span class="color_legend paper"></span> Paper
-                </div>
-                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Code')"><span class="color_legend code"></span> Code
+
+
+                <div class="flex_layout_row widget_container">
+                    <div id="hide-refresh" class="flex_layout_row" style="padding: 5px">
+                        <button type="button"
+                                class="btn btn-primary ego-button" title="Hide relationships"
+                                data-toggle="button"
+                                aria-pressed="false" onclick="toggle_relas()">
+                            <i class="material-icons" id="rela_toggle">
+                                visibility
+                            </i>
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-primary ego-button" title="Reset"
+                                onclick="reset_nodes()">
+                            <i class="material-icons">
+                                refresh
+                            </i>
+                        </button>
+                    </div>
+
+                    <div class="flex_layout_row" style="padding-right: 5px">
+                        <select id="graphfilter"
+                                onchange="show_cites(this.value, 'all')"
+                                style="height: 35px; margin-top: auto; margin-bottom: auto">
+                            <option value="all"> mixed</option>
+                            <option value="cites"> cites</option>
+                            <option value="uses"> uses</option>
+                            <option value="extends"> extends</option>
+                            <option value="authors"> authors</option>
+                            <option value="was published at"> was published at</option>
+                            <option value="evaluates on"> evaluates on</option>
+                            <option value="published"> published</option>
+                            <option value="implements"> implements</option>
+                        </select>
+                    </div>
+
                 </div>
             </div>
 
+            <div class="card-body" style="padding-top: 0">
 
-            <div class="flex_layout_row widget_container">
-                <div id="hide-refresh" class="flex_layout_row" style="padding: 5px">
-                    <button type="button"
-                            class="btn btn-primary ego-button" title="Hide relationships"
-                            data-toggle="button"
-                            aria-pressed="false" onclick="toggle_relas()">
-                        <i class="material-icons" id="rela_toggle">
-                            visibility
-                        </i>
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-primary ego-button" title="Reset"
-                            onclick="reset_nodes()">
-                        <i class="material-icons">
-                            refresh
-                        </i>
-                    </button>
+                <div id="cy">
                 </div>
-
-                <div class="flex_layout_row" style="padding-right: 5px">
-                    <select id="graphfilter"
-                            onchange="show_cites(this.value, 'all')"
-                            style="height: 35px; margin-top: auto; margin-bottom: auto">
-                        <option value="all"> mixed</option>
-                        <option value="cites"> cites</option>
-                        <option value="uses"> uses</option>
-                        <option value="extends"> extends</option>
-                        <option value="authors"> authors</option>
-                        <option value="was published at"> was published at</option>
-                        <option value="evaluates on"> evaluates on</option>
-                        <option value="published"> published</option>
-                        <option value="implements"> implements</option>
-                    </select>
-                </div>
-
             </div>
-        </div>
 
-        <div class="card-body" style="padding-top: 0">
-
-            <div id="cy">
-            </div>
         </div>
     </div>
 

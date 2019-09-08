@@ -83,6 +83,14 @@
     justify-content: flex-end;
 }
 
+#ego-header:hover {
+    cursor: pointer;
+}
+
+.drop_indicator {
+    margin-top: auto;
+    margin-bottom: auto;
+}
 
 @media only screen and (max-width: 678px) {
     #hide-refresh {
