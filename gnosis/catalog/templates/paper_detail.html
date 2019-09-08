@@ -159,52 +159,56 @@
         </div>
 
         <div class="ego-button-container">
-            <!--    {# dropdown menu in header #}-->
-            <div class="flex_layout_row" style="width: 33.3%;">
-                <div class="flex_layout_col"><span class="color_legend dataset"></span>
+            <div class="flex_layout_row legend_container">
+                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Dataset')"><span class="color_legend dataset"></span>
                     Dataset
                 </div>
-                <div class="flex_layout_col"><span class="color_legend person"></span> Person
+                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Person')"><span class="color_legend person"></span> Person
                 </div>
-                <div class="flex_layout_col"><span class="color_legend venue"></span> Venue
+                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Venue')"><span class="color_legend venue"></span> Venue
                 </div>
-                <div class="flex_layout_col"><span class="color_legend paper"></span> Paper
+                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Paper')"><span class="color_legend paper"></span> Paper
                 </div>
-                <div class="flex_layout_col"><span class="color_legend code"></span> Code
+                <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Code')"><span class="color_legend code"></span> Code
                 </div>
             </div>
 
 
-            <div class="flex_layout_row" style="width: 33.3%;">
-                <button type="button"
-                        class="btn btn-primary ego-button" title="Hide relationships"
-                        data-toggle="button"
-                        aria-pressed="false" onclick="toggle_relas()">
-                    <i class="material-icons" id="rela_toggle">
-                        visibility
-                    </i>
-                </button>
+            <div class="flex_layout_row widget_container">
+                <div id="hide-refresh" class="flex_layout_row" style="padding: 5px">
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Hide relationships"
+                            data-toggle="button"
+                            aria-pressed="false" onclick="toggle_relas()">
+                        <i class="material-icons" id="rela_toggle">
+                            visibility
+                        </i>
+                    </button>
 
-                <button type="button"
-                        class="btn btn-primary ego-button" title="Reset"
-                        onclick="reset_layout()">
-                    <i class="material-icons">
-                        refresh
-                    </i>
-                </button>
+                    <button type="button"
+                            class="btn btn-primary ego-button" title="Reset"
+                            onclick="reset_nodes()">
+                        <i class="material-icons">
+                            refresh
+                        </i>
+                    </button>
+                </div>
 
-                <select id="graphfilter"
-                        onchange="show_cites(this.value)" style="height: 35px; margin-top: auto; margin-bottom: auto">
-                    <option value="all relationships"> mixed</option>
-                    <option value="cites"> cites</option>
-                    <option value="uses"> uses</option>
-                    <option value="extends"> extends</option>
-                    <option value="authors"> authors</option>
-                    <option value="was published at"> was published at</option>
-                    <option value="evaluates on"> evaluates on</option>
-                    <option value="published"> published</option>
-                    <option value="implements"> implements</option>
-                </select>
+                <div class="flex_layout_row" style="padding-right: 5px">
+                    <select id="graphfilter"
+                            onchange="show_cites(this.value, 'all')"
+                            style="height: 35px; margin-top: auto; margin-bottom: auto">
+                        <option value="all"> mixed</option>
+                        <option value="cites"> cites</option>
+                        <option value="uses"> uses</option>
+                        <option value="extends"> extends</option>
+                        <option value="authors"> authors</option>
+                        <option value="was published at"> was published at</option>
+                        <option value="evaluates on"> evaluates on</option>
+                        <option value="published"> published</option>
+                        <option value="implements"> implements</option>
+                    </select>
+                </div>
 
             </div>
         </div>

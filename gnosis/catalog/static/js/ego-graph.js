@@ -1,4 +1,3 @@
-
 /************** resizable graph **************/
 // simulate stop resizing using timer
 var resizeTimer;
@@ -66,33 +65,44 @@ function center() {
 
 /************** reset and re-render layout **************/
 // reset layout, all nodes return to initial positions
-function reset_layout() {
-    cy.layout(layout).run();
+// function reset_layout() {
+//     cy.layout(layout).run();
+//     center();
+// }
+
+function reset_nodes() {
+    collection = cy.elements();
+    cy.style().selector('node').style('visibility', 'visible').update();
+    cy.style().selector('edge').style('visibility', 'visible').update();
     center();
+
+    // sync select menu option to 'all'
+    $('#graphfilter').val('all');
 }
 
-/************** dropdown menu **************/
-function show_cites(value) {
-    var cat = value;
+/************** graph filtering function **************/
+function show_cites(label, type) {
 
-    if (cat === "all relationships") {
+    if (label === "all" && type === "all") {
         collection = cy.elements();
         cy.style().selector('node').style('visibility', 'visible').update();
         cy.style().selector('edge').style('visibility', 'visible').update();
     } else {
-        // get all elements currently on the graph
+        // get all elements on the graph
         collection = cy.filter((element) => {
-            return element.data('label') === cat || element.data('label') === "origin"
+            return element.data('label') === label || element.data('type') === type
+                || element.data('label') === "origin"
         });
-
         cy.style().selector('node').style('visibility', 'hidden').update();
         cy.style().selector('edge').style('visibility', 'hidden').update();
-        cy.style().selector('[label="' + cat + '"]').style('visibility', 'visible').update();
+        cy.style().selector('[type="' + type + '"]').style('visibility', 'visible').update();
+        cy.style().selector('[label="' + label + '"]').style('visibility', 'visible').update();
         cy.style().selector('node[label="origin"]').style('visibility', 'visible').update();
     }
 
     center();
 }
+
 
 /************** tooltip **************/
 // interactivity with the ego graph

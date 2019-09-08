@@ -47,25 +47,58 @@
     z-index: 1000;
     flex-direction: row;
     justify-content: space-between;
-    padding: 8px;
     background-color: ghostwhite;
-}
-
-#menu-button {
-    width: 65px;
 }
 
 .flex_layout_row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
 }
 
 .flex_layout_col {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding: 0 3px;
 }
+
+.legend_container {
+    width: 45%;
+}
+
+.legend_ele {
+    padding: 5px;
+}
+
+.legend_ele:hover {
+    background-color: #eeeeee;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.widget_container {
+    width: 45%;
+    justify-content: flex-end;
+}
+
+
+@media only screen and (max-width: 678px) {
+    #hide-refresh {
+        position: absolute;
+        flex-direction: column;
+        top: 130px;
+    }
+
+    .widget_container {
+        width: auto;
+    }
+
+
+}
+
+
 
 
 
