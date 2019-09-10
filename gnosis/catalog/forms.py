@@ -5,6 +5,11 @@ from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
 
+from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV2Invisible, ReCaptchaV2Checkbox, ReCaptchaV3
+
+from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV, RECAPTCHA_PUBLIC_KEY_V3, RECAPTCHA_PRIVATE_KEY_V3
+
 
 #
 # Search forms
@@ -20,6 +25,7 @@ class SearchAllForm(Form):
         return self.cleaned_data["search_keywords"]
 
     search_keywords = forms.CharField(required=True)
+
 
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
@@ -342,7 +348,39 @@ class CommentForm(ModelForm):
         return self.cleaned_data["publication_date"]
 
     # def clean_author(self):
-    #     return self.cleaned_data['author']
+    #      return self.cleaned_data['author']
+
+    # recaptcha checkbox, by default it uses checkbox keys at settings.py
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-callback': 'dataCallback',
+                'data-expired-callback': 'dataExpiredCallback',
+                'data-error-callback': 'dataErrorCallback'
+            }
+        ),
+        label=''
+    )
+
+    # recaptcha invisible
+    # captcha = ReCaptchaField(
+    #     public_key=RECAPTCHA_PUBLIC_KEY_INV,
+    #     private_key=RECAPTCHA_PRIVATE_KEY_INV,
+    #     widget=ReCaptchaV2Invisible,
+    #     label=''
+    # )
+
+    # recaptcha v3
+    # captcha = ReCaptchaField(
+    #     public_key=RECAPTCHA_PUBLIC_KEY_V3,
+    #     private_key=RECAPTCHA_PRIVATE_KEY_V3,
+    #     widget=ReCaptchaV3(
+    #         attrs={
+    #             'required_score': 0.5,
+    #         }
+    #     ),
+    #     label=''
+    # )
 
     class Meta:
         model = Comment
