@@ -9,6 +9,18 @@ from django.utils.safestring import mark_safe
 #
 # Search forms
 #
+
+class SearchAllForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_search_keywords(self):
+        return self.cleaned_data["search_keywords"]
+
+    search_keywords = forms.CharField(required=True)
+
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
@@ -65,6 +77,7 @@ class SearchPapersForm(Form):
     paper_title = forms.CharField(
         required=True, widget=forms.TextInput(attrs={"size": 60})
     )
+
 
 class PaperConnectionForm(Form):
     def __init__(self, *args, **kwargs):
@@ -162,9 +175,9 @@ class PaperImportForm(Form):
         return self.cleaned_data["url"]
 
     url = forms.CharField(
-    # the label will now appear in two lines break at the br label
+        # the label will now appear in two lines break at the br label
         # label= mark_safe("Source URL, e.g., https://arxiv.org/abs/1607.00653* <br /> Currently supported websites: arXiv.org, papers.nips.cc, www.jmlr.org/papers <br /> for papers from JMLR, please provide link of the abstract([abs]) page "),
-        label= mark_safe("Source URL*"),
+        label=mark_safe("Source URL*"),
         max_length=200,
         widget=forms.TextInput(attrs={"size": 60}),
     )
