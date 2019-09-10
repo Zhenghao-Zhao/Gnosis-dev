@@ -7,6 +7,7 @@ urlpatterns = [
     path('persons/', views.persons, name='persons_index'),
     path('paper/<int:id>/', views.paper_detail, name='paper_detail'),
     path('build', views.build, name='build_db'),
+    path('paper/get_recent_10_authors/', views.get_recent_10_authors, name='recent_10_authors'),
 ]
 
 # for updating/creating a new Paper node

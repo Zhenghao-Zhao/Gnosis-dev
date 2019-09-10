@@ -40,8 +40,8 @@
 
         <h4>
         <a href="/home/" class="btn btn-primary" role="button" target="_blank">Recently added papers</a>
-            <a href="{% url 'recent_10_authors' %}" class="btn btn-primary"  role="button" target="_blank">Recently added people </a>
-{#            { % url 'recent_10_authors' %}#}
+            <a href="" class="btn btn-primary"  role="button">Recently added people </a>
+{#            { % url 'get_recent_10_authors' %}#}
 
 
         </h4>
@@ -49,20 +49,25 @@
 
 
     </div>
-    <div class="card-body">
-        {% for paper, authors in papers %}
-        <ul class="list-group">
-            <li class="list-group-item mt-1">
 
-                <h4><a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a></h4>
-                <p>{{ authors }}</p>
-                <p>{{ paper.abstract|truncatewords:50 }}</p>
-            </li>
-        </ul>
-        {% endfor %}
-    </div>
 </div>
+ <div class="card shadow-sm mt-3">
+        <div class="card-header">
+            <h4>Recently added people</h4>
+        </div>
+        <div class="card-body">
+            {% for author in recent_10_authors %}
 
+                <ul class=" list-group">
+                    <li class="list-group-item mt-1">
+                        <h4><a href="{{ paper.get_absolute_url }}">{{ author }}</a></h4>
+
+                    </li>
+
+                </ul>
+            {% endfor %}
+        </div>
+    </div>
 
 {% if user.is_superuser %}
 <div class="card shadow-sm mt-3">
