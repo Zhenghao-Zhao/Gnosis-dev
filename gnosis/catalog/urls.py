@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from bookmark.views import bookmark_entry_remove
+from bookmark.views import bookmark_entry_remove, bookmark_entry_remove_from_view
 
 urlpatterns = [
     path('', views.papers),
@@ -106,12 +106,16 @@ urlpatterns += [
 
 # for updating/creating a Endorsement
 urlpatterns += [
-    path('endorsement/create/<int:paper_id>', views.endorsement_create, name='endorsement_create'),
-    path('endorsement/undo/<int:paper_id>', views.endorsement_undo, name='endorsement_undo'),
+    path('endorsements', views.endorsements, name='endorsements'),
+    path('endorsements/create/<int:paper_id>', views.endorsement_create, name='endorsement_create'),
+    path('endorsements/undo/<int:paper_id>', views.endorsement_undo, name='endorsement_undo'),
+    path('endorsements/undoview//<int:paper_id>', views.endorsement_undo_from_view, name='endorsement_undo_from_view'),
 ]
 
 # for updating/creating a Bookmark
 urlpatterns += [
-    path('bookmark/entry/<int:pid>', views.paper_add_to_bookmark, name='paper_add_to_bookmark'),
-    path('bookmark/paper/<int:pid>/remove', bookmark_entry_remove, name='bookmark_entry_remove'),
+    path('bookmarks/entry/<int:pid>', views.paper_add_to_bookmark, name='paper_add_to_bookmark'),
+    path('bookmarks/paper/<int:pid>/remove', bookmark_entry_remove, name='bookmark_entry_remove'),
+    path('bookmarks/<int:pid>/remove', bookmark_entry_remove_from_view, name='bookmark_entry_remove_from_view'),
+
 ]
