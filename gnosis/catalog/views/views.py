@@ -28,7 +28,7 @@ from catalog.forms import (
     PaperConnectionForm,
 )
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
@@ -294,15 +294,23 @@ def paper_detail(request, id):
     user = request.user
     # if a flagging form is submitted
     if request.method == "POST":
-        comment_id = request.POST.get("comment_id", "")
+        comment_id = request.POST.get("comment_id", None)
         flagged_comment = FlaggedComment()
         flagged_comment.proposed_by = user
         form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
 
         # check if comment_id exists
-        if comment_id != "":
+        if comment_id is not None:
             flagged_comment.comment_id = comment_id
-            if form.is_valid():
+
+            is_valid = form.is_valid()
+
+            if request.is_ajax():
+                data = {'is_valid': is_valid}
+                print("ajax request received!")
+                return JsonResponse(data)
+
+            if is_valid:
                 form.save()
                 print("comment flag form saved successfully!!")
                 return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
