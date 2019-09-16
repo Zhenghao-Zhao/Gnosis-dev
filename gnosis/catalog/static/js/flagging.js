@@ -33,21 +33,25 @@ function cancel_form() {
 
 
 // sending ajax post request
-
 var form = $('#flag_form');
-console.log(form.attr('action'));
 form.submit(function (e) {
+    console.log("submit received!");
     e.preventDefault();
+
+    $('.popup').attr('hidden', true);
 
     $.ajax({
         type: 'POST',
         url: window.location.href,
         data: form.serialize(),
         success: function (data) {
+            alert("Report submitted successfully.");
+            $('#flag_form').trigger('reset');
             console.log("form is valid:", data.is_valid)
         },
         error: function (data) {
-            console.log("An error has occurred!")
+            console.log("An error has occurred!");
+            alert("An error has occurred, please resubmit report.");
         },
 
     })

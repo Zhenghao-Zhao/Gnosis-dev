@@ -7,9 +7,6 @@ from catalog.models import FlaggedComment
 from neomodel import db
 from catalog.models import Comment
 
-from django.contrib.admin.actions import delete_selected
-
-
 # Register your models here.
 admin.site.register(ReadingGroup)
 admin.site.register(ReadingGroupEntry)
@@ -19,7 +16,14 @@ admin.site.register(Endorsement)
 admin.site.register(EndorsementEntry)
 
 
+def delete_selected(modeladmin, request, queryset):
+    for obj in queryset:
+        # delete selected flags
+        obj.delete()
+
+
 delete_selected.short_description = "Delete marked flags"
+
 
 def delete_comment(modeladmin, request, queryset):
     for obj in queryset:
@@ -27,15 +31,28 @@ def delete_comment(modeladmin, request, queryset):
         results, meta = db.cypher_query(query, dict(id=obj.comment_id))
         obj.delete()
 
+        # delete flags about the same comment
+        FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
+
 
 delete_comment.short_description = "Delete marked flags and their comments"
+
+
+def delete_flags(modeladmin, request, queryset):
+    for obj in queryset:
+        # delete flags about the same comment
+        FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
+
+
+delete_flags.short_description = "Delete all flags about the marked comments"
+
 
 # define customized interface for flagged comment
 class FlaggedCommentAdmin(admin.ModelAdmin):
     exclude = ('comment_id', "proposed_by")
     list_display = ['violation', 'get_comment']
     ordering = ['violation']
-    actions = [delete_comment]
+    actions = [delete_comment, delete_selected, delete_flags]
 
     readonly_fields = ['violation', 'description', 'created_at']
 
@@ -54,6 +71,7 @@ class FlaggedCommentAdmin(admin.ModelAdmin):
             comment = all_comments[0]
 
         return comment.text
+
     get_comment.short_description = 'Comment'
 
 
