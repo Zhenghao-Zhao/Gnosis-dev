@@ -28,9 +28,19 @@
             <span class="rounded-lg">
         {{ field }}
         </span>
+            <select>
+                <option value="all">All</option>
+                <option value="papers">Papers</option>
+                <option value="people">People</option>
+                <option value="venues">Venues</option>
+                <option value="datasets">Datasets</option>
+                <option value="codes">Codes</option>
+            </select>
+
             {% endfor %}
             <br>
             <input type="submit" class="btn btn-primary btn-lg" value="Search"/>
+
         </form>
     </div>
 </div>

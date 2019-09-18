@@ -15,6 +15,28 @@ from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV,
 # Search forms
 #
 
+class SearchForm(Form):
+    FILTER_CHOICES = [
+        ('all', 'All'),
+        ('papers', 'Papers'),
+        ('people', 'People'),
+        ('datasets', 'Datasets'),
+        ('venues', 'Venues'),
+        ('codes', 'Codes'),
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+
+    def clean_search_keywords(self):
+        return self.cleaned_data["search_keywords"]
+
+    search_keywords = forms.CharField(required=True)
+    search_filter = forms.CharField(label='', widget=forms.Select(choices=FILTER_CHOICES))
+
+
 class SearchAllForm(Form):
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
