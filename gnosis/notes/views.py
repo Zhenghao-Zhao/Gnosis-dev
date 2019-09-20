@@ -11,6 +11,8 @@ from django.http import HttpResponseRedirect
 from neomodel import db
 
 from datetime import datetime
+
+
 #
 # Note Views
 #
@@ -26,7 +28,7 @@ def note_create(request):
         all_papers = [Paper.inflate(row[0]) for row in results]
         paper = all_papers[0]
     else:  # just send him to the list of papers
-        HttpResponseRedirect(reverse("papers_index"))
+        return HttpResponseRedirect(reverse("papers_index"))
 
     if request.method == "POST":
         note = Note()
@@ -50,7 +52,7 @@ def note_update(request, id):
     note = Note.objects.filter(id=id).first()
     paper_id = request.session["last-viewed-paper"]
     # if this is POST request then process the Form data
-    if request.method == "POST":
+    if request.method == "POST" and request.user == note.created_by:
         form = NoteForm(request.POST)
         if form.is_valid():
             note.note_content = form.cleaned_data["note_content"]
@@ -71,6 +73,17 @@ def note_update(request, id):
 def note_delete(request, id):
     note = Note.objects.filter(id=id).first()
     paper_id = request.session["last-viewed-paper"]
-    note.delete()
-    del request.session["last-viewed-paper"]
+    if request.user == note.created_by:
+        note.delete()
+        del request.session["last-viewed-paper"]
     return redirect("paper_detail", id=paper_id)
+
+
+@login_required
+def note_index(request):
+    notes = []
+    if request.user.is_authenticated:
+        notes = Note.objects.filter(created_by=request.user).order_by('-updated_at')
+    num_notes = len(notes)
+
+    return render(request, "notes/note_index.html", {"notes": notes, "num_notes": num_notes,},)
