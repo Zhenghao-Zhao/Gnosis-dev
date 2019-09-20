@@ -338,6 +338,8 @@ def _get_node_ego_network(id, paper_title):
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
 
+    # type refers to what node type the object is associated with.
+    # label refers to the text on the object.
     node_temp = ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }}}}"
     rela_temp = ",{{data: {{ id: '{}{}{}', type: '{}', label: '{}', source: '{}', target: '{}', line: '{}' }}}}"
 

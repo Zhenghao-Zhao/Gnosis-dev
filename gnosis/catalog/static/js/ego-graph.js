@@ -123,7 +123,7 @@ function collapse_toggle(ele, that) {
 /************** tooltip **************/
 // interactivity with the ego graph
 // timeout for delaying tooltip
-var time_out = 1000;
+var time_out = 300;
 var hoverTimeout;
 cy.on('click', 'node', function (evt) {
     var node = evt.target;
@@ -146,7 +146,6 @@ cy.on('click', 'node', function (evt) {
 
             var tip_item = "";
 
-            var span = document.createElement("span");
             // what is shown on the tooltip
             if (node.data('type') === 'Person') {
                 // combine individual names to one
@@ -157,34 +156,24 @@ cy.on('click', 'node', function (evt) {
                 tip_item = node.data('title')
             }
 
-            span.innerHTML = tip_item;
             if (tip_item.length > 0) {
-
-                $("#cy").append("<div id='tooltip'></div>");
-
                 // css for tooltip
-                $('#tooltip').append(span).css({
-                    "display": "block",
-                    "max-width": "200px",
-                    "margin": 0,
-                    "height": "auto",
-                    "position": "absolute",
-                    "padding": "5px",
-                    "left": px,
-                    "top": py,
-                    "background-color": "#f2e5b8",
-                    "z-index": 1000,
-                    "border-radius": "6px",
-                    "opacity": 0.9,
-                    "text-align": "left"
+                $('#tooltip').attr('hidden', false);
+
+                $('#tooltip span').text(tip_item).css({
+                    "left": px + 15,
+                    "top": py + 15,
                 });
             }
-            $('#tooltip span').css({
-                "margin": 0,
-            })
 
         }, time_out);
 
+    })
+    .on('mousedown', 'node', function (evt) {
+        clearTimeout(hoverTimeout);
+        var node = evt.target;
+        node.style('opacity', 1);
+        $('#tooltip').attr('hidden', true);
     })
 
     // remove tooltip on mouseout
@@ -192,7 +181,7 @@ cy.on('click', 'node', function (evt) {
         clearTimeout(hoverTimeout);
         var node = evt.target;
         node.style('opacity', 1);
-        $('#tooltip').remove();
+        $('#tooltip').attr('hidden', true);
 
     })
 

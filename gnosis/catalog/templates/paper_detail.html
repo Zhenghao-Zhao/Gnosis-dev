@@ -164,9 +164,8 @@
 
             <div class="ego-button-container">
                 <div class="flex_layout_row legend_container">
-                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Dataset')"><span
-                            class="color_legend dataset"></span>
-                        Dataset
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Paper')"><span
+                            class="color_legend paper"></span> Paper
                     </div>
                     <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Person')"><span
                             class="color_legend person"></span> Person
@@ -174,17 +173,24 @@
                     <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Venue')"><span
                             class="color_legend venue"></span> Venue
                     </div>
-                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Paper')"><span
-                            class="color_legend paper"></span> Paper
-                    </div>
                     <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Code')"><span
                             class="color_legend code"></span> Code
                     </div>
+                    <div class="flex_layout_col legend_ele" onclick="show_cites('all', 'Dataset')"><span
+                            class="color_legend dataset"></span>
+                        Dataset
+                    </div>
                 </div>
-
 
                 <div class="flex_layout_row widget_container">
                     <div id="hide-refresh" class="flex_layout_row" style="padding: 5px">
+                        <button type="button"
+                                class="btn btn-primary ego-button" title="Reset"
+                                onclick="reset_nodes()">
+                            <i class="material-icons">
+                                refresh
+                            </i>
+                        </button>
                         <button type="button"
                                 class="btn btn-primary ego-button" title="Hide relationships"
                                 data-toggle="button"
@@ -194,20 +200,13 @@
                             </i>
                         </button>
 
-                        <button type="button"
-                                class="btn btn-primary ego-button" title="Reset"
-                                onclick="reset_nodes()">
-                            <i class="material-icons">
-                                refresh
-                            </i>
-                        </button>
                     </div>
 
                     <div class="flex_layout_row" style="padding-right: 5px">
                         <select id="graphfilter"
                                 onchange="show_cites(this.value, 'all')"
                                 style="height: 35px; margin-top: auto; margin-bottom: auto">
-                            <option value="all"> mixed</option>
+                            <option value="all"> all</option>
                             <option value="cites"> cites</option>
                             <option value="uses"> uses</option>
                             <option value="extends"> extends</option>
@@ -225,6 +224,9 @@
             <div class="card-body" style="padding-top: 0">
 
                 <div id="cy">
+                    <div id="tooltip" hidden>
+                        <span></span>
+                    </div>
                 </div>
             </div>
 
