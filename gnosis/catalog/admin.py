@@ -16,13 +16,13 @@ admin.site.register(Endorsement)
 admin.site.register(EndorsementEntry)
 
 
-def delete_selected(modeladmin, request, queryset):
-    for obj in queryset:
-        # delete selected flags
-        obj.delete()
-
-
-delete_selected.short_description = "Delete marked flags"
+# def delete_selected(modeladmin, request, queryset):
+#     for obj in queryset:
+#         # delete selected flags
+#         obj.delete()
+#
+#
+# delete_selected.short_description = "Delete marked flags"
 
 
 def delete_comment(modeladmin, request, queryset):
@@ -52,7 +52,7 @@ class FlaggedCommentAdmin(admin.ModelAdmin):
     exclude = ('comment_id', "proposed_by")
     list_display = ['violation', 'get_comment']
     ordering = ['violation']
-    actions = [delete_comment, delete_selected, delete_flags]
+    actions = [delete_comment, delete_flags]
 
     readonly_fields = ['violation', 'description', 'created_at']
 
@@ -61,6 +61,12 @@ class FlaggedCommentAdmin(admin.ModelAdmin):
     #     (None, {'fields': ['violation', 'description', 'proposed_by']}),
     #     ('Date information', {'fields': ['created_at']})
     # )
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if request.user.username[0].upper() != 'J':
+            if 'delete_selected' in actions:
+                del actions['delete_selected']
+        return actions
 
     def get_comment(self, obj):
         query = "MATCH (a:Comment) WHERE ID(a)={id} RETURN a"

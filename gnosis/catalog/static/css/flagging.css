@@ -6,10 +6,10 @@
 
 .menu_item {
     vertical-align: bottom;
+    user-select: none;
 }
 
 .more_vert {
-    /* might not be supported in other browsers */
     user-select: none;
     color: darkgrey;
 }
@@ -53,11 +53,21 @@
     z-index: 3000;
 }
 
-.form_buttons {
+/*.sec-border {*/
+    /*width: 100%;*/
+    /*border: 1px solid #cccccc;*/
+    /*margin: 5px 0;*/
+/*}*/
+
+.form_button {
+    font-size: 1.0rem;
+}
+
+.form_button_container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 50%;
-    margin-left: 50%;
+    width: 45%;
+    margin-left: 55%;
 }
 

@@ -15,8 +15,9 @@ function toggle_more(ele) {
 
 
 function open_dialog(comment_id) {
+    // hide all current popups
     $('.popup').attr('hidden', true);
-    $('.cover').attr('hidden', false);
+    $('#flag_form_container').attr('hidden', false);
 
     // add comment id to the form
     $("<input />").attr("type", "hidden")
@@ -35,7 +36,6 @@ function cancel_form() {
 // sending ajax post request
 var form = $('#flag_form');
 form.submit(function (e) {
-    console.log("submit received!");
     e.preventDefault();
 
     $('.popup').attr('hidden', true);
@@ -45,18 +45,16 @@ form.submit(function (e) {
         url: window.location.href,
         data: form.serialize(),
         success: function (data) {
-            alert("Report submitted successfully.");
             $('#flag_form').trigger('reset');
-            console.log("form is valid:", data.is_valid)
+            alert("Thanks. We have received the report. We will assess the comment based on our guidelines, " +
+                "and will remove it if a violation is found.")
         },
         error: function (data) {
-            console.log("An error has occurred!");
             alert("An error has occurred, please resubmit report.");
         },
 
     })
 });
-
 
 //Django basic setup for accepting ajax requests.
 // Cookie obtainer Django
