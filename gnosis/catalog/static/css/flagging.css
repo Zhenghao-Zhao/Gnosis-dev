@@ -48,8 +48,8 @@
     padding: 20px;
     top: 50%;
     left: 50%;
-    margin-left: -222.5px;
-    margin-top: -140px;
+    margin-left: -191.415px;
+    margin-top: -239px;
     z-index: 3000;
 }
 
@@ -67,7 +67,12 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 45%;
-    margin-left: 55%;
+    width: 50%;
+    margin-left: 50%;
+}
+
+#id_violation
+{
+    list-style-type: none;
 }
 

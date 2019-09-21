@@ -480,8 +480,17 @@ class FlaggedCommentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
 
+        VIOLATION_CHOICES = [
+            ('spam comments', 'Unwanted commercial content or spam'),
+            ('porn', 'Pornography or sexually explicit material'),
+            ('child abuse', 'Child abuse'),
+            ('hate or violence', 'Hate speech or graphic violence'),
+            ('harassment or bullying', 'Harassment or bullying')
+        ]
+
         self.fields["description"].widget = forms.Textarea()
         self.fields["description"].widget.attrs.update({"rows": "5"})
+        self.fields["violation"] = forms.ChoiceField(choices=VIOLATION_CHOICES, widget=forms.RadioSelect())
 
     def clean_violation(self):
         return self.cleaned_data["violation"]

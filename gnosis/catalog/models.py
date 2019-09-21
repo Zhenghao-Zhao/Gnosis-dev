@@ -199,17 +199,10 @@ class Code(DjangoNode):
     #
 
 class FlaggedComment(models.Model):
-    VIOLATION_CHOICES = [
-        ('spam comments', 'Unwanted commercial content or spam'),
-        ('porn', 'Pornography or sexually explicit material'),
-        ('child abuse', 'Child abuse'),
-        ('hate or violence', 'Hate speech or graphic violence'),
-        ('harassment or bullying', 'Harassment or bullying')
-    ]
 
     comment_id = models.IntegerField(null=False, blank=False)  # id of the flagged comment
 
-    violation = models.CharField(max_length=100, choices=VIOLATION_CHOICES)
+    violation = models.CharField(max_length=100)
     description = models.TextField()
     created_at = models.DateField(auto_now_add=True, auto_now=False)
 
