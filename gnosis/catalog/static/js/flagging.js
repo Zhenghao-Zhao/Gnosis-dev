@@ -46,8 +46,8 @@ form.submit(function (e) {
         data: form.serialize(),
         success: function (data) {
             $('#flag_form').trigger('reset');
-            alert("Thanks. We have received the report. We will assess the comment based on our guidelines, " +
-                "and will remove it if a violation is found.")
+            alert("Thanks. We have received the report. We will assess the comment against our guidelines, " +
+                "and we will take actions if a violation is found.")
         },
         error: function (data) {
             alert("An error has occurred, please resubmit report.");
@@ -55,6 +55,8 @@ form.submit(function (e) {
 
     })
 });
+
+
 
 //Django basic setup for accepting ajax requests.
 // Cookie obtainer Django

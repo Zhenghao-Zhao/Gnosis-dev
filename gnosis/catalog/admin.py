@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.models import Endorsement, EndorsementEntry
@@ -6,6 +8,8 @@ from catalog.models import FlaggedComment
 
 from neomodel import db
 from catalog.models import Comment
+
+from django.urls import reverse
 
 # Register your models here.
 admin.site.register(ReadingGroup)
@@ -35,7 +39,7 @@ def delete_comment(modeladmin, request, queryset):
         FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
 
 
-delete_comment.short_description = "Delete marked flags and their comments"
+delete_comment.short_description = "Delete marked COMMENTS and their flags"
 
 
 def delete_flags(modeladmin, request, queryset):
@@ -44,28 +48,37 @@ def delete_flags(modeladmin, request, queryset):
         FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
 
 
-delete_flags.short_description = "Delete all flags about the marked comments"
+delete_flags.short_description = "Delete all FLAGS about the marked comments"
 
 
 # define customized interface for flagged comment
 class FlaggedCommentAdmin(admin.ModelAdmin):
-    exclude = ('comment_id', "proposed_by")
+    change_form_template = "admin/flag_changeform.html"
     list_display = ['violation', 'get_comment']
-    ordering = ['violation']
+    ordering = ['comment_id', 'violation']
     actions = [delete_comment, delete_flags]
 
-    readonly_fields = ['violation', 'description', 'created_at']
+    readonly_fields = ('get_comment',)
 
-    # 'violation', 'description', 'proposed_by', 'created_at', 'comment'
-    # fieldsets = (
-    #     (None, {'fields': ['violation', 'description', 'proposed_by']}),
-    #     ('Date information', {'fields': ['created_at']})
-    # )
+    def response_change(self, request, obj):
+        if "_delete-comment" in request.POST:
+            query = "MATCH (a:Comment) WHERE ID(a)={id} DETACH DELETE a"
+            results, meta = db.cypher_query(query, dict(id=obj.comment_id))
+            obj.delete()
+
+            # delete flags about the same comment
+            FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
+            return HttpResponseRedirect(reverse('admin:catalog_flaggedcomment_changelist'))
+
+        if "_delete-flags" in request.POST:
+            FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()
+            return HttpResponseRedirect(reverse('admin:catalog_flaggedcomment_changelist'))
+
+        return super().response_change(request, obj)
+
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if request.user.username[0].upper() != 'J':
-            if 'delete_selected' in actions:
-                del actions['delete_selected']
+        del actions['delete_selected']
         return actions
 
     def get_comment(self, obj):
