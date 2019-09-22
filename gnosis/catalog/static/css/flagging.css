@@ -28,7 +28,6 @@
     background-color: lightgray;
 }
 
-
 .cover {
     position: fixed;
     top: 0;
@@ -38,8 +37,13 @@
     background-color: rgba(248, 248, 255, 0.5);
 }
 
+
 .popup {
     z-index: 2000;
+}
+
+.popup_content {
+    z-index: 3000;
 }
 
 #flag_dialog {
@@ -53,12 +57,6 @@
     z-index: 3000;
 }
 
-/*.sec-border {*/
-    /*width: 100%;*/
-    /*border: 1px solid #cccccc;*/
-    /*margin: 5px 0;*/
-/*}*/
-
 .form_button {
     font-size: 1.0rem;
 }
@@ -71,8 +69,31 @@
     margin-left: 50%;
 }
 
-#id_violation
-{
+#id_violation {
     list-style-type: none;
 }
 
+#flag_response {
+    width: 400px;
+    top: 50%;
+    left: 50%;
+    margin-left: -200px;
+    margin-top: -69px;
+    z-index: 3000;
+}
+
+.ok-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    user-select: none;
+}
+
+.response-ok {
+    color: darkseagreen;
+    cursor: pointer;
+}
+
+.response-ok:hover {
+    color: olivedrab;
+}

@@ -39,15 +39,13 @@ form.submit(function (e) {
     e.preventDefault();
 
     $('.popup').attr('hidden', true);
-
     $.ajax({
         type: 'POST',
         url: window.location.href,
         data: form.serialize(),
         success: function (data) {
             $('#flag_form').trigger('reset');
-            alert("Thanks. We have received the report. We will assess the comment against our guidelines, " +
-                "and we will take actions if a violation is found.")
+            $('#response_container').attr('hidden', false);
         },
         error: function (data) {
             alert("An error has occurred, please resubmit report.");
