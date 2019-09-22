@@ -1,7 +1,5 @@
 {% extends "gnosis_theme.html" %}
-
 {% block content %}
-
 {% load el_pagination_tags %}
 
 <div class="card shadow-sm text-center mt-3">
@@ -17,17 +15,19 @@
     </div>
 </div>
 
-<div class=" card shadow-sm mt-3">
+
+<div class="card shadow-sm mt-3">
     <div class="card-header">
-        <h4>Papers </h4>
+        <h4>Datasets that match your query</h4>
     </div>
     <div class="card-body">
-        {% if paper_results %}
-        {% paginate paper_results %}
-        {% for paper in paper_results %}
+        {% if dataset_results %}
+        {% paginate dataset_results %}
+        {% for dataset in dataset_results %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
-                <a href="{{ paper.get_absolute_url }}">{{ paper.title }}</a>
+                <p><a href="{{ dataset.get_absolute_url }}">{{ dataset.name }}</a></p>
+                <p>{{ dataset.description|truncatewords:25 }}</p>
             </li>
         </ul>
         {% endfor %}
@@ -57,5 +57,6 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
+
 </div>
 {% endblock %}

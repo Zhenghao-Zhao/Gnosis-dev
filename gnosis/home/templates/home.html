@@ -9,7 +9,7 @@
         <h3> Hi, <a href="{% url 'login' %}?next={{request.path}}">login</a> to make full use of &gamma;&nu;&#974;&sigma;&iota;&sigmaf;.
         </h3>
         <h4>If you are new here then why not <a href="{% url 'django_registration_register' %}">register a new
-            account!</a></h4>
+            account!</a></h4>git fetch origin
         {% endif %}
 
         <p class="text-right">Statistics: We have {{ num_papers }} papers and {{ num_people }} people in our DB</p>
@@ -26,17 +26,8 @@
             {% csrf_token %}
             {% for field in form %}
             <span class="rounded-lg">
-        {{ field }}
-        </span>
-            <select>
-                <option value="all">All</option>
-                <option value="papers">Papers</option>
-                <option value="people">People</option>
-                <option value="venues">Venues</option>
-                <option value="datasets">Datasets</option>
-                <option value="codes">Codes</option>
-            </select>
-
+                {{ field }}
+            </span>
             {% endfor %}
             <br>
             <input type="submit" class="btn btn-primary btn-lg" value="Search"/>

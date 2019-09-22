@@ -1,43 +1,48 @@
 {% extends "gnosis_theme.html" %}
-
 {% block content %}
+{% load el_pagination_tags %}
 
-<div class="card shadow-sm mt-3">
-    <div class="card-body text-center">
-        {% if message %}
-        <p class="bg-info">{{ message }}</p>
-        {% endif %}
-        <br/>
+<!--
+
+<div class="card shadow-sm text-center mt-3">
+    <div class="card-body">
         <form action="" method="post">
             {% csrf_token %}
-            <div class="form-group form-inline justify-content-center">
-                {{ form }}
-            </div>
-            <br/>
-            <input type="submit" class="btn btn-primary btn-lg" value="Search Datasets"/>
+            {% for field in form %}
+            {{ field }}
+            {% endfor %}
+            <br>
+            <input type="submit" class="btn btn-primary btn-lg" value="Search"/>
         </form>
     </div>
-    <br>
 </div>
+-->
 
-{% if datasets %}
 <div class="card shadow-sm mt-3">
-    {% load el_pagination_tags %}
-    {% paginate datasets %}
-    <div class="card-header"><h4>Datasets</h4></div>
+    <div class="card-header">
+        <h4>Datasets</h4>
+    </div>
     <div class="card-body">
-
+        {% if datasets %}
+        {% paginate datasets %}
         {% for dataset in datasets %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
-
                 <p><a href="{{ dataset.get_absolute_url }}">{{ dataset.name }}</a></p>
                 <p>{{ dataset.description|truncatewords:25 }}</p>
             </li>
         </ul>
         {% endfor %}
+        {% endif %}
 
-        {% get_pages %}
+        {% if message %}
+        <div class="mt-5">
+            <p class="bg-info">{{ message }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% get_pages %}
         <!-- Center-aligned -->
         <ul class="pagination justify-content-center" style="margin:20px 0">
             {% if not pages.current.is_first %}
@@ -54,8 +59,6 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
-    </div>
-</div>
-{% endif %}
 
+</div>
 {% endblock %}

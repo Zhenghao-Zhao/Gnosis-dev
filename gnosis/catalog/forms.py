@@ -46,8 +46,20 @@ class SearchAllForm(Form):
     def clean_search_keywords(self):
         return self.cleaned_data["search_keywords"]
 
-    search_keywords = forms.CharField(required=True)
+    def clean_search_type(self):
+        return self.cleaned_data["search_type"]
 
+    SELECT_CHOICES = {
+        ('all', 'All'),
+        ('papers', 'Papers'),
+        ('people', 'People'),
+        ('venues', 'Venues'),
+        ('datasets', 'Datasets'),
+        ('codes', 'Codes'),
+    }
+
+    search_keywords = forms.CharField(required=True)
+    search_type = forms.CharField(widget=forms.Select(choices=SELECT_CHOICES))
 
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
@@ -63,7 +75,6 @@ class SearchVenuesForm(Form):
 
     venue_name = forms.CharField(required=True)
     venue_publication_year = forms.CharField(required=True)
-
 
 class SearchDatasetsForm(Form):
     def __init__(self, *args, **kwargs):
@@ -91,7 +102,6 @@ class SearchDatasetsForm(Form):
     keywords = forms.CharField(
         required=False, widget=forms.TextInput(attrs={"size": 40})
     )
-
 
 class SearchPapersForm(Form):
     def __init__(self, *args, **kwargs):
@@ -136,7 +146,6 @@ class SearchPeopleForm(Form):
         return self.cleaned_data["person_name"]
 
     person_name = forms.CharField(required=True)
-
 
 class SearchCodesForm(Form):
     def __init__(self, *args, **kwargs):

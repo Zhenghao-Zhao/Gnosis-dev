@@ -19,13 +19,18 @@ from catalog.forms import (
     PaperImportForm
 )
 from catalog.forms import (
+    SearchAllForm,
     SearchVenuesForm,
     SearchPapersForm,
     SearchPeopleForm,
     SearchDatasetsForm,
     SearchCodesForm,
-    PaperConnectionForm,
+    PaperConnectionForm
 )
+
+
+
+
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from neomodel import db
@@ -1600,7 +1605,7 @@ def datasets(request):
             if len(datasets) > 0:
                 return render(
                     request,
-                    "datasets.html",
+                    "dataset_results.html",
                     {"datasets": datasets, "form": form, "message": ""},
                 )
             else:
