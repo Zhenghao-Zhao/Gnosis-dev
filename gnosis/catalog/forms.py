@@ -492,6 +492,9 @@ class FlaggedCommentForm(ModelForm):
         self.fields["description"].widget.attrs.update({"rows": "5"})
         self.fields["violation"] = forms.ChoiceField(choices=VIOLATION_CHOICES, widget=forms.RadioSelect())
 
+        self.fields["description"].label = "Description"
+        self.fields["violation"].label = "Violation"
+
     def clean_violation(self):
         return self.cleaned_data["violation"]
 
