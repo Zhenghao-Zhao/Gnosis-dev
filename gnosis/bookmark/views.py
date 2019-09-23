@@ -41,7 +41,7 @@ def bookmark_entry_remove(request, pid):
         print("   ==> entry found")
         b_entry.delete()
     except:
-        return render(request, "paper_detail.html")
+        return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
 
     return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
 
@@ -50,7 +50,7 @@ def bookmark_entry_remove_from_view(request, pid):
     """Delete view"""
     print("WARNING: Deleting bookmark entry with pid {}".format(pid))
 
-    # check if the bookmark for the user exists, if not, create one
+    # check if the bookmark for the user exists
     try:
         bookmark = Bookmark.objects.filter(owner = request.user)[0]
         print("  ==> bookmark found")
@@ -58,6 +58,6 @@ def bookmark_entry_remove_from_view(request, pid):
         print("   ==> entry found")
         b_entry.delete()
     except:
-        return render(request, "paper_detail.html")
+        return HttpResponseRedirect(reverse("bookmarks"))
 
     return HttpResponseRedirect(reverse("bookmarks"))
