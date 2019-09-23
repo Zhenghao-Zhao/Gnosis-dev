@@ -10,4 +10,4 @@ class Note(models.Model):
     updated_at = models.DateTimeField(auto_now=True)  # The last time the note was modified
 
     def __str__(self):
-        return "Private note on paper" + str(self.paper_id) + " by " + str(self.created_by.name)
+        return "Private note on paper" + str(self.paper_id) + " by " + str(self.created_by.username)
