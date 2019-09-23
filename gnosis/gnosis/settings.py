@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'bookmark.apps.BookmarkConfig',
     'home.apps.HomeConfig',
     'django_nose',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
