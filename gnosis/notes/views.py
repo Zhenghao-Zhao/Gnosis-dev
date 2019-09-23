@@ -82,8 +82,19 @@ def note_delete(request, id):
 @login_required
 def note_index(request):
     notes = []
+    notes_info = []
     if request.user.is_authenticated:
         notes = Note.objects.filter(created_by=request.user).order_by('-updated_at')
+        for note in notes:
+            paper_id = note.paper_id
+            print("Paper id are: ", paper_id)
+            query = "MATCH (p:Paper) where id(p) = {paper_id} RETURN p"
+            results, meta = db.cypher_query(query, dict(paper_id=paper_id))
+            if len(results) > 0:
+                all_papers = [Paper.inflate(row[0]) for row in results]
+                paper = all_papers[0]
+                pairs = (note, paper)
+                notes_info += [pairs]
     num_notes = len(notes)
 
-    return render(request, "notes/note_index.html", {"notes": notes, "num_notes": num_notes,},)
+    return render(request, "notes/note_index.html", {"notes": notes, "num_notes": num_notes, "notes_info": notes_info}, )
