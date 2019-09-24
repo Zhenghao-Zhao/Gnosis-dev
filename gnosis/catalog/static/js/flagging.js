@@ -39,21 +39,28 @@ form.submit(function (e) {
     e.preventDefault();
 
     $('.popup').attr('hidden', true);
+
+    // open loader
+    $('#loader').attr('hidden', false);
+
     $.ajax({
         type: 'POST',
         url: window.location.href,
         data: form.serialize(),
         success: function (data) {
+            console.log("submit successful!");
             $('#flag_form').trigger('reset');
+            // close loader
+            $('#loader').attr('hidden', true);
             $('#response_container').attr('hidden', false);
         },
         error: function (data) {
+            $('#loader').attr('hidden', true);
             alert("An error has occurred, please resubmit report.");
         },
 
     })
 });
-
 
 
 //Django basic setup for accepting ajax requests.

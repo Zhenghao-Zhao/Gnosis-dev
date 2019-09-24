@@ -18,3 +18,17 @@ jQuery.fn.preventDoubleSubmission = function () {
 };
 
 $('form').preventDoubleSubmission();
+
+// var form = $(document);
+//
+// $(document).ajaxStart(function () {
+//     console.log("job starts!");
+//     $('#loader').attr('hidden', false);
+// });
+//
+//
+// $(document).ajaxStop(function () {
+//     console.log("job ends!");
+//     $('#loader').attr('hidden', true);
+//
+// });

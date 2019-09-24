@@ -211,6 +211,8 @@ class FlaggedComment(models.Model):
                                     on_delete=models.CASCADE,
                                     related_name="flagged_items")
 
+    # about = models.ForeignKey(to=Comment, on_delete=models.CASCADE, related_name="flagged")
+
     class Meta:
         ordering = ['violation', '-created_at']
         verbose_name = "comment flag"

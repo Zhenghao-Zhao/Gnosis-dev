@@ -33,7 +33,6 @@ def delete_comment(modeladmin, request, queryset):
     for obj in queryset:
         query = "MATCH (a:Comment) WHERE ID(a)={id} DETACH DELETE a"
         results, meta = db.cypher_query(query, dict(id=obj.comment_id))
-        obj.delete()
 
         # delete flags about the same comment
         FlaggedComment.objects.filter(comment_id=obj.comment_id).delete()

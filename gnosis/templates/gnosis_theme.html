@@ -194,6 +194,28 @@
     <!--    </div>-->
 </div>
 
+<div id="response_container" class="cover popup" hidden>
+    <div id="flag_response_dialog" class="card">
+        <div class="card-body">
+            <div><span>Thanks. We have received your report. If we find this content to be in violation of our guidelines,
+            we will remove it.</span>
+            </div>
+
+            <div class="ok-container">
+                <span class="response-ok" onclick="$('#response_container').attr('hidden', true)">Ok</span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="loader" class="cover" hidden>
+    <div class="loader_container">
+        <div class="loader_icon">
+        </div>
+    </div>
+</div>
+
 <!-- Footer -->
 <footer class="page-footer text-center font-small blue pt-4 mt-5">
     {% block footer %}
