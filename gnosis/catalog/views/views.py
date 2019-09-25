@@ -338,8 +338,10 @@ def _get_node_ego_network(id, paper_title):
         id, paper_title, reverse("paper_detail", kwargs={"id": id}), 'Paper', 'origin'
     )
 
+    # type refers to what node type the object is associated with.
+    # label refers to the text on the object.
     node_temp = ", {{data : {{id: '{}', title: '{}', href: '{}', type: '{}', label: '{}' }}}}"
-    rela_temp = ",{{data: {{ id: '{}{}{}', label: '{}', source: '{}', target: '{}', line: '{}' }}}}"
+    rela_temp = ",{{data: {{ id: '{}{}{}', type: '{}', label: '{}', source: '{}', target: '{}', line: '{}' }}}}"
 
     # Assort nodes and store them in arrays accordingly
     # 'out' refers to being from the paper to the object
@@ -362,7 +364,7 @@ def _get_node_ego_network(id, paper_title):
 
                     # adding relationship with paper node
                     ego_json += rela_temp.format(
-                        id, '-', tp.id, new_rela, id, tp.id, line
+                        id, '-', tp.id, 'Paper', new_rela, id, tp.id, line
                     )
 
                 if label == 'Person':
@@ -387,7 +389,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        id, "-", tpe.id, new_rela, id, tpe.id, line
+                        id, "-", tpe.id, 'Person', new_rela, id, tpe.id, line
                     )
 
                 if label == 'Venue':
@@ -398,7 +400,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        id, '-', tv.id, new_rela, id, tv.id, line
+                        id, '-', tv.id, 'Venue', new_rela, id, tv.id, line
                     )
 
                 if label == 'Dataset':
@@ -408,7 +410,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        id, '-', td.id, new_rela, id, td.id, line
+                        id, '-', td.id, 'Dataset', new_rela, id, td.id, line
                     )
 
                 if label == 'Code':
@@ -418,7 +420,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        id, '-', tc.id, new_rela, id, tc.id, line
+                        id, '-', tc.id, 'Code', new_rela, id, tc.id, line
                     )
 
     if len(results_all_in) > 0:
@@ -436,7 +438,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        tp.id, '-', id, new_rela, tp.id, id, line
+                        tp.id, '-', id, 'Paper', new_rela, tp.id, id, line
                     )
 
                 if label == 'Person':
@@ -458,7 +460,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        tpe.id, "-", id, new_rela, tpe.id, id, line
+                        tpe.id, "-", id, 'Person', new_rela, tpe.id, id, line
                     )
 
                 if label == 'Venue':
@@ -468,7 +470,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        tv.id, "-", id, new_rela, tv.id, id, line
+                        tv.id, "-", id, 'Venue', new_rela, tv.id, id, line
                     )
                 if label == 'Dataset':
                     td = Dataset.inflate(row[0])
@@ -477,7 +479,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        td.id, "-", id, new_rela, td.id, id, line
+                        td.id, "-", id, 'Dataset', new_rela, td.id, id, line
                     )
 
                 if label == 'Code':
@@ -487,7 +489,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        tc.id, "-", id, new_rela, tc.id, id, line
+                        tc.id, "-", id, 'Dataset', new_rela, tc.id, id, line
                     )
 
     return "[" + ego_json + "]"
