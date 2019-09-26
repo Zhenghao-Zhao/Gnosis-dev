@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Form
-from .models import Paper, Person, Dataset, Venue, Comment, Code
+from .models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
 from .models import ReadingGroup, ReadingGroupEntry
 from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
@@ -512,3 +512,33 @@ class CollectionForm(ModelForm):
     class Meta:
         model = Collection
         fields = ["name", "description", "keywords"]
+
+
+class FlaggedCommentForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+
+        VIOLATION_CHOICES = [
+            ('unwanted commercial content or spam', 'Unwanted commercial content or spam'),
+            ('pornography or sexually explicit material', 'Pornography or sexually explicit material'),
+            ('child abuse', 'Child abuse'),
+            ('hate speech or graphic violence', 'Hate speech or graphic violence'),
+            ('harassment or bullying', 'Harassment or bullying')
+        ]
+
+        self.fields["description"].widget = forms.Textarea()
+        self.fields["description"].widget.attrs.update({"rows": "5"})
+        self.fields["violation"] = forms.ChoiceField(choices=VIOLATION_CHOICES, widget=forms.RadioSelect())
+
+        self.fields["description"].label = "Description"
+        self.fields["violation"].label = "Violation"
+
+    def clean_violation(self):
+        return self.cleaned_data["violation"]
+
+    def clean_description(self):
+        return self.cleaned_data["description"]
+
+    class Meta:
+        model = FlaggedComment
+        fields = ['violation', 'description']

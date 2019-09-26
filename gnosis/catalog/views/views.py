@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
@@ -16,7 +16,8 @@ from catalog.forms import (
     DatasetForm,
     VenueForm,
     CommentForm,
-    PaperImportForm
+    PaperImportForm,
+    FlaggedCommentForm,
 )
 from catalog.forms import (
     SearchVenuesForm,
@@ -27,7 +28,7 @@ from catalog.forms import (
     PaperConnectionForm,
 )
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from neomodel import db
 from datetime import date
 from nltk.corpus import stopwords
@@ -139,8 +140,6 @@ def papers(request):
     )
 
 
-
-
 def paper_authors(request, id):
     """Displays the list of authors associated with this paper"""
     relationship_ids = []
@@ -223,6 +222,8 @@ def paper_detail(request, id):
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
 
+    print("ids are:", id, paper.id)
+
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
     if request.user.is_authenticated:
@@ -284,11 +285,48 @@ def paper_detail(request, id):
     try:
         bookmark = Bookmark.objects.filter(owner=request.user)[0]
         print("bookmark found:", request.user)
-        b = bookmark.papers.filter(paper_id = paper.id)[0]
+        b = bookmark.papers.filter(paper_id=paper.id)[0]
         print("entry found:", paper.id)
         bookmarked = True
     except:
         bookmarked = False
+
+    user = request.user
+    # if a flagging form is submitted
+    if request.method == "POST":
+        comment_id = request.POST.get("comment_id", None)
+
+        query = "MATCH (a:Comment) WHERE ID(a)={id} RETURN a"
+        results, meta = db.cypher_query(query, dict(id=comment_id))
+        comment = None
+        if len(results) > 0:
+            all_comments = [Comment.inflate(row[0]) for row in results]
+            comment = all_comments[0]
+
+        flagged_comment = FlaggedComment()
+        flagged_comment.proposed_by = user
+
+        form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
+
+        # check if comment_id exists
+        if comment_id is not None:
+            flagged_comment.comment_id = comment_id
+            is_valid = form.is_valid()
+
+            if is_valid:
+                form.save()
+                if not request.is_ajax():
+                    print("comment flag form saved successfully!!")
+                    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
+
+            # if the received request is ajax
+            # return a json object for ajax requests containing form validity
+            if request.is_ajax():
+                data = {'is_valid': is_valid}
+                print("ajax request received!")
+                return JsonResponse(data)
+    else:
+        form = FlaggedCommentForm()
 
     print("ego_network_json: {}".format(ego_network_json))
     return render(
@@ -308,6 +346,7 @@ def paper_detail(request, id):
             "endorsed": endorsed,
             "num_endorsements": num_endorsements,
             "bookmarked": bookmarked,
+            "flag_form": form,
         },
     )
 
@@ -619,6 +658,7 @@ def paper_connect_venue(request, id):
         {"form": form, "venues": None, "message": message},
     )
 
+
 @login_required
 def paper_add_to_collection_selected(request, id, cid):
     message = None
@@ -686,7 +726,6 @@ def paper_add_to_collection(request, id):
 
 @login_required
 def paper_add_to_bookmark(request, pid):
-
     """input:
     pid: paper id
     """
@@ -717,8 +756,7 @@ def paper_add_to_bookmark(request, pid):
             bookmark_entry.paper_title = paper.title
             bookmark_entry.bookmark = bookmark
             bookmark_entry.save()
-    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid,}))
-
+    return HttpResponseRedirect(reverse("paper_detail", kwargs={"id": pid, }))
 
 
 @login_required
@@ -1382,6 +1420,7 @@ def get_title(bs4obj, source_website):
                 return title_text
     return None
 
+
 def get_abstract(bs4obj, source_website):
     """
     Extract paper abstract from the source website.
@@ -1399,7 +1438,7 @@ def get_abstract(bs4obj, source_website):
     elif source_website == "jmlr":
         abstract = get_abstract_from_jmlr(bs4obj)
     elif source_website == "pmlr":
-        abstract = bs4obj.find("div", {"id":"abstract"}).get_text().strip()
+        abstract = bs4obj.find("div", {"id": "abstract"}).get_text().strip()
     elif source_website == "ieee":
         abstract = get_abstract_from_IEEE(bs4obj)
     elif source_website == "acm":
@@ -1462,6 +1501,7 @@ def get_download_link(bs4obj, source_website, url):
         download_link = None
     return download_link
 
+
 def get_paper_info(url, source_website):
     """
     Extract paper information, title, abstract, and authors, from source website
@@ -1517,7 +1557,7 @@ def paper_create_from_url(request):
         # get the data from arxiv
         url = request.POST["url"]
 
-        validity,source_website,url = analysis_url(url)
+        validity, source_website, url = analysis_url(url)
         # return error message if the website is not supported
         if validity == False:
             form = PaperImportForm()
