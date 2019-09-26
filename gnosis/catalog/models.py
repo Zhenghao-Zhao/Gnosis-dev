@@ -198,8 +198,8 @@ class Code(DjangoNode):
     # These are models for the SQL database
     #
 
-class FlaggedComment(models.Model):
 
+class FlaggedComment(models.Model):
     comment_id = models.IntegerField(null=False, blank=False)  # id of the flagged comment
 
     violation = models.CharField(max_length=100)
@@ -210,8 +210,6 @@ class FlaggedComment(models.Model):
     proposed_by = models.ForeignKey(to=User,
                                     on_delete=models.CASCADE,
                                     related_name="flagged_items")
-
-    # about = models.ForeignKey(to=Comment, on_delete=models.CASCADE, related_name="flagged")
 
     class Meta:
         ordering = ['violation', '-created_at']

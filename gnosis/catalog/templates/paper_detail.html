@@ -240,7 +240,7 @@
                                 <div class="popup" hidden>
                                     <div class="more_menu">
                                         {% if user.is_authenticated %}
-                                            <div class="opt_container" onclick="open_dialog({{ comment.id }})">
+                                            <div class="opt_container" onclick="open_flag_dialog({{ comment.id }})">
                                                 <i class="material-icons menu_item">
                                                     outlined_flag
                                                 </i>
@@ -289,9 +289,12 @@
                     {% csrf_token %}
                     <table class="w-75">
                         {% for field in flag_form %}
+                            <div style="font-weight: bold">
                             {{ field.label_tag }}
-                            <br>
+                            </div>
+                            <div style="padding: 0 10px">
                             {{ field }}
+                            </div>
                             {% if field.help_text %}
                                 {{ field.help_text }}
                             {% endif %}
@@ -300,10 +303,8 @@
                                 {{ error }}
                             {% endfor %}
                         {% endfor %}
-                        {#                        {{ flag_form.as_p }}#}
                     </table>
                     <br/>
-                    {#                    <div class="sec-border"></div>#}
                     <div class="form_button_container">
                         <button type="button" class="btn btn-primary btn-lg float-right form_button"
                                 onclick="cancel_form()">

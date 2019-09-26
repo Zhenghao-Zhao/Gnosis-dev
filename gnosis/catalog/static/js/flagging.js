@@ -1,3 +1,4 @@
+/************** click anywhere on page to cancel popups **************/
 $(document).click(function (e) {
     var container = $(".popup");
     // if the target of the click isn't the container nor a descendant of the container.
@@ -6,15 +7,15 @@ $(document).click(function (e) {
     }
 });
 
-// toggles more button: shows/hides popup menu.
+/************** toggles more button: shows/hides popup menu **************/
 function toggle_more(ele) {
     var hidden = $(ele).siblings('.popup').attr('hidden');
     $('.popup').attr('hidden', true);
     $(ele).siblings('.popup').attr('hidden', !hidden);
 }
 
-
-function open_dialog(comment_id) {
+/************** opens flag dialog that contains flag form **************/
+function open_flag_dialog(comment_id) {
     // hide all current popups
     $('.popup').attr('hidden', true);
     $('#flag_form_container').attr('hidden', false);
@@ -26,14 +27,13 @@ function open_dialog(comment_id) {
         .appendTo("#flag_form");
 }
 
-// hide popup form and reset its text.
+/************** hide popup form and reset its text. **************/
 function cancel_form() {
     $('#flag_form').trigger('reset');
     $('.popup').attr('hidden', true);
 }
 
-
-// sending ajax post request
+/************** sending ajax post request with flag forms **************/
 var form = $('#flag_form');
 form.submit(function (e) {
     e.preventDefault();
@@ -52,7 +52,7 @@ form.submit(function (e) {
             $('#flag_form').trigger('reset');
             // close loader
             $('#loader').attr('hidden', true);
-            $('#response_container').attr('hidden', false);
+            $('#flag_response').attr('hidden', false);
         },
         error: function (data) {
             $('#loader').attr('hidden', true);
@@ -62,10 +62,7 @@ form.submit(function (e) {
     })
 });
 
-
-//Django basic setup for accepting ajax requests.
-// Cookie obtainer Django
-
+/************** Django basic setup for accepting ajax requests. **************/
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {

@@ -19,6 +19,7 @@ jQuery.fn.preventDoubleSubmission = function () {
 
 $('form').preventDoubleSubmission();
 
+// apply loader to all ajax forms
 // var form = $(document);
 //
 // $(document).ajaxStart(function () {

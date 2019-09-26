@@ -57,7 +57,7 @@ class FlaggedCommentAdmin(admin.ModelAdmin):
     ordering = ['comment_id', 'violation']
     actions = [delete_comment, delete_flags]
 
-    readonly_fields = ('get_comment',)
+    readonly_fields = ('get_comment', 'created_at')
 
     def response_change(self, request, obj):
         if "_delete-comment" in request.POST:

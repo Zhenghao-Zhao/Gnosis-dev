@@ -1,3 +1,4 @@
+/* style more icon and its container */
 .more_menu {
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
     border-width: 1px;
@@ -27,6 +28,7 @@
     background-color: lightgray;
 }
 
+/* covers entire page as a background to popup elements (e.g. dialogs) */
 .cover {
     position: fixed;
     top: 0;
@@ -44,13 +46,15 @@
     padding: 20px;
     top: 50%;
     left: 50%;
-    margin-left: -171.5px;
-    margin-top: -239px;
+    margin-left: -131.5px;      /* form width/2.0 */
+    margin-top: -239px;     /* form height/2.0 */
     z-index: 3000;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
 
 }
 
+/* style flag dialog */
+/* *A dialog is the popup area that is used to display information on the same page */
 #flag_response_dialog {
     width: 400px;
     top: 50%;
@@ -73,11 +77,13 @@
     margin-left: 45%;
 }
 
+/* style violation field of the form */
 #id_violation {
     list-style-type: none;
     padding: 0;
 }
 
+/* style response dialog */
 .ok-container {
     display: flex;
     flex-direction: row;

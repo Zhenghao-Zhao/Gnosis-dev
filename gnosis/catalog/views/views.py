@@ -310,7 +310,6 @@ def paper_detail(request, id):
 
         # check if comment_id exists
         if comment_id is not None:
-            # flagged_comment.about = comment
             flagged_comment.comment_id = comment_id
             is_valid = form.is_valid()
 
@@ -320,6 +319,7 @@ def paper_detail(request, id):
                     print("comment flag form saved successfully!!")
                     return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
 
+            # if the received request is ajax
             # return a json object for ajax requests containing form validity
             if request.is_ajax():
                 data = {'is_valid': is_valid}

@@ -481,10 +481,10 @@ class FlaggedCommentForm(ModelForm):
         super(ModelForm, self).__init__(*args, **kwargs)
 
         VIOLATION_CHOICES = [
-            ('spam comments', 'Unwanted commercial content or spam'),
-            ('porn', 'Pornography or sexually explicit material'),
+            ('unwanted commercial content or spam', 'Unwanted commercial content or spam'),
+            ('pornography or sexually explicit material', 'Pornography or sexually explicit material'),
             ('child abuse', 'Child abuse'),
-            ('hate or violence', 'Hate speech or graphic violence'),
+            ('hate speech or graphic violence', 'Hate speech or graphic violence'),
             ('harassment or bullying', 'Harassment or bullying')
         ]
 
