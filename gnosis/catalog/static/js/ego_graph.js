@@ -44,11 +44,6 @@ function toggle_options() {
 }
 
 /************** double click toggle **************/
-// $(".graph-canvas").dblclick(
-//     function () {
-//         toggle_options();
-//     }
-// );
 
 // collection of all elements (nodes + edges) in the graph currently
 var collection = cy.elements();
@@ -103,6 +98,7 @@ function show_cites(label, type) {
     center();
 }
 
+/************** collapse ego-graph **************/
 // stores state of the collapse target
 var hidden = false;
 
@@ -119,6 +115,11 @@ function collapse_toggle(ele, that) {
     }
 }
 
+// collapse initially if device width is < 600
+// device widths reference: https://www.w3schools.com/css/css_rwd_mediaqueries.asp
+if ($(window).width() < 600){
+    collapse_toggle('ego-graph-content', $('#ego-header'));
+}
 
 /************** tooltip **************/
 // interactivity with the ego graph

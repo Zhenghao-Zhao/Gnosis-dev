@@ -12,7 +12,6 @@
     font-size: 100%;
 }
 
-
 .paper {
     background-color: #39acff;
 }
@@ -103,7 +102,7 @@
     text-align: left
 }
 
-@media only screen and (max-width: 765px) {
+@media only screen and (max-width: 768px) {
     .legend_ele {
         padding: 5px 10px;
     }
@@ -119,7 +118,6 @@
     .widget_container {
         width: auto;
     }
-
 }
 
 @media only screen and (max-width: 550px) {
