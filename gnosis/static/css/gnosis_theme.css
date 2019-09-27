@@ -8,8 +8,11 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    margin-top: -25px;
-    margin-left: -25px;
+    /* uncomment below two lines for border spinners */
+    /*margin-top: -25px;*/
+    /*margin-left: -25px;*/
+    margin-top: -17px;
+    margin-left: -88.78px;
     text-align: center;
 
 }
