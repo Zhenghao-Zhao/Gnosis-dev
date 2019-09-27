@@ -128,7 +128,7 @@ class PaperModelTest(TestCase):
     #         person = Person()
     #         person.first_name = "FirstName"
     #         person.last_name = "Author " + str(i)
-    #         person.middle_name = "FirstName " + "Author " + str(i)
+    #         person.middle_name = "['MiddleName']" # notice the middle name format must be "[' ... ']"
     #         person.save()
     #         person.authors.connect(main_paper)
     #
