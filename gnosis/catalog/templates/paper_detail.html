@@ -293,8 +293,8 @@
                                 <a href="{% url 'comment_update' comment.id %}">Edit</a>
                             {% endif %}
                         </li>
-                        </ul>
                     {% endfor %}
+                </ul>
             </div>
         </div>
 
@@ -367,6 +367,8 @@
     {% endif %}
 
     {% load static %}
+    <script src="{% static "js/flagging.js" %}"></script>
+
     <script>
         // concentric level value
         var paper_count = 50;
@@ -575,6 +577,6 @@
 
     </script>
 
-    <script src="{% static "js/ego-graph.js" %}"></script>
+    <script src="{% static "js/ego_graph.js" %}"></script>
 
 {% endblock %}
