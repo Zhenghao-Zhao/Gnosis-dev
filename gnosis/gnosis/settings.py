@@ -82,6 +82,7 @@ WSGI_APPLICATION = 'gnosis.wsgi.application'
 
 # Increase this number when in production.
 EL_PAGINATION_PER_PAGE = 3
+NOTE_PAGINATION_PER_PAGE = 5
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
