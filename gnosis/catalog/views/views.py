@@ -2162,6 +2162,22 @@ def comment_update(request, id):
     return render(request, "comment_update.html", {"form": form, "comment": comment})
 
 
+@login_required()
+def comment_delete(request, id):
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        comments = [Comment.inflate(row[0]) for row in results]
+        comment = comments[0]
+    else:
+        comment = Comment()
+
+    paper_id = request.session["last-viewed-paper"]
+    if request.user.id == comment.created_by:
+        comment.delete()
+        del request.session["last-viewed-paper"]
+    return redirect("paper_detail", id=paper_id)
+
 #
 # Utility Views (admin required)
 #

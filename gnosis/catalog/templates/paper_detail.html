@@ -318,6 +318,7 @@
                                     <small class="ml-3 text-muted">{{ comment.publication_date|naturaltime }}</small>
                                     {% if comment.created_by == user.id %}
                                     <a class="ml-5" href="{% url 'comment_update' comment.id %}">Edit</a>
+                                    <a class="ml-5" href="{% url 'comment_delete' comment.id %}" > Delete</a>
                                     {% endif %}
                                 </p>
                                 <p>{{ comment.text }}</p>
