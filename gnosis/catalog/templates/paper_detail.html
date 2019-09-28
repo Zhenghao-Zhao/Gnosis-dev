@@ -3,6 +3,9 @@
 {% block content %}
 {% load el_pagination_tags %}
 {% load humanize %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="/static/js/comment_form.js"></script>
+
     <div class="card shadow-sm mt-5">
         <div class="card-header">
             <h3>{{ paper.title }}</h3>
@@ -299,10 +302,10 @@
                 <div class="tab-pane fade show active" id="navcomment" role="tabpanel" aria-labelledby="nav-comment-tab">
                         <div class="mt-2">
 {#                            comment form#}
-                            <form action="" method="post">
+                            <form action="" method="POST" id="comment-form">
                                 {% csrf_token %}
-                                {{ commmentform }}
-                                <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
+                                {{ commentform }}
+                                <input type="submit"  name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
                                 <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
                             </form>
                         </div>

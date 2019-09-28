@@ -303,12 +303,12 @@ def paper_detail(request, id):
         comment = Comment()
         comment.created_by = user.id
         comment.author = user.username
-        commmentform = CommentForm(instance=comment, data=request.POST)
+        commentform = CommentForm(instance=comment, data=request.POST)
 
         success = False
 
-        if 'comment_form' in request.POST and commmentform.is_valid():
-            commmentform.save()
+        if 'comment_form' in request.POST and commentform.is_valid():
+            commentform.save()
             comment.discusses.connect(paper)
             success = True
         if 'note_form' in request.POST and noteform.is_valid():
@@ -317,7 +317,7 @@ def paper_detail(request, id):
         if success:
             return redirect("paper_detail", id=id)
     else:  # GET
-        commmentform = CommentForm()
+        commentform = CommentForm()
         noteform = NoteForm()
 
     return render(
@@ -334,7 +334,7 @@ def paper_detail(request, id):
             "num_comments": num_comments,
             "ego_network": ego_network_json,
             "noteform": noteform,
-            "commmentform": commmentform,
+            "commentform": commentform,
             "main_paper_id": main_paper_id,
             "endorsed": endorsed,
             "num_endorsements": num_endorsements,

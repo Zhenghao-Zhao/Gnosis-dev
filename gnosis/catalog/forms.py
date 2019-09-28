@@ -347,6 +347,13 @@ class CommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ["text"]
+        widgets = {
+            'text': forms.TextInput(attrs={
+                'id': 'comment-text',
+                'required': True,
+                'placeholder': 'myCustomPlaceholder'
+            }),
+        }
 
 
 class CodeForm(ModelForm):
