@@ -10,7 +10,7 @@ from catalog.models import Collection, CollectionEntry
 from catalog.models import Endorsement, EndorsementEntry
 from bookmark.models import Bookmark, BookmarkEntry
 from datetime import datetime
-
+import json
 from catalog.views.utils.import_functions import *
 
 from catalog.forms import (
@@ -310,6 +310,12 @@ def paper_detail(request, id):
         if 'comment_form' in request.POST and commentform.is_valid():
             commentform.save()
             comment.discusses.connect(paper)
+            response_data = {}
+            response_data['result'] = 'Create post successful!'
+            response_data['text'] = comment.text
+            response_data['created_by'] = comment.created_by
+            response_data['author'] = comment.author
+            dump = json.dumps(response_data)
             success = True
         if 'note_form' in request.POST and noteform.is_valid():
             noteform.save()

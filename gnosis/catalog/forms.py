@@ -329,6 +329,7 @@ class CommentForm(ModelForm):
         self.fields["text"].widget = forms.Textarea()
         self.fields["text"].widget.attrs.update({"rows": "5"})
         self.fields["text"].label = ""
+        self.fields['text'].widget.attrs.update({'id': 'comment_text'})
 
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
@@ -347,12 +348,6 @@ class CommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ['text']
-        widgets = {
-            'text': forms.TextInput(attrs={
-                'id': 'comment_text',
-                'required': True
-            }),
-        }
 
 
 class CodeForm(ModelForm):
