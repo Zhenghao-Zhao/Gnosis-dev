@@ -3,7 +3,12 @@
 {% block content %}
 {% load el_pagination_tags %}
 {% load humanize %}
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(function(){
+            $('#pagination').load('pagination.html');
+        });
+    </script>
     <div class="card shadow-sm mt-5">
         <div class="card-header">
             <h3>{{ paper.title }}</h3>
@@ -302,6 +307,7 @@
 {#                            comment form#}
                             <form action="" method="post">
                                 {% csrf_token %}
+
                                 {{ commmentform }}
                                 <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md" value="Post a comment"/>
                                 <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
@@ -311,6 +317,7 @@
 {#                    show comments#}
                     {% if num_comments > 0 %}
                     <ul class="list-group list-group-flush">
+                        {% paginate notes %}
                         {% for comment in comments %}
                         <li class="list-group-item shadow-sm mt-1">
                                 <p><strong>{{ comment.author }}</strong>
@@ -323,6 +330,8 @@
                                 <p>{{ comment.text }}</p>
                             </li>
                         {% endfor %}
+                        {% get_pages %}
+                        <div id="pagination"></div>
                     </ul>
                     {% endif %}
                 </div>
@@ -356,22 +365,7 @@
                             {% endfor %}
 
                             {% get_pages %}
-                            <!-- Center-aligned -->
-                            <ul class="pagination justify-content-center" style="margin:20px 0">
-                                {% if not pages.current.is_first %}
-                                <li class="page-item"><a class="page-link" href="{{ pages.previous.path }}">Previous</a></li>
-                                {% endif %}
-                                {% for page in pages %}
-                                {% if page.is_current %}
-                                <li class="page-item active"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
-                                {% else %}
-                                <li class="page-item"><a class="page-link" href="{{ page.path }}">{{ page.number }}</a></li>
-                                {% endif %}
-                                {% endfor %}
-                                {% if not pages.current.is_last %}
-                                <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
-                                {% endif %}
-                            </ul>
+                            <div id="pagination"></div>
                         </ul>
                         {% endif %}
                 </div>

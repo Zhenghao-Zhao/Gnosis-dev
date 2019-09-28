@@ -81,7 +81,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gnosis.wsgi.application'
 
 # Increase this number when in production.
-EL_PAGINATION_PER_PAGE = 3
+EL_PAGINATION_PER_PAGE = 2
 NOTE_PAGINATION_PER_PAGE = 5
 
 # Database
