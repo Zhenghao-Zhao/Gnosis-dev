@@ -1,10 +1,4 @@
-$(document).ready(function(){
-    $(".card-header").click(function(){
-        $(".card-header").hide();
-    });
-});
-
-// Submit post on submit
+// Submit comment on submit
 
 $(document).ready(function(){
     $('#comment-form').on('submit', function(event){
@@ -16,5 +10,5 @@ $(document).ready(function(){
 
 function create_comment() {
     console.log("create post is working!") // sanity check
-    console.log($('#comment-text').val())
+    console.log($('#comment_text').val())
 };
