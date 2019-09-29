@@ -5,6 +5,7 @@
     <div class="card shadow-sm mt-5">
         <div class="card-header">
 
+
         <div style="display: flex">
             <div style="display: flex; width: 11%;">
                 {% if user.is_authenticated %}
@@ -13,80 +14,17 @@
                         <form id="e_create" action="{% url 'endorsement_create' paper_id=paper.id%}" method = "post">
                             {% csrf_token %}
                             <button name="endorse" value="endorse" style="border: none; outline: none !important;
-                            background: none;"><img src="https://img.icons8.com/ultraviolet/30/000000/blunt-bulb.png"
+                            background: none;" onclick="endorsement_bookmark_fun('#e_create', '#endorsement')"><img src="https://img.icons8.com/ultraviolet/30/000000/blunt-bulb.png"
                             >{{ num_endorsements }}</button>
                         </form>
-                        <script type="text/javascript">
-                                var frm = $('#e_create');
-                                frm.submit(function () {
-                                    $.ajax({
-                                        type: frm.attr('method'),
-                                        url: frm.attr('action'),
-                                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                        success: function () {
-                                            $("#endorsement").load(" #endorsement",function(){
-                                                var frm2 = $('#e_undo');
-                                                frm2.submit(function () {
-                                                    $.ajax({
-                                                        type: frm2.attr('method'),
-                                                        url: frm2.attr('action'),
-                                                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                                        success: function () {
-                                                            $("#endorsement").load(" #endorsement");
-                                                        },
-                                                        error: function () {
-                                                            alert("something is wrong")
-                                                        }
-                                                    });
-                                                    return false;});
-                                            });
-                                        },
-                                        error: function () {
-                                            alert("something is wrong")
-                                        }
-                                    });
-                                    return false;
-                                });
-                        </script>
+
 
                     {% else %}
                         <form id="e_undo" action="{% url 'endorsement_undo' paper_id=paper.id%}" method="post">
                             {% csrf_token %}
                             <button name="undo_endorse" value="endorse" style="border: none; outline: none !important;
-                            background: none;"><img src="https://img.icons8.com/officel/30/000000/blunt-bulb.png">{{ num_endorsements }}</button>
+                            background: none;" onclick="endorsement_bookmark_fun('#e_undo', '#endorsement')"><img src="https://img.icons8.com/officel/30/000000/blunt-bulb.png">{{ num_endorsements }}</button>
                         </form>
-                        <script type="text/javascript">
-                                var frm2 = $('#e_undo');
-                                frm2.submit(function () {
-                                    $.ajax({
-                                        type: frm2.attr('method'),
-                                        url: frm2.attr('action'),
-                                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                        success: function () {
-                                            $("#endorsement").load(" #endorsement",function(){
-                                                var frm = $('#e_undo');
-                                                frm.submit(function () {
-                                                    $.ajax({
-                                                        type: frm1.attr('method'),
-                                                        url: frm.attr('action'),
-                                                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                                        success: function () {
-                                                            $("#endorsement").load(" #endorsement");
-                                                        },
-                                                        error: function () {
-                                                            alert("something is wrong")
-                                                        }
-                                                    });
-                                                    return false;});
-                                            });
-                                        },
-                                        error: function () {
-                                            alert("something is wrong")
-                                        }
-                                    });
-                                    return false;
-                                });
-                        </script>
                     {% endif %}
                 </div>
 
@@ -95,80 +33,14 @@
                         <form id="b_create" action="{% url 'paper_add_to_bookmark' pid=paper.id%}" method="post">
                             {% csrf_token %}
                         <button name="add_bookmark_button" value="endorse" style="border: none;outline: none !important;
-                            background: none;"><img src="https://img.icons8.com/ios/30/000000/add-bookmark.png"></button>
+                            background: none;" onclick="endorsement_bookmark_fun('#b_create', '#bookmark')"><img src="https://img.icons8.com/ios/30/000000/add-bookmark.png"></button>
                         </form>
-                        <script type="text/javascript">
-                            var frm3 = $('#b_create');
-                            frm3.submit(function () {
-                                $.ajax({
-                                    type: frm3.attr('method'),
-                                    url: frm3.attr('action'),
-                                    data : {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                    success: function () {
-                                        $("#bookmark").load(" #bookmark", function () {
-                                            var frm4 = $('#b_undo');
-                                            frm4.submit(function () {
-                                                $.ajax({
-                                                    type: frm4.attr('method'),
-                                                    url: frm4.attr('action'),
-                                                    data : {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                                    success: function () {
-                                                        $("#bookmark").load(" #bookmark");
-                                                    },
-                                                    error: function() {
-                                                        alert("something is wrong")
-                                                    }
-                                                });
-                                                return false;
-                                            });
-                                        });
-                                    },
-                                    error: function() {
-                                        alert("something is wrong")
-                                    }
-                                });
-                                return false;
-                            });
-                        </script>
                     {% else %}
                         <form id="b_undo" action="{% url 'bookmark_entry_remove' pid=paper.id%}" method="post">
                             {% csrf_token %}
                         <button name="undo_bookmark" value="endorse" style="border: none;outline: none !important;
-                            background: none;"><img src="https://img.icons8.com/ios-filled/30/000000/remove-bookmark.png"></button>
+                            background: none;" onclick="endorsement_bookmark_fun('#b_undo', '#bookmark')"><img src="https://img.icons8.com/ios-filled/30/000000/remove-bookmark.png"></button>
                         </form>
-                        <script type="text/javascript">
-                            var frm4 = $('#b_undo');
-                            frm4.submit(function () {
-                                $.ajax({
-                                    type: frm4.attr('method'),
-                                    url: frm4.attr('action'),
-                                    data : {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                    success: function () {
-                                        $("#bookmark").load(" #bookmark", function () {
-                                            var frm3 = $('#b_create');
-                                            frm3.submit(function () {
-                                                $.ajax({
-                                                    type: frm3.attr('method'),
-                                                    url: frm3.attr('action'),
-                                                    data : {csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                                    success: function () {
-                                                        $("#bookmark").load(" #bookmark");
-                                                    },
-                                                    error: function() {
-                                                        alert("something is wrong")
-                                                    }
-                                                });
-                                                return false;
-                                            });
-                                        });
-                                    },
-                                    error: function() {
-                                        alert("something is wrong")
-                                    }
-                                });
-                                return false;
-                            });
-                        </script>
                     {% endif %}
                 </div>
                 {% else %}
@@ -618,6 +490,8 @@
     </script>
 
     <script src="{% static "js/ego-graph.js" %}"></script>
+    <script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+    <script src="{% static "js/endorsement-bookmark.js" %}"></script>
 
 {% endblock %}
   
