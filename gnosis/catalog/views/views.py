@@ -6,7 +6,7 @@ from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, Flagged
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
-from catalog.models import Endorsement, EndorsementEntry
+from catalog.models import EndorsementEntry
 from bookmark.models import Bookmark, BookmarkEntry
 
 from catalog.views.utils.import_functions import *
@@ -268,19 +268,18 @@ def paper_detail(request, id):
     main_paper_id = paper.id
 
     # catch the case when the user is not logged in
+    paper_endorse = EndorsementEntry.objects.filter(paper_id=paper.id)
     try:
-        if EndorsementEntry.objects.filter(paper=paper.id, user=request.user):
+        endorse = EndorsementEntry.objects.filter(paper_id=paper.id).filter(user=request.user)
+        if endorse:
             endorsed = True
+            num_endorsements = len(paper_endorse)
         else:
             endorsed = False
+            num_endorsements = len(paper_endorse)
     except:
         endorsed = False
-
-    endorsement = Endorsement.objects.filter(paper=paper.id)
-    if endorsement:
-        num_endorsements = endorsement[0].endorsement_count
-    else:
-        num_endorsements = 0
+        num_endorsements = len(paper_endorse)
 
     try:
         bookmark = Bookmark.objects.filter(owner=request.user)[0]

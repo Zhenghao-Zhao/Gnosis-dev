@@ -327,34 +327,12 @@ class CollectionEntry(models.Model):
         return str(self.paper_id)
 
 
-class Endorsement(models.Model):
-    """An endorsement model for papers, mainly records the time of the latest endorsement, endorsement counts etc"""
-
-    # Fields
-    paper = models.IntegerField(null=False, blank=False)
-
-    endorsement_count = models.IntegerField(null=False, blank=False, default=0)
-
-    created_at = models.DateField(auto_now_add=True, auto_now=False)
-    updated_at = models.DateField(null=True)
-
-    # Metadata
-    class Meta:
-        ordering = ['-created_at']
-
-    # Methods
-    def get_absolute_url(self):
-        return reverse('paper_detail', args=[str(self.id)])
-
-    def __str__(self):
-        return str(self.paper) + ": " + str(self.endorsement_count) + " endorsements."
-
-
 class EndorsementEntry(models.Model):
     """An entry, that is user, in an endorsement for a paper"""
 
     # Fields
-    paper = models.IntegerField(null=False, blank=False)
+    paper_id = models.IntegerField(null=False, blank=False)
+    paper_title = models.TextField(null=False, blank=False)  # The paper title to avoid extra DB calls
 
     user = models.ForeignKey(to=User,
                              on_delete=models.CASCADE,

@@ -3,20 +3,19 @@ from django.http import HttpResponseRedirect
 
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
-from catalog.models import Endorsement, EndorsementEntry
 from catalog.models import FlaggedComment
 
 from neomodel import db
 from catalog.models import Comment
 
 from django.urls import reverse
+from catalog.models import EndorsementEntry
 
 # Register your models here.
 admin.site.register(ReadingGroup)
 admin.site.register(ReadingGroupEntry)
 admin.site.register(Collection)
 admin.site.register(CollectionEntry)
-admin.site.register(Endorsement)
 admin.site.register(EndorsementEntry)
 
 
