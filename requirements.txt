@@ -3,7 +3,7 @@ certifi==2018.1.18
 chardet==3.0.4
 confusable-homoglyphs==3.2.0
 cycler==0.10.0
-Django==2.0.4
+Django==2.2.5
 django-el-pagination==3.2.4
 django-neomodel==0.0.4
 django-registration==3.0
