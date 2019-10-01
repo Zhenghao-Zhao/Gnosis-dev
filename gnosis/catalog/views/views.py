@@ -310,12 +310,6 @@ def paper_detail(request, id):
         if 'comment_form' in request.POST and commentform.is_valid():
             commentform.save()
             comment.discusses.connect(paper)
-            response_data = {}
-            response_data['result'] = 'Create post successful!'
-            response_data['text'] = comment.text
-            response_data['created_by'] = comment.created_by
-            response_data['author'] = comment.author
-            dump = json.dumps(response_data)
             success = True
         if 'note_form' in request.POST and noteform.is_valid():
             noteform.save()
