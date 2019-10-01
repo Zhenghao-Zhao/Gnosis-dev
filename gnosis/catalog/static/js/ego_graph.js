@@ -28,21 +28,6 @@ function toggle_relas() {
     }
 }
 
-// /************** show/hide graph add-ons **************/
-// var hide_opt = false;
-//
-// function toggle_options() {
-//     hide_opt = !hide_opt;
-//     if (hide_opt) {
-//         $(".graph-adder").hide(300);
-//         $("#menu-button").text("Show").attr("title", "Show add-ons");
-//
-//     } else {
-//         $(".graph-adder").show(300);
-//         $("#menu-button").text("Hide").attr("title", "Hide add-ons");
-//     }
-// }
-
 // collection of all elements (nodes + edges) in the graph currently
 var collection = cy.elements();
 
@@ -195,3 +180,5 @@ cy.on('click', 'node', function (evt) {
         edge.style('opacity', 1);
 
     });
+
+// attach functions to events
