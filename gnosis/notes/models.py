@@ -11,3 +11,6 @@ class Note(models.Model):
 
     def __str__(self):
         return "Private note on paper" + str(self.paper_id) + " by " + str(self.created_by.username)
+
+    class Meta:
+        ordering = ['-updated_at']

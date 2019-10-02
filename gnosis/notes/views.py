@@ -86,6 +86,7 @@ def note_index(request):
     if request.user.is_authenticated:
         notes = Note.objects.filter(created_by=request.user).order_by('-updated_at')
         for note in notes:
+            print(note.note_content)
             paper_id = note.paper_id
             print("Paper id are: ", paper_id)
             query = "MATCH (p:Paper) where id(p) = {paper_id} RETURN p"
