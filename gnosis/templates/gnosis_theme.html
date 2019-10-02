@@ -52,6 +52,11 @@
                                         href="{% url 'endorsements' %}">Endorsements</a></li>
                 </li>
                 {% endif %}
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link"
+                                        href="{% url 'note_index' %}">Notes</a></li>
+                </li>
+                {% endif %}
             </ul>
 
             <ul class="nav navbar-nav">

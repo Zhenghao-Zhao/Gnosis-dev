@@ -3,12 +3,14 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
+from notes.forms import NoteForm
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
 from catalog.models import Collection, CollectionEntry
 from catalog.models import EndorsementEntry
 from bookmark.models import Bookmark, BookmarkEntry
-
+from datetime import datetime
+import json
 from catalog.views.utils.import_functions import *
 
 from catalog.forms import (
@@ -227,11 +229,8 @@ def paper_detail(request, id):
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
     if request.user.is_authenticated:
-        notes = Note.objects.filter(paper=paper.__str__(), author=request.user)
-
+        notes = Note.objects.filter(paper_id=id, created_by=request.user)
     num_notes = len(notes)
-    print("The note retrieved from data is")
-    print(notes)
 
     # Retrieve the paper's authors
     authors = get_paper_authors(paper)
@@ -328,6 +327,36 @@ def paper_detail(request, id):
         form = FlaggedCommentForm()
 
     print("ego_network_json: {}".format(ego_network_json))
+
+    # Comment / Note form
+    if request.method == "POST":
+        user = request.user
+        note = Note()
+        note.created_by = user
+        note.paper_id = id
+        note.created_at = datetime.now()
+        noteform = NoteForm(instance=note, data=request.POST)
+
+        comment = Comment()
+        comment.created_by = user.id
+        comment.author = user.username
+        commentform = CommentForm(instance=comment, data=request.POST)
+
+        success = False
+
+        if 'comment_form' in request.POST and commentform.is_valid():
+            commentform.save()
+            comment.discusses.connect(paper)
+            success = True
+        if 'note_form' in request.POST and noteform.is_valid():
+            noteform.save()
+            success = True
+        if success:
+            return redirect("paper_detail", id=id)
+    else:  # GET
+        commentform = CommentForm()
+        noteform = NoteForm()
+
     return render(
         request,
         "paper_detail.html",
@@ -341,6 +370,8 @@ def paper_detail(request, id):
             "num_notes": num_notes,
             "num_comments": num_comments,
             "ego_network": ego_network_json,
+            "noteform": noteform,
+            "commentform": commentform,
             "main_paper_id": main_paper_id,
             "endorsed": endorsed,
             "num_endorsements": num_endorsements,
@@ -2171,6 +2202,22 @@ def comment_update(request, id):
 
     return render(request, "comment_update.html", {"form": form, "comment": comment})
 
+
+@login_required()
+def comment_delete(request, id):
+    query = "MATCH (a) WHERE ID(a)={id} RETURN a"
+    results, meta = db.cypher_query(query, dict(id=id))
+    if len(results) > 0:
+        comments = [Comment.inflate(row[0]) for row in results]
+        comment = comments[0]
+    else:
+        comment = Comment()
+
+    paper_id = request.session["last-viewed-paper"]
+    if request.user.id == comment.created_by:
+        comment.delete()
+        del request.session["last-viewed-paper"]
+    return redirect("paper_detail", id=paper_id)
 
 #
 # Utility Views (admin required)

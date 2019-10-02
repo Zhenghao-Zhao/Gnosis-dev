@@ -335,10 +335,11 @@ class CommentForm(ModelForm):
         self.fields["text"].widget = forms.Textarea()
         self.fields["text"].widget.attrs.update({"rows": "5"})
         self.fields["text"].label = ""
+        self.fields['text'].widget.attrs.update({'id': 'comment_text'})
 
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
-            visible.field.widget.attrs.update({"style": "width:35em"})
+            visible.field.widget.attrs.update({"style": "width:100%"})
             print(visible.field.widget.attrs.items())
 
     def clean_text(self):
@@ -384,7 +385,7 @@ class CommentForm(ModelForm):
 
     class Meta:
         model = Comment
-        fields = ["text"]
+        fields = ['text']
 
 
 class CodeForm(ModelForm):
