@@ -275,7 +275,7 @@
                             <form action="" method="POST" id="comment-form">
                                 {% csrf_token %}
                                 {{ commentform }}
-                                <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md"
+                                <input type="submit" name="comment_form" class="btn btn-info mt-3 btn-md captcha-submit"
                                        value="Post a comment"/>
                                 <small class="mt-2 float-right">* Comments are public and visible to all users.</small>
                             </form>
@@ -287,6 +287,35 @@
                             {% paginate comments %}
                             {% for comment in comments %}
                                 <li class="list-group-item shadow-sm mt-1">
+                                    <div style="float: right; text-align: right;">
+                                        <i class="material-icons more_vert" onclick="toggle_more(this)">
+                                            more_vert
+                                        </i>
+                                        <div class="popup" hidden>
+                                            <div class="more_menu">
+                                                {% if user.is_authenticated %}
+                                                    <div class="opt_container"
+                                                         onclick="open_flag_dialog({{ comment.id }})">
+                                                        <i class="material-icons menu_item">
+                                                            outlined_flag
+                                                        </i>
+                                                        <span class="menu_item">Report</span>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="opt_container">
+                                                        <a class="icon_link"
+                                                           href="{% url 'login' %}?next={{ request.path }}"
+                                                           style="text-decoration: none; color: black">
+                                                            <i class="material-icons menu_item">
+                                                                outlined_flag
+                                                            </i>
+                                                            <span class="menu_item">Report</span>
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <p><strong>{{ comment.author }}</strong>
 
                                         <small class="ml-3 text-muted">{{ comment.publication_date|naturaltime }}</small>
@@ -413,14 +442,7 @@
                                                     </a>
                                                 </div>
                                             {% endif %}
-                                            {#                                            <div class="opt_container">#}
-                                            {#                                                <i class="material-icons menu_item">#}
-                                            {#                                                    delete#}
-                                            {#                                                </i>#}
-                                            {#                                                <span class="menu_item">Delete</span>#}
-                                            {#                                            </div>#}
                                         </div>
-
                                     </div>
                                 </div>
                                 <p><strong>{{ comment.author }}</strong>
@@ -481,6 +503,7 @@
     <!-- end-flagging -->
 
     {% load static %}
+    <script>setButton();</script>
     <script src="{% static "js/flagging.js" %}"></script>
 
     <script>

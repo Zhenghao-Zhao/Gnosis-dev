@@ -56,12 +56,9 @@ INSTALLED_APPS = [
     'bookmark.apps.BookmarkConfig',
     'home.apps.HomeConfig',
     'django_nose',
-<<<<<<< HEAD
     'recaptcha',
-    'captcha'
-=======
+    'captcha',
     'django.contrib.humanize',
->>>>>>> feature-1.4.2
 ]
 
 MIDDLEWARE = [
