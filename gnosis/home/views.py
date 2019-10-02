@@ -13,7 +13,7 @@ def home(request):
     authors = [', '.join(get_paper_authors(paper)) for paper in recent_papers]
 
     papers = list(zip(recent_papers, authors))
-
+    form = SearchAllForm(request.POST)
     message = None
     paper_results = []
     person_results = []
@@ -21,8 +21,10 @@ def home(request):
     dataset_results = []
     codes_results = []
 
+    form.fields['search_type'].initial = ['all']
+
     if request.method == 'POST':
-        form = SearchAllForm(request.POST)
+
         print("Received POST request")
         if form.is_valid():
             english_stopwords = stopwords.words('english')

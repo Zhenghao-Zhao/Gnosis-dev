@@ -21,17 +21,15 @@
         {% if message %}
         <p class="bg-info">{{ message }}</p>
         {% endif %}
-        <br>
-        <form action="" method="post">
+       <form action="" method="post">
             {% csrf_token %}
-            {% for field in form %}
-            <span class="rounded-lg">
-                {{ field }}
-            </span>
-            {% endfor %}
-            <br>
-            <input type="submit" class="btn btn-primary btn-lg" value="Search"/>
-
+            <table>
+                <tr>
+                    <td><span>{{ form.search_type }}</span></td>
+                    <td><span>{{ form.search_keywords }}</span></td>
+                    <td><span><input type="submit" class="btn btn-primary btn-md" value="Search"/></span></td>
+                </tr>
+            </table>
         </form>
     </div>
 </div>

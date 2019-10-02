@@ -42,12 +42,13 @@ class SearchAllForm(Form):
         super(Form, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs["class"] = "form-control"
-
-    def clean_search_keywords(self):
-        return self.cleaned_data["search_keywords"]
+        #self.fields['search_type'].initial = 'all'
 
     def clean_search_type(self):
         return self.cleaned_data["search_type"]
+
+    def clean_search_keywords(self):
+        return self.cleaned_data["search_keywords"]
 
     SELECT_CHOICES = {
         ('all', 'All'),
@@ -58,8 +59,9 @@ class SearchAllForm(Form):
         ('codes', 'Codes'),
     }
 
+    search_type = forms.ChoiceField(widget=forms.Select(), choices=SELECT_CHOICES, initial='all', required=True)
     search_keywords = forms.CharField(required=True)
-    search_type = forms.CharField(widget=forms.Select(choices=SELECT_CHOICES))
+
 
 class SearchVenuesForm(Form):
     def __init__(self, *args, **kwargs):
