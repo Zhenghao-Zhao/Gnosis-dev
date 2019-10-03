@@ -551,7 +551,7 @@ def _get_node_ego_network(id, paper_title):
                     )
 
                     ego_json += rela_temp.format(
-                        tc.id, "-", id, 'Dataset', new_rela, tc.id, id, line
+                        tc.id, "-", id, 'Code', new_rela, tc.id, id, line
                     )
 
     return "[" + ego_json + "]"
