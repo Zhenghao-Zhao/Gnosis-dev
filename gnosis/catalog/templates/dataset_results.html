@@ -20,14 +20,12 @@
     </div>
 </div>
 
-
+{% if dataset_results %}
 <div class="card shadow-sm mt-3">
-    <div class="card-header">
-        <h4>Datasets that match your query</h4>
-    </div>
+    <div class="card-header"><h4>Datasets that match your query</h4></div>
+    {% paginate dataset_results %}
     <div class="card-body">
-        {% if dataset_results %}
-        {% paginate dataset_results %}
+
         {% for dataset in dataset_results %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
@@ -36,16 +34,9 @@
             </li>
         </ul>
         {% endfor %}
-        {% endif %}
-
-        {% if message %}
-        <div class="mt-5">
-            <p class="bg-info">{{ message }}</p>
-        </div>
-        {% endif %}
     </div>
 
-    {% get_pages %}
+        {% get_pages %}
         <!-- Center-aligned -->
         <ul class="pagination justify-content-center" style="margin:20px 0">
             {% if not pages.current.is_first %}
@@ -62,6 +53,6 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
-
 </div>
+{% endif %}
 {% endblock %}

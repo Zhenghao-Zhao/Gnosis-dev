@@ -22,13 +22,12 @@
     </div>
 </div>
 
+{% if paper_results %}
 <div class=" card shadow-sm mt-3">
-    <div class="card-header">
-        <h4>Papers that match your query </h4>
-    </div>
+    <div class="card-header"><h4>Papers that match your query </h4></div>
+
+    {% paginate paper_results %}
     <div class="card-body">
-        {% if paper_results %}
-        {% paginate paper_results %}
         {% for paper in paper_results %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
@@ -36,13 +35,6 @@
             </li>
         </ul>
         {% endfor %}
-        {% endif %}
-
-        {% if message %}
-        <div class="mt-5">
-            <p class="bg-info">{{ message }}</p>
-        </div>
-        {% endif %}
     </div>
 
     {% get_pages %}
@@ -63,4 +55,5 @@
             {% endif %}
         </ul>
 </div>
+{% endif %}
 {% endblock %}

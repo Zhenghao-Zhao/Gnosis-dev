@@ -21,15 +21,11 @@
     </div>
 </div>
 
-
+{% if venue_results %}
 <div class="card shadow-sm mt-3">
-
-    <div class="card-header">
-        <h4>Venues that match your query</h4>
-    </div>
+    <div class="card-header"><h4>Venues that match your query</h4></div>
+    {% paginate venue_results %}
     <div class="card-body">
-        {% if venue_results %}
-        {% paginate venue_results %}
         {% for venue in venue_results %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
@@ -38,13 +34,6 @@
             </li>
         </ul>
         {% endfor %}
-        {% endif %}
-
-        {% if message %}
-        <div class="mt-5">
-            <p class="bg-info">{{ message }}</p>
-        </div>
-        {% endif %}
     </div>
 
         {% get_pages %}
@@ -67,5 +56,5 @@
 
 </div>
 
-
+{% endif %}
 {% endblock %}

@@ -23,10 +23,12 @@
 </div>
 
 {% if codes_results %}
-{% paginate codes_results %}
+
 <div class="card shadow-sm mt-3">
     <div class="card-header"><h4>Codes that match your query</h4></div>
+    {% paginate codes_results %}
     <div class="card-body">
+
         {% for code in codes_results %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
@@ -38,7 +40,7 @@
             </li>
         </ul>
         {% endfor %}
-
+    </div>
         {% get_pages %}
         <!-- Center-aligned -->
         <ul class="pagination justify-content-center" style="margin:20px 0">
@@ -56,7 +58,7 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
-    </div>
+
 </div>
 {% endif %}
 
