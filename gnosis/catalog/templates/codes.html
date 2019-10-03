@@ -21,10 +21,11 @@
         </form>
     </div>
 </div>
+
 {% if codes %}
-{% paginate codes %}
 <div class="card shadow-sm mt-3">
     <div class="card-header"><h4>New Codes</h4></div>
+    {% paginate codes %}
     <div class="card-body">
         {% for code in codes %}
         <ul class="list-group">
@@ -37,7 +38,7 @@
             </li>
         </ul>
         {% endfor %}
-
+    </div>
         {% get_pages %}
         <!-- Center-aligned -->
         <ul class="pagination justify-content-center" style="margin:20px 0">
@@ -55,7 +56,7 @@
             <li class="page-item"><a class="page-link" href="{{ pages.next.path }}">Next</a></li>
             {% endif %}
         </ul>
-    </div>
+
 </div>
 {% endif %}
 
