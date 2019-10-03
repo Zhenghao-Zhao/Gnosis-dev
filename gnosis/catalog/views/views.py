@@ -106,6 +106,7 @@ def papers(request):
     form.fields['search_type'].initial = 'papers'
     print(form.fields['search_type'].initial)
 
+
     message = None
     paper_results = []
     person_results = []

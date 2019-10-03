@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_nose',
     'recaptcha',
     'captcha'
+
 ]
 
 MIDDLEWARE = [

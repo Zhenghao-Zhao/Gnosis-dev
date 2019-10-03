@@ -1,7 +1,9 @@
 {% extends "gnosis_theme.html" %}
 
 {% block content %}
-{% load el_pagination_tags %}
+
+
+
 
 <div class="card shadow-sm mt-3">
     <div class="card-body text-center">
@@ -26,9 +28,13 @@
     <div class="card-header">
         <h4>Venues</h4>
     </div>
+
+
     <div class="card-body">
         {% if venues %}
+        {% load el_pagination_tags %}
         {% paginate venues %}
+
         {% for venue in venues %}
         <ul class="list-group">
             <li class="list-group-item mt-1">
