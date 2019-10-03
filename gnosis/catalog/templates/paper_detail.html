@@ -359,7 +359,7 @@
                         {% if num_notes > 0 %}
                         <ul class="list-group list-group-flush">
                             {% paginate notes %}
-                            {% for note in notes reversed %}
+                            {% for note in notes %}
                             <li class="list-group-item shadow-sm mt-1">
                                 <p>{{ note.note_content }}</p>
                                 <p>Date:
