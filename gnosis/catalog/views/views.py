@@ -102,9 +102,10 @@ def papers(request):
 
     papers = list(zip(all_papers, all_authors, all_venues))
     form = SearchAllForm(request.POST)
-
-    form.fields['search_type'].initial = 'papers'
-    print(form.fields['search_type'].initial)
+    #search = form.get_search_type;
+    #search.initial
+    #form.fields['search_type'].initial = 'papers'
+    #print(form.fields['search_type'].initial)
 
 
     message = None
@@ -249,6 +250,7 @@ def papers(request):
     elif request.method == 'GET':
         print("Received GET request")
         form = SearchAllForm()
+        form.fields['search_type'].initial = 'papers'
 
     print(message);
 
@@ -1898,6 +1900,7 @@ def datasets(request):
     elif request.method == "GET":
         print("Received GET request")
         form = SearchAllForm()
+        form.fields['search_type'].initial = 'datasets'
 
     print(message);
 
@@ -2250,6 +2253,7 @@ def venues(request):
     if request.method == "GET":
         form = SearchAllForm()
         message = None
+        form.fields['search_type'].initial = 'venues'
 
     return render(request, "venues.html", {"venues": all_venues, "form": form, "message": message})
 

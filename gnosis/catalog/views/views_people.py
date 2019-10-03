@@ -240,6 +240,7 @@ def persons(request):
     elif request.method == "GET":
         print("Received GET request")
         form = SearchAllForm()
+        form.fields['search_type'].initial = 'people'
 
     print(message);
 

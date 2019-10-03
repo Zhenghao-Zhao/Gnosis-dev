@@ -59,8 +59,12 @@ class SearchAllForm(Form):
         ('codes', 'Codes'),
     }
 
+
     search_type = forms.ChoiceField(widget=forms.Select(), choices=SELECT_CHOICES, initial='all', required=True)
     search_keywords = forms.CharField(required=True)
+    #search_type.initial = 'papers'
+    def get_search_type(self):
+        return self.search_type;
 
 
 class SearchVenuesForm(Form):
