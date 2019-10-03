@@ -294,13 +294,6 @@ def paper_detail(request, id):
     if request.method == "POST":
         comment_id = request.POST.get("comment_id", None)
 
-        query = "MATCH (a:Comment) WHERE ID(a)={id} RETURN a"
-        results, meta = db.cypher_query(query, dict(id=comment_id))
-        comment = None
-        if len(results) > 0:
-            all_comments = [Comment.inflate(row[0]) for row in results]
-            comment = all_comments[0]
-
         flagged_comment = FlaggedComment()
         flagged_comment.proposed_by = user
 
