@@ -6,7 +6,7 @@ from .models import Collection, CollectionEntry
 from django.utils.safestring import mark_safe
 
 from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Invisible, ReCaptchaV2Checkbox, ReCaptchaV3
+from captcha.widgets import ReCaptchaV2Checkbox, ReCaptchaV2Invisible, ReCaptchaV3
 
 from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV, RECAPTCHA_PUBLIC_KEY_V3, RECAPTCHA_PRIVATE_KEY_V3
 
@@ -16,14 +16,14 @@ from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV,
 #
 
 class SearchForm(Form):
-    FILTER_CHOICES = [
+    FILTER_CHOICES = (
         ('all', 'All'),
         ('papers', 'Papers'),
         ('people', 'People'),
         ('datasets', 'Datasets'),
         ('venues', 'Venues'),
         ('codes', 'Codes'),
-    ]
+    )
 
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
@@ -50,21 +50,21 @@ class SearchAllForm(Form):
     def clean_search_keywords(self):
         return self.cleaned_data["search_keywords"]
 
-    SELECT_CHOICES = {
+    SELECT_CHOICES = (
         ('all', 'All'),
         ('papers', 'Papers'),
         ('people', 'People'),
         ('venues', 'Venues'),
         ('datasets', 'Datasets'),
         ('codes', 'Codes'),
-    }
+    )
 
 
     search_type = forms.ChoiceField(widget=forms.Select(), choices=SELECT_CHOICES, initial='all', required=True)
     search_keywords = forms.CharField(required=True)
     #search_type.initial = 'papers'
     def get_search_type(self):
-        return self.search_type;
+        return self.search_type
 
 
 class SearchVenuesForm(Form):
