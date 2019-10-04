@@ -12,6 +12,15 @@ def home(request):
     recent_papers = Paper.nodes.order_by('-created')[:5]
     authors = [', '.join(get_paper_authors(paper)) for paper in recent_papers]
 
+    all_authors = []
+
+    for s in authors:
+        if len(s) > 0:
+            temp = s.split(', ')
+            all_authors = all_authors + temp
+
+    recent_authors = all_authors[:9]
+
     papers = list(zip(recent_papers, authors))
     form = SearchAllForm(request.POST)
     message = None
@@ -156,9 +165,9 @@ def home(request):
         print("Received GET request")
         form = SearchAllForm()
 
-    print(message);
+    print(message)
     return render(request, 'home.html', {'papers': papers, 'num_papers': num_papers,
-                                             'num_people': num_people, 'form': form, 'message': message})
+                                             'num_people': num_people, 'form': form, 'message': message, 'recent_authors': recent_authors})
 
 
 
