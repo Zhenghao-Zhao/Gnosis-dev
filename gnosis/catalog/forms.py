@@ -15,7 +15,16 @@ from gnosis.settings import RECAPTCHA_PRIVATE_KEY_INV, RECAPTCHA_PUBLIC_KEY_INV,
 # Search forms
 #
 
-class SearchAllForm(Form):
+class SearchForm(Form):
+    FILTER_CHOICES = [
+        ('all', 'All'),
+        ('papers', 'Papers'),
+        ('people', 'People'),
+        ('datasets', 'Datasets'),
+        ('venues', 'Venues'),
+        ('codes', 'Codes'),
+    ]
+
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
@@ -25,6 +34,37 @@ class SearchAllForm(Form):
         return self.cleaned_data["search_keywords"]
 
     search_keywords = forms.CharField(required=True)
+    search_filter = forms.CharField(label='', widget=forms.Select(choices=FILTER_CHOICES))
+
+
+class SearchAllForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(Form, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control"
+        #self.fields['search_type'].initial = 'all'
+
+    def clean_search_type(self):
+        return self.cleaned_data["search_type"]
+
+    def clean_search_keywords(self):
+        return self.cleaned_data["search_keywords"]
+
+    SELECT_CHOICES = {
+        ('all', 'All'),
+        ('papers', 'Papers'),
+        ('people', 'People'),
+        ('venues', 'Venues'),
+        ('datasets', 'Datasets'),
+        ('codes', 'Codes'),
+    }
+
+
+    search_type = forms.ChoiceField(widget=forms.Select(), choices=SELECT_CHOICES, initial='all', required=True)
+    search_keywords = forms.CharField(required=True)
+    #search_type.initial = 'papers'
+    def get_search_type(self):
+        return self.search_type;
 
 
 class SearchVenuesForm(Form):
@@ -41,7 +81,6 @@ class SearchVenuesForm(Form):
 
     venue_name = forms.CharField(required=True)
     venue_publication_year = forms.CharField(required=True)
-
 
 class SearchDatasetsForm(Form):
     def __init__(self, *args, **kwargs):
@@ -69,7 +108,6 @@ class SearchDatasetsForm(Form):
     keywords = forms.CharField(
         required=False, widget=forms.TextInput(attrs={"size": 40})
     )
-
 
 class SearchPapersForm(Form):
     def __init__(self, *args, **kwargs):
@@ -114,7 +152,6 @@ class SearchPeopleForm(Form):
         return self.cleaned_data["person_name"]
 
     person_name = forms.CharField(required=True)
-
 
 class SearchCodesForm(Form):
     def __init__(self, *args, **kwargs):
