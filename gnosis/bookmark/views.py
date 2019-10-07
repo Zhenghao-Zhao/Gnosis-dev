@@ -66,6 +66,7 @@ def bookmark_entry_remove_from_view(request, pid):
 @login_required
 def search_bookmarks(request):
         keyword = request.POST.get('keyword1', "")
+        # pre-process query
         english_stopwords = stopwords.words('english')
         if len(keyword)>1:
             search_keywords_tokens = [w for w in keyword.split(' ') if w not in english_stopwords]
@@ -73,6 +74,7 @@ def search_bookmarks(request):
             search_keywords_tokens = [keyword]
         bookmark = Bookmark.objects.filter(owner=request.user)[0]
         print("  ==> bookmark found")
+        # rank the query results
         match_count = {}
         for paper in range(len(bookmark.papers.all())):
             match_count[paper] = 0
@@ -83,6 +85,7 @@ def search_bookmarks(request):
         pairs = [(i,j) for (j,i) in match_count.items() if not i == 0]
         pairs.sort()
         papers = [bookmark.papers.all()[i] for (j,i) in pairs]
+        # If no input query, display all papers
         if not search_keywords_tokens:
             papers = bookmark.papers
         return render(request,
