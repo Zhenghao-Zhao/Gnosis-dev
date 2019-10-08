@@ -431,18 +431,19 @@ def paper_detail(request, id):
             flagged_comment.comment_id = comment_id
             is_valid = form.is_valid()
 
-            if is_valid:
-                form.save()
-                if not request.is_ajax():
-                    print("comment flag form saved successfully!!")
-                    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
-
             # if the received request is ajax
             # return a json object for ajax requests containing form validity
             if request.is_ajax():
+                if is_valid:
+                    form.save()
                 data = {'is_valid': is_valid}
                 print("ajax request received!")
                 return JsonResponse(data)
+            else:
+                if is_valid:
+                    form.save()
+                    print("comment flag form saved successfully!!")
+                    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
     else:
         form = FlaggedCommentForm()
 
