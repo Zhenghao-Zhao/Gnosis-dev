@@ -125,8 +125,7 @@
 
                     <div>
                         <div>Connect with:
-                            <a
-                                    href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
+                            <a href="{% url 'paper_connect_paper' paper.id %}">Paper</a>
                             || <a href="{% url 'paper_connect_venue' paper.id %}">Venue</a> ||
                             <a href="{% url 'paper_connect_author' paper.id %}">Author</a> ||
                             <a href="{% url 'paper_connect_dataset' paper.id %}">Dataset</a> ||
@@ -460,23 +459,22 @@
         </div>
     </div>
 
-    <!-- start-flagging -->
-    <div id="flag_form_container" class="cover popup" hidden>
-        <div id="flag_dialog">
-            <form id="flag_form" action="" method="post">
-                {% csrf_token %}
-                <table class="w-75">
-                    {% for field in flag_form %}
-                        <div style="font-weight: bold">
-                            {{ field.label_tag }}
-                        </div>
-                        <div style="padding: 0 10px">
-                            {{ field }}
-                        </div>
-                        {% if field.help_text %}
-                            {{ field.help_text }}
-                        {% endif %}
-
+        <!-- start-flagging -->
+        <div id="flag_form_container" class="cover popup" hidden>
+            <div id="flag_form_dialog" class="box_shadow">
+                <form id="flag_form" action="" method="post">
+                    {% csrf_token %}
+                    <table class="w-75">
+                        {% for field in flag_form %}
+                            <div style="font-weight: bold">
+                                {{ field.label_tag }}
+                            </div>
+                            <div style="padding: 0 10px">
+                                {{ field }}
+                            </div>
+                            {% if field.help_text %}
+                                {{ field.help_text }}
+                            {% endif %}
                         {% for error in field.errors %}
                             {{ error }}
                         {% endfor %}
