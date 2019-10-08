@@ -79,9 +79,8 @@ def search_bookmarks(request):
         for paper in range(len(bookmark.papers.all())):
             match_count[paper] = 0
             for token in search_keywords_tokens:
-                if token in bookmark.papers.all()[paper].paper_title:
+                if token.lower() in bookmark.papers.all()[paper].paper_title.lower():
                     match_count[paper] += 1
-        print(match_count)
         pairs = [(i,j) for (j,i) in match_count.items() if not i == 0]
         pairs.sort()
         papers = [bookmark.papers.all()[i] for (j,i) in pairs]
