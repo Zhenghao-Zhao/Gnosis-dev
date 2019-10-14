@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
 from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
 from notes.forms import NoteForm
 from notes.models import Note
@@ -419,31 +420,35 @@ def paper_detail(request, id):
     user = request.user
     # if a flagging form is submitted
     if request.method == "POST":
-        comment_id = request.POST.get("comment_id", None)
+        if user.is_authenticated:
+            comment_id = request.POST.get("comment_id", None)
 
-        flagged_comment = FlaggedComment()
-        flagged_comment.proposed_by = user
+            flagged_comment = FlaggedComment()
+            flagged_comment.proposed_by = user
 
-        form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
+            form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
 
-        # check if comment_id exists
-        if comment_id is not None:
-            flagged_comment.comment_id = comment_id
-            is_valid = form.is_valid()
+            # check if comment_id exists
+            if comment_id is not None:
+                flagged_comment.comment_id = comment_id
+                is_valid = form.is_valid()
 
-            # if the received request is ajax
-            # return a json object for ajax requests containing form validity
-            if request.is_ajax():
-                if is_valid:
-                    form.save()
-                data = {'is_valid': is_valid}
-                print("ajax request received!")
-                return JsonResponse(data)
-            else:
-                if is_valid:
-                    form.save()
-                    print("comment flag form saved successfully!!")
-                    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
+                # if the received request is ajax
+                # return a json object for ajax requests containing form validity
+                if request.is_ajax():
+                    if is_valid:
+                        form.save()
+                    data = {'is_valid': is_valid}
+                    print("ajax request received!")
+                    return JsonResponse(data)
+                else:
+                    if is_valid:
+                        form.save()
+                        print("comment flag form saved successfully!!")
+                        return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
+        else:
+            # raise SuspiciousOperation('Undesired POST request received.')
+            return HttpResponseBadRequest(reverse("paper_detail", kwargs={'id': id}))
     else:
         form = FlaggedCommentForm()
 
