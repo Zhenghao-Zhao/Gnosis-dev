@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from catalog.models import FlaggedComment, Paper
+from catalog.models import CommentFlag, Paper
 from django.contrib.auth.models import User
 from neomodel import db
 
@@ -13,7 +13,7 @@ class FlaggedCommentViewTest(TestCase):
         test_user1 = User.objects.create_user(username='testuser1', password='1X<ISRUkw+tuK')
         test_user1.save()
 
-        FlaggedComment.objects.create(
+        CommentFlag.objects.create(
             comment_id=1,
             description="test description",
             violation="unwanted commercial content or spam",

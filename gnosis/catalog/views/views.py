@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404, HttpResponseBadRequest
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, CommentFlag
 from notes.forms import NoteForm
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
@@ -365,7 +365,7 @@ def paper_detail(request, id):
     authors = ", ".join(authors)
 
     user = request.user
-    flagged_comments = user.flagged_comments.all()
+    flagged_comments = user.comment_flags.all()
     flagged_comment_ids = []
     for flag in flagged_comments:
         flagged_comment_ids.append(flag.comment_id)
@@ -427,7 +427,7 @@ def paper_detail(request, id):
         if user.is_authenticated:
             comment_id = request.POST.get("comment_id", None)
 
-            flagged_comment = FlaggedComment()
+            flagged_comment = CommentFlag()
             flagged_comment.proposed_by = user
 
             form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)

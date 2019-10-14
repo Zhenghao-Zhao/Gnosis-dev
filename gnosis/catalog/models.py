@@ -199,7 +199,7 @@ class Code(DjangoNode):
     #
 
 
-class FlaggedComment(models.Model):
+class CommentFlag(models.Model):
     comment_id = models.IntegerField(null=False, blank=False)  # id of the flagged comment
 
     violation = models.CharField(max_length=100)
@@ -209,7 +209,7 @@ class FlaggedComment(models.Model):
     # user who flags the item
     proposed_by = models.ForeignKey(to=User,
                                     on_delete=models.CASCADE,
-                                    related_name="flagged_comments")
+                                    related_name="comment_flags")
 
     class Meta:
         ordering = ['violation', '-created_at']
