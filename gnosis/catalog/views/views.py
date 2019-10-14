@@ -352,8 +352,6 @@ def paper_detail(request, id):
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
 
-    print("ids are:", id, paper.id)
-
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
     if request.user.is_authenticated:
@@ -375,6 +373,8 @@ def paper_detail(request, id):
     else:
         comments = []
         num_comments = 0
+
+    # filtered_comments =
 
     # Retrieve the code repos that implement the algorithm(s) in this paper
     codes = _get_paper_codes(paper)
