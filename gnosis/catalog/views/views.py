@@ -339,6 +339,7 @@ def _get_paper_by_id(id):
 
 
 def paper_detail(request, id):
+
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -363,18 +364,22 @@ def paper_detail(request, id):
     # authors is a list of strings so just concatenate the strings.
     authors = ", ".join(authors)
 
-    # Retrieve all comments about this paper.
-    query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+    user = request.user
+    flagged_comments = user.flagged_comments.all()
+    flagged_comment_ids = []
+    for flag in flagged_comments:
+        flagged_comment_ids.append(flag.comment_id)
 
-    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+    # Retrieve all comments about this paper.
+    query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) WHERE NOT ID(c) IN {ids} RETURN c"
+
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title, ids=flagged_comment_ids))
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
         num_comments = len(comments)
     else:
         comments = []
         num_comments = 0
-
-    # filtered_comments =
 
     # Retrieve the code repos that implement the algorithm(s) in this paper
     codes = _get_paper_codes(paper)
@@ -417,7 +422,6 @@ def paper_detail(request, id):
     except:
         bookmarked = False
 
-    user = request.user
     # if a flagging form is submitted
     if request.method == "POST":
         if user.is_authenticated:

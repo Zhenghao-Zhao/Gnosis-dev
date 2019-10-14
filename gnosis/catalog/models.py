@@ -209,7 +209,7 @@ class FlaggedComment(models.Model):
     # user who flags the item
     proposed_by = models.ForeignKey(to=User,
                                     on_delete=models.CASCADE,
-                                    related_name="flagged_comment")
+                                    related_name="flagged_comments")
 
     class Meta:
         ordering = ['violation', '-created_at']
