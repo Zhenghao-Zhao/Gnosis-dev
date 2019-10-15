@@ -7,11 +7,14 @@ $(document).click(function (e) {
     }
 });
 
+var this_comment;
+
 /************** toggles more button: shows/hides popup menu **************/
 function toggle_more(ele) {
     var hidden = $(ele).siblings('.popup').attr('hidden');
     $('.popup').attr('hidden', true);
     $(ele).siblings('.popup').attr('hidden', !hidden);
+    this_comment = $(ele).closest('#comment_thread');
 }
 
 /************** opens flag dialog that contains flag form **************/
@@ -33,6 +36,14 @@ function cancel_form() {
     $('.popup').attr('hidden', true);
 }
 
+// $('#show_comment').click(function () {
+//     this_comment = $(this).closest('#comment_thread');
+//     if (this_comment != null) {
+//         $(this_comment).closest('#hidden_comment').attr('hidden', true);
+//         $(this_comment).attr('hidden', false);
+//     }
+// });
+
 /************** sending ajax post request with flag forms **************/
 var form = $('#flag_form');
 form.submit(function (e) {
@@ -49,6 +60,12 @@ form.submit(function (e) {
         data: form.serialize(),
         success: function (data) {
             console.log("submit successful!");
+
+            if (this_comment != null) {
+                $(this_comment).attr('hidden', true);
+                $(this_comment).prev('#hidden_comment').attr('hidden', false);
+            }
+
             $('#flag_form').trigger('reset');
             // close loader
             $('#loader').attr('hidden', true);
