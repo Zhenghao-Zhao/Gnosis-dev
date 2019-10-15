@@ -36,13 +36,16 @@ function cancel_form() {
     $('.popup').attr('hidden', true);
 }
 
-// $('#show_comment').click(function () {
-//     this_comment = $(this).closest('#comment_thread');
-//     if (this_comment != null) {
-//         $(this_comment).closest('#hidden_comment').attr('hidden', true);
-//         $(this_comment).attr('hidden', false);
-//     }
-// });
+$('.show_comment').click(function () {
+    console.log("this is called!");
+    var $hidden = $(this).closest('#hidden_comment');
+
+    this_comment = $hidden.next('#comment_thread');
+    if (this_comment != null) {
+        $hidden.attr('hidden', true);
+        $(this_comment).attr('hidden', false);
+    }
+});
 
 /************** sending ajax post request with flag forms **************/
 var form = $('#flag_form');
