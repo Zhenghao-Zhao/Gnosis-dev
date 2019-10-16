@@ -286,23 +286,23 @@
                             {% paginate comments %}
                             {% for comment in comments %}
                                 <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
-                                    <div style="float: right; text-align: right;">
+                                    <div class="even-vert-center">
+                                        <span>You have reported this comment.</span>
                                         <button type="button" class="btn btn-primary btn-lg form_button show_comment">
                                             Show
                                         </button>
                                     </div>
-                                    <p>You have reported this comment.</p>
                                 </li>
 
                                 <li id="comment_thread" class="list-group-item shadow-sm mt-1">
                                     <div style="float: right; text-align: right;">
-                                        <i class="material-icons more_vert" onclick="toggle_more(this)">
+                                        <i class="material-icons more_vert">
                                             more_vert
                                         </i>
                                         <div class="popup" hidden>
                                             <div class="more_menu box_shadow">
                                                 {% if user.is_authenticated %}
-                                                    <div class="opt_container"
+                                                    <div class="opt_container opt_auth"
                                                          onclick="open_flag_dialog({{ comment.id }})">
                                                         <i class="material-icons menu_item">
                                                             outlined_flag
@@ -429,7 +429,7 @@
                         {% for comment in comments %}
                             <li class="list-group-item shadow-sm mt-1">
                                 <div style="float: right; text-align: right;">
-                                    <i class="material-icons more_vert" onclick="toggle_more(this)">
+                                    <i class="material-icons more_vert">
                                         more_vert
                                     </i>
                                     <div class="popup" hidden>

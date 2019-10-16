@@ -7,16 +7,6 @@ $(document).click(function (e) {
     }
 });
 
-var this_comment;
-
-/************** toggles more button: shows/hides popup menu **************/
-function toggle_more(ele) {
-    var hidden = $(ele).siblings('.popup').attr('hidden');
-    $('.popup').attr('hidden', true);
-    $(ele).siblings('.popup').attr('hidden', !hidden);
-    this_comment = $(ele).closest('#comment_thread');
-}
-
 /************** opens flag dialog that contains flag form **************/
 function open_flag_dialog(comment_id) {
     // hide all current popups
@@ -36,8 +26,19 @@ function cancel_form() {
     $('.popup').attr('hidden', true);
 }
 
+// points to the comment that has been flagged
+var this_comment;
+
+/************** toggles more button: shows/hides popup menu **************/
+$('.more_vert').click(function () {
+    var hidden = $(this).siblings('.popup').attr('hidden');
+    $('.popup').attr('hidden', true);
+    $(this).siblings('.popup').attr('hidden', !hidden);
+    this_comment = $(this).closest('#comment_thread');
+});
+
+/************** click to show hidden comment **************/
 $('.show_comment').click(function () {
-    console.log("this is called!");
     var $hidden = $(this).closest('#hidden_comment');
 
     this_comment = $hidden.next('#comment_thread');
