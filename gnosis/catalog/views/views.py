@@ -372,13 +372,9 @@ def paper_detail(request, id):
         flagged_comment_ids.append(flag.comment_id)
 
     # Retrieve all comments about this paper.
-    # query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) WHERE NOT ID(c) IN {ids} RETURN c"
+    query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
 
-    query_unfiltered = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
-
-    # results, meta = db.cypher_query(query, dict(paper_title=paper.title))
-
-    results, meta = db.cypher_query(query_unfiltered, dict(paper_title=paper.title))
+    results, meta = db.cypher_query(query, dict(paper_title=paper.title))
 
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]

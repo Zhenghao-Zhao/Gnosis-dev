@@ -20,6 +20,10 @@ function open_flag_dialog(comment_id) {
         .appendTo("#flag_form");
 }
 
+function hide_comment(comment_id){
+
+}
+
 /************** hide popup form and reset its text. **************/
 function cancel_form() {
     $('#flag_form').trigger('reset');

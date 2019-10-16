@@ -284,7 +284,6 @@
                             <ul class="list-group list-group-flush">
                             {% paginate comments %}
                             {% for comment in filtered_comments %}
-
                                 {% if comment.is_hidden %}
                                     <li id="hidden_comment" class="list-group-item shadow-sm mt-1">
                                         <div class="even-vert-center">
@@ -297,35 +296,37 @@
                                     </li>
 
                                     <li id="comment_thread" class="list-group-item shadow-sm mt-1" hidden>
-                                        <div style="float: right; text-align: right;">
-                                            <i class="material-icons more_vert">
-                                                more_vert
-                                            </i>
-                                            <div class="popup" hidden>
-                                                <div class="more_menu box_shadow">
-                                                    {% if user.is_authenticated %}
-                                                        <div class="opt_container opt_auth"
-                                                             onclick="open_flag_dialog({{ comment.id }})">
-                                                            <i class="material-icons menu_item">
-                                                                outlined_flag
-                                                            </i>
-                                                            <span class="menu_item">Report</span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="opt_container">
-                                                            <a class="icon_link"
-                                                               href="{% url 'login' %}?next={{ request.path }}"
-                                                               style="text-decoration: none; color: black">
+                                        {% if comment.created_by != user.id %}
+                                            <div style="float: right; text-align: right;">
+                                                <i class="material-icons more_vert">
+                                                    more_vert
+                                                </i>
+                                                <div class="popup" hidden>
+                                                    <div class="more_menu box_shadow">
+                                                        {% if user.is_authenticated %}
+                                                            <div class="opt_container"
+                                                                 onclick="open_flag_dialog({{ comment.id }})">
                                                                 <i class="material-icons menu_item">
                                                                     outlined_flag
                                                                 </i>
                                                                 <span class="menu_item">Report</span>
-                                                            </a>
-                                                        </div>
-                                                    {% endif %}
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="opt_container">
+                                                                <a class="icon_link"
+                                                                   href="{% url 'login' %}?next={{ request.path }}"
+                                                                   style="text-decoration: none; color: black">
+                                                                    <i class="material-icons menu_item">
+                                                                        outlined_flag
+                                                                    </i>
+                                                                    <span class="menu_item">Report</span>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                         <p><strong>{{ comment.author }}</strong>
 
                                             <small class="ml-3 text-muted">{{ comment.publication_date|naturaltime }}</small>
@@ -349,35 +350,37 @@
                                     </li>
 
                                     <li id="comment_thread" class="list-group-item shadow-sm mt-1">
-                                        <div style="float: right; text-align: right;">
-                                            <i class="material-icons more_vert">
-                                                more_vert
-                                            </i>
-                                            <div class="popup" hidden>
-                                                <div class="more_menu box_shadow">
-                                                    {% if user.is_authenticated %}
-                                                        <div class="opt_container opt_auth"
-                                                             onclick="open_flag_dialog({{ comment.id }})">
-                                                            <i class="material-icons menu_item">
-                                                                outlined_flag
-                                                            </i>
-                                                            <span class="menu_item">Report</span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="opt_container">
-                                                            <a class="icon_link"
-                                                               href="{% url 'login' %}?next={{ request.path }}"
-                                                               style="text-decoration: none; color: black">
+                                        {% if comment.created_by != user.id %}
+                                            <div style="float: right; text-align: right;">
+                                                <i class="material-icons more_vert">
+                                                    more_vert
+                                                </i>
+                                                <div class="popup" hidden>
+                                                    <div class="more_menu box_shadow">
+                                                        {% if user.is_authenticated %}
+                                                            <div class="opt_container"
+                                                                 onclick="open_flag_dialog({{ comment.id }})">
                                                                 <i class="material-icons menu_item">
                                                                     outlined_flag
                                                                 </i>
                                                                 <span class="menu_item">Report</span>
-                                                            </a>
-                                                        </div>
-                                                    {% endif %}
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="opt_container">
+                                                                <a class="icon_link"
+                                                                   href="{% url 'login' %}?next={{ request.path }}"
+                                                                   style="text-decoration: none; color: black">
+                                                                    <i class="material-icons menu_item">
+                                                                        outlined_flag
+                                                                    </i>
+                                                                    <span class="menu_item">Report</span>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                         <p><strong>{{ comment.author }}</strong>
 
                                             <small class="ml-3 text-muted">{{ comment.publication_date|naturaltime }}</small>
