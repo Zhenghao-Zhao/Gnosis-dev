@@ -14,6 +14,8 @@ from datetime import datetime
 import json
 from catalog.views.utils.import_functions import *
 
+from catalog.views.utils.classes import UserComment
+
 from catalog.forms import (
     PaperForm,
     DatasetForm,
@@ -337,7 +339,6 @@ def _get_paper_by_id(id):
         paper = all_papers[0]
     return paper
 
-
 def paper_detail(request, id):
 
     # Retrieve the paper from the database
@@ -365,21 +366,35 @@ def paper_detail(request, id):
     authors = ", ".join(authors)
 
     user = request.user
-    flagged_comments = user.comment_flags.all()
+    flags = user.comment_flags.all()
     flagged_comment_ids = []
-    for flag in flagged_comments:
+    for flag in flags:
         flagged_comment_ids.append(flag.comment_id)
 
     # Retrieve all comments about this paper.
-    query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) WHERE NOT ID(c) IN {ids} RETURN c"
+    # query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) WHERE NOT ID(c) IN {ids} RETURN c"
 
-    results, meta = db.cypher_query(query, dict(paper_title=paper.title, ids=flagged_comment_ids))
+    query_unfiltered = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
+
+    # results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+
+    results, meta = db.cypher_query(query_unfiltered, dict(paper_title=paper.title))
+
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
         num_comments = len(comments)
     else:
         comments = []
         num_comments = 0
+
+    filtered_comments = []
+
+    for c in comments:
+        if c.id in flagged_comment_ids:
+            user_comment = UserComment(c, True)
+        else:
+            user_comment = UserComment(c, False)
+        filtered_comments.append(user_comment)
 
     # Retrieve the code repos that implement the algorithm(s) in this paper
     codes = _get_paper_codes(paper)
@@ -496,6 +511,7 @@ def paper_detail(request, id):
             "authors": authors,
             "notes": notes,
             "comments": comments,
+            "filtered_comments": filtered_comments,
             "codes": codes,
             "num_notes": num_notes,
             "num_comments": num_comments,

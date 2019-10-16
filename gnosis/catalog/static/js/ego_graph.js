@@ -85,23 +85,25 @@ function show_cites(label, type) {
 // stores state of the collapse target
 var hidden = false;
 
-function collapse_toggle(ele, that) {
+var ego_header = $('#ego-header');
+
+$(ego_header).click(function () {
     hidden = !hidden;
     if (hidden) {
-        $(that).children('.drop_indicator').text('arrow_drop_down');
-        $('#' + ele).hide(200);
+        $(this).children('.drop_indicator').text('arrow_drop_down');
+        $('#ego-graph-content').hide(200);
 
     } else {
-        $(that).children('.drop_indicator').text('arrow_drop_up');
-        $('#' + ele).show(200);
+        $(this).children('.drop_indicator').text('arrow_drop_up');
+        $('#ego-graph-content').show(200);
 
     }
-}
+});
 
 // collapse initially if device width is < 600
 // device widths reference: https://www.w3schools.com/css/css_rwd_mediaqueries.asp
-if ($(window).width() < 600){
-    collapse_toggle('ego-graph-content', $('#ego-header'));
+if ($(window).width() < 600) {
+    $(ego_header).click()
 }
 
 /************** tooltip **************/
