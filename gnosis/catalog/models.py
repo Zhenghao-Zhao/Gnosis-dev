@@ -223,15 +223,15 @@ class CommentFlag(models.Model):
         return self.description
 
 
-# class HiddenCommentFlag(models.Model):
-#     comment_id = models.IntegerField(null=False, blank=False)
-#     proposed_by = models.ForeignKey(to=User,
-#                                     on_delete=models.CASCADE,
-#                                     related_name="hidden_flags")
-#
-#     class Meta:
-#         ordering = ['proposed_by', 'object_id']
-#         verbose_name = "hidden flag"
+class HiddenComment(models.Model):
+    comment_id = models.IntegerField(null=False, blank=False)
+    proposed_by = models.ForeignKey(to=User,
+                                    on_delete=models.CASCADE,
+                                    related_name="hidden_flags")
+
+    class Meta:
+        ordering = ['proposed_by', 'object_id']
+        verbose_name = "hidden flag"
 
 
 class ReadingGroup(models.Model):

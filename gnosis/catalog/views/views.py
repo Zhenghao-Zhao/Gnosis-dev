@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404, HttpResponseBadRequest
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, CommentFlag
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, CommentFlag, HiddenComment
 from notes.forms import NoteForm
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
@@ -366,10 +366,21 @@ def paper_detail(request, id):
     authors = ", ".join(authors)
 
     user = request.user
+
+    # One cannot have hidden and flagged comments of the same id
+    # Get all hidden comments
+    hidden_comments = user.hidden_flags.all()
+    hidden_comment_ids = []
+    for comment in hidden_comments:
+        hidden_comment_ids.append(comment.comment_id)
+
+    # Get all flagged comments
     flags = user.comment_flags.all()
     flagged_comment_ids = []
     for flag in flags:
         flagged_comment_ids.append(flag.comment_id)
+        # flagged comments are also hidden by default
+        hidden_comment_ids.append(flag.comment_id)
 
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
@@ -386,7 +397,7 @@ def paper_detail(request, id):
     filtered_comments = []
 
     for c in comments:
-        if c.id in flagged_comment_ids:
+        if c.id in hidden_comment_ids:
             user_comment = UserComment(c, True)
         else:
             user_comment = UserComment(c, False)
@@ -2594,6 +2605,28 @@ def comment_delete(request, id):
         comment.delete()
         del request.session["last-viewed-paper"]
     return redirect("paper_detail", id=paper_id)
+
+
+@login_required()
+def comment_hide(request, id):
+    user = request.user
+    if request.is_ajax():
+        if id is not None:
+            hidden_comment = HiddenComment(comment_id=id, proposed_by=user)
+            hidden_comment.save()
+            data = {'is_valid': True}
+        else:
+            data = {'is_valid': False}
+        print("ajax request received!")
+        return JsonResponse(data)
+    else:
+        if id is not None:
+            hidden_comment = HiddenComment(comment_id=id, proposed_by=user)
+            hidden_comment.save()
+
+        paper_id = request.session["last-viewed-paper"]
+        return redirect("paper_detail", id=paper_id)
+
 
 #
 # Utility Views (admin required)

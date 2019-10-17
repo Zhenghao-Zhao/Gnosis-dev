@@ -20,10 +20,6 @@ function open_flag_dialog(comment_id) {
         .appendTo("#flag_form");
 }
 
-function hide_comment(comment_id){
-
-}
-
 /************** hide popup form and reset its text. **************/
 function cancel_form() {
     $('#flag_form').trigger('reset');
@@ -32,6 +28,27 @@ function cancel_form() {
 
 // points to the comment that has been flagged
 var this_comment;
+
+$('.async-hide').click(function (e) {
+    e.preventDefault();
+    var url = $(this).attr('href');
+    this_comment = $(this).closest('#comment_thread');
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: form.serialize(),
+        success: function (data) {
+            console.log("submit successful!");
+            if (this_comment != null) {
+                $(this_comment).attr('hidden', true);
+                $(this_comment).prev('#hidden_comment').attr('hidden', false);
+            }
+        },
+        error: function (data) {
+            alert("An error has occurred, please resubmit report.");
+        },
+    })
+});
 
 /************** toggles more button: shows/hides popup menu **************/
 $('.more_vert').click(function () {
@@ -44,7 +61,6 @@ $('.more_vert').click(function () {
 /************** click to show hidden comment **************/
 $('.show_comment').click(function () {
     var $hidden = $(this).closest('#hidden_comment');
-
     this_comment = $hidden.next('#comment_thread');
     if (this_comment != null) {
         $hidden.attr('hidden', true);

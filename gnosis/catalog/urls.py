@@ -71,6 +71,7 @@ urlpatterns += [
     path('comment/<int:id>/', views.comment_detail, name='comment_detail'),
     path('comment/<int:id>/update', views.comment_update, name='comment_update'),
     path('comment/<int:id>/delete', views.comment_delete, name='comment_delete'),
+    path('comment/<int:id>/hide', views.comment_hide, name='comment_hide'),
 ]
 
 # for updating/creating a new Code node
