@@ -26,29 +26,7 @@ function cancel_form() {
     $('.popup').attr('hidden', true);
 }
 
-// points to the comment that has been flagged
 var this_comment;
-
-$('.async-hide').click(function (e) {
-    e.preventDefault();
-    var url = $(this).attr('href');
-    this_comment = $(this).closest('#comment_thread');
-    $.ajax({
-        type: 'GET',
-        url: url,
-        data: form.serialize(),
-        success: function (data) {
-            console.log("submit successful!");
-            if (this_comment != null) {
-                $(this_comment).attr('hidden', true);
-                $(this_comment).prev('#hidden_comment').attr('hidden', false);
-            }
-        },
-        error: function (data) {
-            alert("An error has occurred, please resubmit report.");
-        },
-    })
-});
 
 /************** toggles more button: shows/hides popup menu **************/
 $('.more_vert').click(function () {
@@ -58,10 +36,52 @@ $('.more_vert').click(function () {
     this_comment = $(this).closest('#comment_thread');
 });
 
-/************** click to show hidden comment **************/
-$('.show_comment').click(function () {
+// points to the comment that has been flagged/hidden
+$('.async-hide').click(function (e) {
+    e.preventDefault();
+    var url = $(this).attr('href');
+    this_comment = $(this).closest('#comment_thread');
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: function (data) {
+            console.log("submit successful!");
+            if (this_comment != null) {
+                $(this_comment).attr('hidden', true);
+                $(this_comment).prevAll('#hidden_comment:first').attr('hidden', false);
+            }
+        },
+        error: function (data) {
+            alert("An error has occurred, please resubmit report.");
+        },
+    })
+});
+
+$('.unhide_comment').click(function (e) {
+    e.preventDefault();
     var $hidden = $(this).closest('#hidden_comment');
-    this_comment = $hidden.next('#comment_thread');
+    this_comment = $hidden.nextAll('#comment_thread:first');
+
+    $.ajax({
+        type: 'GET',
+        url: $(this).attr('href'),
+        success: function (data) {
+            console.log("submit successful!");
+            if (this_comment != null) {
+                $hidden.attr('hidden', true);
+                $(this_comment).attr('hidden', false);
+            }
+        },
+        error: function (data) {
+            alert("An error has occurred, please resubmit report.");
+        },
+    })
+});
+
+/************** click to show reported comment **************/
+$('.show_comment').click(function () {
+    var $hidden = $(this).closest('#reported_comment');
+    this_comment = $hidden.nextAll('#comment_thread:first');
     if (this_comment != null) {
         $hidden.attr('hidden', true);
         $(this_comment).attr('hidden', false);
@@ -87,7 +107,7 @@ form.submit(function (e) {
 
             if (this_comment != null) {
                 $(this_comment).attr('hidden', true);
-                $(this_comment).prev('#hidden_comment').attr('hidden', false);
+                $(this_comment).prevAll('#reported_comment:first').attr('hidden', false);
             }
 
             $('#flag_form').trigger('reset');

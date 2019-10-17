@@ -230,7 +230,7 @@ class HiddenComment(models.Model):
                                     related_name="hidden_flags")
 
     class Meta:
-        ordering = ['proposed_by', 'object_id']
+        ordering = ['proposed_by', 'comment_id']
         verbose_name = "hidden flag"
 
 

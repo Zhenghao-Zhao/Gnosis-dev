@@ -285,15 +285,43 @@
                             {% paginate comments %}
                             {% for comment in filtered_comments %}
                                 {% if comment.is_hidden %}
-                                    <li id="hidden_comment" class="list-group-item shadow-sm mt-1">
-                                        <div class="even-vert-center">
-                                            <span>You have reported this comment.</span>
-                                            <button type="button"
-                                                    class="btn btn-primary btn-lg form_button show_comment">
-                                                Show
-                                            </button>
-                                        </div>
-                                    </li>
+                                    {% if comment.is_flagged %}
+                                        <li id="reported_comment" class="list-group-item shadow-sm mt-1">
+                                            <div class="even-vert-center">
+                                                <span>You have reported this comment.</span>
+                                                <button type="button"
+                                                        class="btn btn-primary btn-lg form_button show_comment">
+                                                    Undo
+                                                </button>
+                                            </div>
+                                        </li>
+                                        <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                            <div class="even-vert-center">
+                                                <span>Comment hidden.</span>
+                                                <a class="btn btn-primary unhide_comment"
+                                                   href="{% url 'comment_unhide' comment.id %}"
+                                                   role="button">Undo</a>
+                                            </div>
+                                        </li>
+                                    {% else %}
+                                        <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                            <div class="even-vert-center">
+                                                <span>You have reported this comment.</span>
+                                                <button type="button"
+                                                        class="btn btn-primary btn-lg form_button show_comment">
+                                                    Undo
+                                                </button>
+                                            </div>
+                                        </li>
+                                        <li id="hidden_comment" class="list-group-item shadow-sm mt-1">
+                                            <div class="even-vert-center">
+                                                <span>Comment hidden.</span>
+                                                <a class="btn btn-primary unhide_comment"
+                                                   href="{% url 'comment_unhide' comment.id %}"
+                                                   role="button">Undo</a>
+                                            </div>
+                                        </li>
+                                    {% endif %}
 
                                     <li id="comment_thread" class="list-group-item shadow-sm mt-1" hidden>
                                         {#                                        {% if comment.created_by != user.id %}#}
@@ -334,19 +362,29 @@
                                                 <a class="ml-5" href="{% url 'comment_update' comment.id %}">Edit</a>
                                                 <a class="ml-5" href="{% url 'comment_delete' comment.id %}"> Delete</a>
                                             {% endif %}
-                                            <a class="ml-5 async-hide" href="{% url 'comment_hide' comment.id %}">Hide</a>
+                                            <a class="ml-5 async-hide"
+                                               href="{% url 'comment_hide' comment.id %}">Hide</a>
                                         </p>
                                         <p>{{ comment.text }}</p>
                                     </li>
 
                                 {% else %}
-                                    <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                    <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
                                         <div class="even-vert-center">
                                             <span>You have reported this comment.</span>
                                             <button type="button"
                                                     class="btn btn-primary btn-lg form_button show_comment">
-                                                Show
+                                                Undo
                                             </button>
+                                        </div>
+                                    </li>
+
+                                    <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                        <div class="even-vert-center">
+                                            <span>Comment hidden.</span>
+                                            <a class="btn btn-primary unhide_comment"
+                                               href="{% url 'comment_unhide' comment.id %}"
+                                               role="button">Undo</a>
                                         </div>
                                     </li>
 
@@ -389,7 +427,8 @@
                                                 <a class="ml-5" href="{% url 'comment_update' comment.id %}">Edit</a>
                                                 <a class="ml-5" href="{% url 'comment_delete' comment.id %}">Delete</a>
                                             {% endif %}
-                                            <a class="ml-5 async-hide" href="{% url 'comment_hide' comment.id %}">Hide</a>
+                                            <a class="ml-5 async-hide"
+                                               href="{% url 'comment_hide' comment.id %}">Hide</a>
                                         </p>
                                         <p>{{ comment.text }}</p>
                                     </li>
@@ -493,7 +532,7 @@
                                         more_vert
                                     </i>
                                     <div class="popup" hidden>
-                                        <div class="more_menu">
+                                        <div class="more_menu box_shadow">
                                             <div class="opt_container">
                                                 <a class="icon_link"
                                                    href="{% url 'login' %}?next={{ request.path }}"

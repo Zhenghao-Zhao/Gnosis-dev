@@ -365,23 +365,6 @@ def paper_detail(request, id):
     # authors is a list of strings so just concatenate the strings.
     authors = ", ".join(authors)
 
-    user = request.user
-
-    # One cannot have hidden and flagged comments of the same id
-    # Get all hidden comments
-    hidden_comments = user.hidden_flags.all()
-    hidden_comment_ids = []
-    for comment in hidden_comments:
-        hidden_comment_ids.append(comment.comment_id)
-
-    # Get all flagged comments
-    flags = user.comment_flags.all()
-    flagged_comment_ids = []
-    for flag in flags:
-        flagged_comment_ids.append(flag.comment_id)
-        # flagged comments are also hidden by default
-        hidden_comment_ids.append(flag.comment_id)
-
     # Retrieve all comments about this paper.
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
 
@@ -394,14 +377,31 @@ def paper_detail(request, id):
         comments = []
         num_comments = 0
 
+    user = request.user
     filtered_comments = []
 
-    for c in comments:
-        if c.id in hidden_comment_ids:
-            user_comment = UserComment(c, True)
-        else:
-            user_comment = UserComment(c, False)
-        filtered_comments.append(user_comment)
+    # One cannot have hidden and flagged comments of the same id
+    # Get all hidden comments
+    if user.is_authenticated:
+        hidden_comments = user.hidden_flags.all()
+        hidden_comment_ids = []
+        for comment in hidden_comments:
+            hidden_comment_ids.append(comment.comment_id)
+
+        # Get all flagged comments
+        flags = user.comment_flags.all()
+        flagged_comment_ids = []
+        for flag in flags:
+            flagged_comment_ids.append(flag.comment_id)
+
+        for c in comments:
+            if c.id in hidden_comment_ids:
+                user_comment = UserComment(c, True, False)
+            elif c.id in flagged_comment_ids:
+                user_comment = UserComment(c, True, True)
+            else:
+                user_comment = UserComment(c, False, False)
+            filtered_comments.append(user_comment)
 
     # Retrieve the code repos that implement the algorithm(s) in this paper
     codes = _get_paper_codes(paper)
@@ -2627,6 +2627,28 @@ def comment_hide(request, id):
         paper_id = request.session["last-viewed-paper"]
         return redirect("paper_detail", id=paper_id)
 
+
+@login_required()
+def comment_unhide(request, id):
+    user = request.user
+    if request.is_ajax():
+        data = {'is_valid': False}
+        if id is not None:
+            hidden_comment = user.hidden_flags.get(comment_id=id)
+            if hidden_comment is not None:
+                hidden_comment.delete()
+                data = {'is_valid': True}
+
+        print("ajax request received!")
+        return JsonResponse(data)
+    else:
+        if id is not None:
+            hidden_comment = user.hidden_flags.get(comment_id=id)
+            if hidden_comment is not None:
+                hidden_comment.delete()
+
+        paper_id = request.session["last-viewed-paper"]
+        return redirect("paper_detail", id=paper_id)
 
 #
 # Utility Views (admin required)
