@@ -444,39 +444,7 @@ def paper_detail(request, id):
     except:
         bookmarked = False
 
-    # if a flagging form is submitted
-    if request.method == "POST":
-        if user.is_authenticated:
-            comment_id = request.POST.get("comment_id", None)
-
-            flagged_comment = CommentFlag()
-            flagged_comment.proposed_by = user
-
-            form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
-
-            # check if comment_id exists
-            if comment_id is not None:
-                flagged_comment.comment_id = comment_id
-                is_valid = form.is_valid()
-
-                # if the received request is ajax
-                # return a json object for ajax requests containing form validity
-                if request.is_ajax():
-                    if is_valid:
-                        form.save()
-                    data = {'is_valid': is_valid}
-                    print("ajax request received!")
-                    return JsonResponse(data)
-                else:
-                    if is_valid:
-                        form.save()
-                        print("comment flag form saved successfully!!")
-                        return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
-        else:
-            # raise SuspiciousOperation('Undesired POST request received.')
-            return HttpResponseBadRequest(reverse("paper_detail", kwargs={'id': id}))
-    else:
-        form = FlaggedCommentForm()
+    form = FlaggedCommentForm()
 
     print("ego_network_json: {}".format(ego_network_json))
 

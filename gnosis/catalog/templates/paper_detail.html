@@ -289,10 +289,9 @@
                                         <li id="reported_comment" class="list-group-item shadow-sm mt-1">
                                             <div class="even-vert-center">
                                                 <span>You have reported this comment.</span>
-                                                <button type="button"
-                                                        class="btn btn-primary btn-lg form_button show_comment">
-                                                    Undo
-                                                </button>
+                                                <a class="btn btn-primary show_comment"
+                                                   href="{% url 'comment_flag_remove' comment.id %}"
+                                                   role="button">Undo</a>
                                             </div>
                                         </li>
                                         <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
@@ -307,10 +306,9 @@
                                         <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
                                             <div class="even-vert-center">
                                                 <span>You have reported this comment.</span>
-                                                <button type="button"
-                                                        class="btn btn-primary btn-lg form_button show_comment">
-                                                    Undo
-                                                </button>
+                                                <a class="btn btn-primary show_comment"
+                                                   href="{% url 'comment_flag_remove' comment.id %}"
+                                                   role="button">Undo</a>
                                             </div>
                                         </li>
                                         <li id="hidden_comment" class="list-group-item shadow-sm mt-1">
@@ -331,26 +329,13 @@
                                             </i>
                                             <div class="popup" hidden>
                                                 <div class="more_menu box_shadow">
-                                                    {% if user.is_authenticated %}
-                                                        <div class="opt_container"
-                                                             onclick="open_flag_dialog({{ comment.id }})">
-                                                            <i class="material-icons menu_item">
-                                                                outlined_flag
-                                                            </i>
-                                                            <span class="menu_item">Report</span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="opt_container">
-                                                            <a class="icon_link"
-                                                               href="{% url 'login' %}?next={{ request.path }}"
-                                                               style="text-decoration: none; color: black">
-                                                                <i class="material-icons menu_item">
-                                                                    outlined_flag
-                                                                </i>
-                                                                <span class="menu_item">Report</span>
-                                                            </a>
-                                                        </div>
-                                                    {% endif %}
+                                                    <div class="opt_container open_flag_dialog"
+                                                         data-url="{% url 'comment_flag_create' comment.id %}">
+                                                        <i class="material-icons menu_item">
+                                                            outlined_flag
+                                                        </i>
+                                                        <span class="menu_item">Report</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -372,10 +357,9 @@
                                     <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
                                         <div class="even-vert-center">
                                             <span>You have reported this comment.</span>
-                                            <button type="button"
-                                                    class="btn btn-primary btn-lg form_button show_comment">
-                                                Undo
-                                            </button>
+                                            <a class="btn btn-primary show_comment"
+                                               href="{% url 'comment_flag_remove' comment.id %}"
+                                               role="button">Undo</a>
                                         </div>
                                     </li>
 
@@ -396,26 +380,13 @@
                                             </i>
                                             <div class="popup" hidden>
                                                 <div class="more_menu box_shadow">
-                                                    {% if user.is_authenticated %}
-                                                        <div class="opt_container"
-                                                             onclick="open_flag_dialog({{ comment.id }})">
-                                                            <i class="material-icons menu_item">
-                                                                outlined_flag
-                                                            </i>
-                                                            <span class="menu_item">Report</span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="opt_container">
-                                                            <a class="icon_link"
-                                                               href="{% url 'login' %}?next={{ request.path }}"
-                                                               style="text-decoration: none; color: black">
-                                                                <i class="material-icons menu_item">
-                                                                    outlined_flag
-                                                                </i>
-                                                                <span class="menu_item">Report</span>
-                                                            </a>
-                                                        </div>
-                                                    {% endif %}
+                                                    <div class="opt_container open_flag_dialog"
+                                                         data-url="{% url 'comment_flag_create' comment.id %}">
+                                                        <i class="material-icons menu_item">
+                                                            outlined_flag
+                                                        </i>
+                                                        <span class="menu_item">Report</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

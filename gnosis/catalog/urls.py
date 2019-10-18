@@ -122,3 +122,8 @@ urlpatterns += [
     path('bookmarks/<int:pid>/remove', bookmark_entry_remove_from_view, name='bookmark_entry_remove_from_view'),
 
 ]
+
+urlpatterns += [
+    path('flags/comment/<int:comment_id>/create', views.cflag_create, name='comment_flag_create'),
+    path('flags/comment/<int:comment_id>/remove', views.cflag_remove, name='comment_flag_remove'),
+]
