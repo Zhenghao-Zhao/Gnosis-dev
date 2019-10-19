@@ -233,6 +233,8 @@ class HiddenComment(models.Model):
         ordering = ['proposed_by', 'comment_id']
         verbose_name = "hidden flag"
 
+    def __str__(self):
+        return "comment id: " + str(self.comment_id)
 
 class ReadingGroup(models.Model):
     """A ReadingGroup model"""

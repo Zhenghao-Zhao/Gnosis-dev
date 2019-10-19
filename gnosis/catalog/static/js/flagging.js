@@ -7,18 +7,27 @@ $(document).click(function (e) {
     }
 });
 
-var this_flag_url;
+var this_url;
 var this_comment;
+var comment_id;
+var hidden_comment;
+var reported_comment;
 
 /************** opens flag dialog that contains flag form **************/
 
 $('.open_flag_dialog').click(function () {
+    // get comment id of this event
+    comment_id = $(this).attr('data-commentid');
+    // identify this comment and its url
+    this_comment = $('#cmt_thread_' + comment_id);
+    this_url = $(this).attr('data-url');
+
+    reported_comment = $('#reported_cmt_' + comment_id);
+
     // hide all current popups
     $('.popup').attr('hidden', true);
     $('#flag_form_container').attr('hidden', false);
 
-    this_flag_url = $(this).attr('data-url');
-    this_comment = $(this).closest('#comment_thread');
 });
 
 /************** hide popup form and reset its text. **************/
@@ -35,18 +44,24 @@ $('.more_vert').click(function () {
 });
 
 // points to the comment that has been flagged/hidden
-$('.async-hide').click(function (e) {
+$('.async_hide').click(function (e) {
     e.preventDefault();
-    var url = $(this).attr('href');
-    this_comment = $(this).closest('#comment_thread');
+
+    // get comment id of this event
+    comment_id = $(this).attr('data-commentid');
+    // identify this comment, its url and its hidden comment
+    this_comment = $('#cmt_thread_' + comment_id);
+    this_url = $(this).attr('href');
+    hidden_comment = $('#hidden_cmt_' + comment_id);
+
     $.ajax({
         type: 'POST',
-        url: url,
+        url: this_url,
         success: function (data) {
             console.log("submit successful!");
             if (this_comment != null) {
-                $(this_comment).attr('hidden', true);
-                $(this_comment).prevAll('#hidden_comment:first').attr('hidden', false);
+                this_comment.attr('hidden', true);
+                hidden_comment.attr('hidden', false);
             }
         },
         error: function (data) {
@@ -55,19 +70,25 @@ $('.async-hide').click(function (e) {
     })
 });
 
-$('.unhide_comment').click(function (e) {
+/************** show hidden comments **************/
+$('.async_unhide').click(function (e) {
     e.preventDefault();
-    var $hidden = $(this).closest('#hidden_comment');
-    this_comment = $hidden.nextAll('#comment_thread:first');
+
+    // get comment id of this event
+    comment_id = $(this).attr('data-commentid');
+    // identify this comment, its url and its hidden comment
+    this_comment = $('#cmt_thread_' + comment_id);
+    this_url = $(this).attr('href');
+    hidden_comment = $('#hidden_cmt_' + comment_id);
 
     $.ajax({
         type: 'GET',
-        url: $(this).attr('href'),
+        url: this_url,
         success: function (data) {
             console.log("submit successful!");
             if (this_comment != null) {
-                $hidden.attr('hidden', true);
-                $(this_comment).attr('hidden', false);
+                hidden_comment.attr('hidden', true);
+                this_comment.attr('hidden', false);
             }
         },
         error: function (data) {
@@ -77,18 +98,23 @@ $('.unhide_comment').click(function (e) {
 });
 
 /************** click to show reported comment **************/
-$('.show_comment').click(function (e) {
+$('.async_unreport').click(function (e) {
     e.preventDefault();
-    var $hidden = $(this).closest('#reported_comment');
-    this_comment = $hidden.nextAll('#comment_thread:first');
-    console.log($(this).attr('href'));
+
+    // get comment id of this event
+    comment_id = $(this).attr('data-commentid');
+    // identify this comment, its url and its hidden comment
+    this_comment = $('#cmt_thread_' + comment_id);
+    this_url = $(this).attr('href');
+    reported_comment = $('#reported_cmt_' + comment_id);
+
     $.ajax({
         type: 'GET',
-        url: $(this).attr('href'),
+        url: this_url,
         success: function (data) {
             if (this_comment != null) {
-                $hidden.attr('hidden', true);
-                $(this_comment).attr('hidden', false);
+                reported_comment.attr('hidden', true);
+                this_comment.attr('hidden', false);
             }
         },
         error: function (data) {
@@ -106,18 +132,18 @@ form.submit(function (e) {
     // open loader
     $('#loader').attr('hidden', false);
 
-    if (this_flag_url != null) {
+    if (this_url != null) {
         $.ajax({
             type: 'POST',
-            url: this_flag_url,
+            url: this_url,
             data: form.serialize(),
             success: function (data) {
                 console.log("submit successful!");
                 if (this_comment != null) {
-                    $(this_comment).attr('hidden', true);
-                    $(this_comment).prevAll('#reported_comment:first').attr('hidden', false);
+                    this_comment.attr('hidden', true);
+                    reported_comment.attr('hidden', false);
                 }
-                $('#flag_form').trigger('reset');
+                form.trigger('reset');
                 // close loader
                 $('#loader').attr('hidden', true);
                 $('#flag_response').attr('hidden', false);

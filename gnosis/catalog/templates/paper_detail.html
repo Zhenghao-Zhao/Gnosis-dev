@@ -286,42 +286,48 @@
                             {% for comment in filtered_comments %}
                                 {% if comment.is_hidden %}
                                     {% if comment.is_flagged %}
-                                        <li id="reported_comment" class="list-group-item shadow-sm mt-1">
+                                        <li id="reported_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1">
                                             <div class="even-vert-center">
                                                 <span>You have reported this comment.</span>
-                                                <a class="btn btn-primary show_comment"
+                                                <a class="btn btn-primary async_unhide"
                                                    href="{% url 'comment_flag_remove' comment.id %}"
+                                                   data-commentid="{{ comment.id }}"
                                                    role="button">Undo</a>
                                             </div>
                                         </li>
-                                        <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                        <li id="hidden_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1"
+                                            hidden>
                                             <div class="even-vert-center">
                                                 <span>Comment hidden.</span>
-                                                <a class="btn btn-primary unhide_comment"
+                                                <a class="btn btn-primary async_unhide"
                                                    href="{% url 'comment_unhide' comment.id %}"
+                                                   data-commentid="{{ comment.id }}"
                                                    role="button">Undo</a>
                                             </div>
                                         </li>
                                     {% else %}
-                                        <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                        <li id="reported_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1"
+                                            hidden>
                                             <div class="even-vert-center">
                                                 <span>You have reported this comment.</span>
-                                                <a class="btn btn-primary show_comment"
+                                                <a class="btn btn-primary async_unreport"
                                                    href="{% url 'comment_flag_remove' comment.id %}"
+                                                   data-commentid="{{ comment.id }}"
                                                    role="button">Undo</a>
                                             </div>
                                         </li>
-                                        <li id="hidden_comment" class="list-group-item shadow-sm mt-1">
+                                        <li id="hidden_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1">
                                             <div class="even-vert-center">
                                                 <span>Comment hidden.</span>
-                                                <a class="btn btn-primary unhide_comment"
+                                                <a class="btn btn-primary async_unhide"
                                                    href="{% url 'comment_unhide' comment.id %}"
+                                                   data-commentid="{{ comment.id }}"
                                                    role="button">Undo</a>
                                             </div>
                                         </li>
                                     {% endif %}
 
-                                    <li id="comment_thread" class="list-group-item shadow-sm mt-1" hidden>
+                                    <li id="cmt_thread_{{ comment.id }}" class="list-group-item shadow-sm mt-1" hidden>
                                         {#                                        {% if comment.created_by != user.id %}#}
                                         <div style="float: right; text-align: right;">
                                             <i class="material-icons more_vert">
@@ -330,7 +336,8 @@
                                             <div class="popup" hidden>
                                                 <div class="more_menu box_shadow">
                                                     <div class="opt_container open_flag_dialog"
-                                                         data-url="{% url 'comment_flag_create' comment.id %}">
+                                                         data-url="{% url 'comment_flag_create' comment.id %}"
+                                                         data-commentid="{{ comment.id }}">
                                                         <i class="material-icons menu_item">
                                                             outlined_flag
                                                         </i>
@@ -347,32 +354,35 @@
                                                 <a class="ml-5" href="{% url 'comment_update' comment.id %}">Edit</a>
                                                 <a class="ml-5" href="{% url 'comment_delete' comment.id %}"> Delete</a>
                                             {% endif %}
-                                            <a class="ml-5 async-hide"
+                                            <a class="ml-5 async_hide"
                                                href="{% url 'comment_hide' comment.id %}">Hide</a>
                                         </p>
                                         <p>{{ comment.text }}</p>
                                     </li>
 
                                 {% else %}
-                                    <li id="reported_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                    <li id="reported_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1"
+                                        hidden>
                                         <div class="even-vert-center">
                                             <span>You have reported this comment.</span>
-                                            <a class="btn btn-primary show_comment"
+                                            <a class="btn btn-primary async_unreport"
                                                href="{% url 'comment_flag_remove' comment.id %}"
+                                               data-commentid="{{ comment.id }}"
                                                role="button">Undo</a>
                                         </div>
                                     </li>
 
-                                    <li id="hidden_comment" class="list-group-item shadow-sm mt-1" hidden>
+                                    <li id="hidden_cmt_{{ comment.id }}" class="list-group-item shadow-sm mt-1" hidden>
                                         <div class="even-vert-center">
                                             <span>Comment hidden.</span>
-                                            <a class="btn btn-primary unhide_comment"
+                                            <a class="btn btn-primary async_unhide"
                                                href="{% url 'comment_unhide' comment.id %}"
+                                               data-commentid="{{ comment.id }}"
                                                role="button">Undo</a>
                                         </div>
                                     </li>
 
-                                    <li id="comment_thread" class="list-group-item shadow-sm mt-1">
+                                    <li id="cmt_thread_{{ comment.id }}" class="list-group-item shadow-sm mt-1">
                                         {#                                        {% if comment.created_by != user.id %}#}
                                         <div style="float: right; text-align: right;">
                                             <i class="material-icons more_vert">
@@ -381,7 +391,8 @@
                                             <div class="popup" hidden>
                                                 <div class="more_menu box_shadow">
                                                     <div class="opt_container open_flag_dialog"
-                                                         data-url="{% url 'comment_flag_create' comment.id %}">
+                                                         data-url="{% url 'comment_flag_create' comment.id %}"
+                                                         data-commentid={{ comment.id }}>
                                                         <i class="material-icons menu_item">
                                                             outlined_flag
                                                         </i>
@@ -398,8 +409,8 @@
                                                 <a class="ml-5" href="{% url 'comment_update' comment.id %}">Edit</a>
                                                 <a class="ml-5" href="{% url 'comment_delete' comment.id %}">Delete</a>
                                             {% endif %}
-                                            <a class="ml-5 async-hide"
-                                               href="{% url 'comment_hide' comment.id %}">Hide</a>
+                                            <a class="ml-5 async_hide"
+                                               href="{% url 'comment_hide' comment.id %}" data-commentid="{{ comment.id }}">Hide</a>
                                         </p>
                                         <p>{{ comment.text }}</p>
                                     </li>
