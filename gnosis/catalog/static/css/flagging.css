@@ -9,6 +9,11 @@
     align-items: center
 }
 
+.icon_link {
+    display: block;
+    color: black;
+}
+
 .more_menu {
     border-width: 1px;
 }
@@ -34,6 +39,8 @@
 
 .opt_container:hover {
     cursor: pointer;
+    text-decoration: none;
+    color: black;
     background-color: lightgray;
 }
 
