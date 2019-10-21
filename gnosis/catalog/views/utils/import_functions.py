@@ -1,5 +1,5 @@
-
 from urllib.request import urlopen, Request
+from urllib.error import HTTPError, URLError
 from bs4 import BeautifulSoup
 import re
 
@@ -45,7 +45,6 @@ def get_paper_info(url, source_website):
         return title, authors, abstract, download_link
     return None, None, None, None
 
-
 def analysis_url(url) :
     """
     analysis whether a given url belongs to one of the supported website
@@ -79,17 +78,21 @@ def analysis_url(url) :
         source_website = "pmlr"
         print("source from pmlr")
     # from IEEE
-    elif url.startswith("https://ieeexplore.ieee.org/document/") \
-            or url.startswith("https://ieeexplore.ieee.org/abstract/document/"):
+    elif url.startswith("https://ieeexplore.ieee.org/document/") or url.startswith("https://ieeexplore.ieee.org/abstract/document/"):
         source_website = "ieee"
         print("source from ieee")
     # from ACM
     elif url.startswith("https://dl.acm.org/"):
         source_website = "acm"
         print("source from acm")
+    # from the cvf.com
+    elif url.startswith("https://openaccess.thecvf.com/content_") and url.endswith("paper.html") :
+        source_website = "cvf"
+        # the cvf does not support https
+        url = "http://" + url[8:]
+        print("source from cvf")
     validity = True if (source_website != "false") else False
     return validity, source_website, url
-
 
 def check_valid_paper_type_ieee(bs4obj):
     """
@@ -141,6 +144,9 @@ def get_title(bs4obj, source_website):
         if title == "Non":
             return None
         return title
+    elif source_website == "cvf":
+        title = bs4obj.find("div",{"id":"papertitle"}).get_text()
+        return title
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -180,6 +186,8 @@ def get_abstract(bs4obj, source_website):
         abstract = get_abstract_from_IEEE(bs4obj)
     elif source_website == "acm":
         abstract = get_abstract_from_ACM(bs4obj)
+    elif source_website == "cvf":
+        abstract = bs4obj.find("div",{"id":"abstract"}).get_text()
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
@@ -277,6 +285,8 @@ def get_authors(bs4obj, source_website):
         return get_authors_from_IEEE(bs4obj)
     elif source_website == "acm":
         return get_authors_from_ACM(bs4obj)
+    elif source_website == "cvf":
+        return get_authors_from_cvf(bs4obj)
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -397,6 +407,10 @@ def get_authors_from_ACM(bs4obj):
     # names are last, first so reverse to first, last
     return author_str
 
+def get_authors_from_cvf(bs4obj):
+    author_str = bs4obj.find("div",{"id":"authors"}).find("b").get_text()
+    return author_str
+
 def get_download_link(bs4obj, source_website, url):
     """
     Extract download link from paper page1
@@ -425,6 +439,9 @@ def get_download_link(bs4obj, source_website, url):
         end = download_link.find('"', start + 1)
         download_link = download_link[start + 1:end]
         return download_link
+    elif source_website == "cvf":
+        download_link = url.replace("/html/","/papers/",1)
+        download_link = download_link[:-4]+"pdf"
     else:
         download_link = None
     return download_link
