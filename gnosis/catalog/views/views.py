@@ -1523,6 +1523,7 @@ def paper_create_from_url(request):
         # server, then we will return an error message and redirect to paper_form.html.
         title, authors, abstract, download_link = get_paper_info(url, source_website)
         if title is None or authors is None or abstract is None:
+            print("missing information for paper")
             form = PaperImportForm()
             return render(
                 request,

@@ -26,11 +26,17 @@ def get_paper_info(url, source_website):
         bs4obj = BeautifulSoup(html, features="html.parser")
         if source_website == "ieee":
             if check_valid_paper_type_ieee(bs4obj) == False:
+                print("invalid paper type from IEEE")
+                return None, None, None, None
+        if source_website == "spg":
+            if check_valid_paper_type_spg(bs4obj) == False:
+                print("invalid paper type from springer")
                 return None, None, None, None
         if source_website == "acm":
             url = ""
             if bs4obj.find("a", {"title": "Buy this Book"}) or bs4obj.find("a", {"ACM Magazines"}) \
                     or bs4obj.find_all("meta", {"name": "citation_conference_title"}):
+                print("invalid paper type from acm")
                 return None, None, None, None
         # Now, we can access individual element in the page
         authors = get_authors(bs4obj, source_website)
@@ -91,6 +97,11 @@ def analysis_url(url) :
         # the cvf does not support https
         url = "http://" + url[8:]
         print("source from cvf")
+    # from the springer.com
+    elif url.startswith("https://link.springer.com/chapter/") or url.startswith("https://link.springer.com/article/"):
+        source_website = "spg"
+        print("source from spg")
+
     validity = True if (source_website != "false") else False
     return validity, source_website, url
 
@@ -111,6 +122,23 @@ def check_valid_paper_type_ieee(bs4obj):
     paper_type = text[start:i - 1]
     print(paper_type)
     if paper_type == "Journals & Magazine":
+        return True
+    return False
+
+def check_valid_paper_type_spg(bs4obj):
+    text = bs4obj.get_text()
+    # the paper type is stored as "Event Category"
+    i = text.find("'Event Category':")
+    start = i + 18
+    i = start
+    count = 1
+    while count != 0:
+        if text[i] == '''"''':
+            count = 0
+        i += 1
+    paper_type = text[start:i - 1]
+    print(paper_type)
+    if "Conference Paper" in paper_type or "Article" in paper_type:
         return True
     return False
 
@@ -146,6 +174,10 @@ def get_title(bs4obj, source_website):
         return title
     elif source_website == "cvf":
         title = bs4obj.find("div",{"id":"papertitle"}).get_text()
+        return title
+    elif source_website == "spg":
+        title = bs4obj.find("title").get_text()
+        title = title.replace(" | SpringerLink","")
         return title
     else:
         titleList = []
@@ -188,6 +220,8 @@ def get_abstract(bs4obj, source_website):
         abstract = get_abstract_from_ACM(bs4obj)
     elif source_website == "cvf":
         abstract = bs4obj.find("div",{"id":"abstract"}).get_text()
+    elif source_website == "spg":
+        abstract = get_abstract_from_spg(bs4obj)
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
@@ -267,6 +301,12 @@ def get_abstract_from_jmlr(bs4obj):
             abstract = abstract.next_sibling.text
     return abstract
 
+def get_abstract_from_spg(bs4obj):
+    h2_list = bs4obj.findAll("h2",{"class":"Heading"})
+    for heading in h2_list:
+        if heading.get_text() == "Abstract":
+            return heading.next_sibling.get_text()
+
 def get_authors(bs4obj, source_website):
     """
     Extract authors from the source website
@@ -287,6 +327,8 @@ def get_authors(bs4obj, source_website):
         return get_authors_from_ACM(bs4obj)
     elif source_website == "cvf":
         return get_authors_from_cvf(bs4obj)
+    elif source_website == "spg":
+        return get_authors_from_spg(bs4obj)
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -411,6 +453,15 @@ def get_authors_from_cvf(bs4obj):
     author_str = bs4obj.find("div",{"id":"authors"}).find("b").get_text()
     return author_str
 
+def get_authors_from_spg(bs4obj):
+    authorList = bs4obj.findAll("span",{"class":"authors__name"})
+    if authorList:
+        authorList = [author.text for author in authorList]
+        author_str = ','.join(authorList)
+        return author_str
+    else :
+        return None
+
 def get_download_link(bs4obj, source_website, url):
     """
     Extract download link from paper page1
@@ -425,7 +476,6 @@ def get_download_link(bs4obj, source_website, url):
         download_link = url + ".pdf"
     elif source_website == "jmlr":
         download_link = bs4obj.find(href=re.compile("pdf"))['href']
-        print(download_link)
         if download_link.startswith("/papers/"):
             download_link = "http://www.jmlr.org" + download_link
     elif source_website == "pmlr":
@@ -442,6 +492,9 @@ def get_download_link(bs4obj, source_website, url):
     elif source_website == "cvf":
         download_link = url.replace("/html/","/papers/",1)
         download_link = download_link[:-4]+"pdf"
+    elif source_website == "spg":
+        download_link = get_ddl_from_spg(url)
+
     else:
         download_link = None
     return download_link
@@ -460,6 +513,19 @@ def get_ddl_from_IEEE(bs4obj):
     ddl = text[start:i - 1]
     ddl = "https://ieeexplore.ieee.org" + ddl
     return ddl
+
+def get_ddl_from_spg(url):
+    if "springer.com/chapter/" in url :
+        download_link = url.replace("springer.com/chapter/","springer.com/content/pdf/",1)
+        download_link = download_link + ".pdf"
+        return download_link
+    elif "springer.com/article/" in url :
+        download_link = url.replace("springer.com/article/","springer.com/content/pdf/",1)
+        download_link = download_link + ".pdf"
+        return download_link
+    else :
+        return None
+
 
 def get_venue(bs4obj):
     """
