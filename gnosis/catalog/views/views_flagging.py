@@ -1,4 +1,4 @@
-from django.http import JsonResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.urls import reverse
 
 from catalog.forms import FlaggedCommentForm
@@ -31,12 +31,12 @@ def cflag_create(request, comment_id):
             print("responded!")
             return JsonResponse(data)
     else:
-        # raise SuspiciousOperation('Undesired POST request received.')
+        # handling unauthenticated post request.
         return HttpResponseBadRequest(reverse("paper_detail", kwargs={'id': id}))
 
 
 # deletes the comment flag
-# handles ajax DELETE requests
+# handles ajax GET requests
 def cflag_remove(request, comment_id):
     print("flag remove ajax request received!")
     user = request.user
@@ -53,5 +53,5 @@ def cflag_remove(request, comment_id):
         return JsonResponse(data)
 
     else:
-        # raise SuspiciousOperation('Undesired POST request received.')
+        # handling unauthenticated get request.
         return HttpResponseBadRequest(reverse("paper_detail", kwargs={'id': id}))
