@@ -101,6 +101,12 @@ def analysis_url(url) :
     elif url.startswith("https://link.springer.com/chapter/") or url.startswith("https://link.springer.com/article/"):
         source_website = "spg"
         print("source from spg")
+    # from the robotics proceedings
+    elif url.startswith("https://www.roboticsproceedings.org/rss"):
+        if not url.endswith("index.html") and not url.endswith("authors.html"):
+            source_website = "rbtc"
+            print("source from roboticsproceedings")
+            url = "http://" + url[8:]
 
     validity = True if (source_website != "false") else False
     return validity, source_website, url
@@ -179,6 +185,8 @@ def get_title(bs4obj, source_website):
         title = bs4obj.find("title").get_text()
         title = title.replace(" | SpringerLink","")
         return title
+    elif source_website == "rbtc":
+        title = bs4obj.find("h3").get_text()
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -222,6 +230,8 @@ def get_abstract(bs4obj, source_website):
         abstract = bs4obj.find("div",{"id":"abstract"}).get_text()
     elif source_website == "spg":
         abstract = get_abstract_from_spg(bs4obj)
+    elif source_website == "rbtc":
+        abstract = get_abstract_from_rbtc(bs4obj)
     else:
         abstract = None
     # want to remove all the leading and ending white space and line breakers in the abstract
@@ -302,10 +312,16 @@ def get_abstract_from_jmlr(bs4obj):
     return abstract
 
 def get_abstract_from_spg(bs4obj):
-    h2_list = bs4obj.findAll("h2",{"class":"Heading"})
+    h2_list = bs4obj.findAll("b")
     for heading in h2_list:
-        if heading.get_text() == "Abstract":
+        if heading.get_text() == "Abstract:":
             return heading.next_sibling.get_text()
+
+# def get_abstract_from_rbtc(bs4obj):
+#     h2_list = bs4obj.findAll("h2",{"class":"Heading"})
+#     for heading in h2_list:
+#         if heading.get_text() == "Abstract":
+#             return heading.next_sibling.get_text()
 
 def get_authors(bs4obj, source_website):
     """
@@ -329,6 +345,8 @@ def get_authors(bs4obj, source_website):
         return get_authors_from_cvf(bs4obj)
     elif source_website == "spg":
         return get_authors_from_spg(bs4obj)
+    elif source_website == "rbtc":
+        return get_authors_from_rbtc(bs4obj)
     # if source website is not supported or the autherlist is none , return none
     return None
 
@@ -462,6 +480,15 @@ def get_authors_from_spg(bs4obj):
     else :
         return None
 
+def get_authors_from_rbtc(bs4obj):
+    authorList = bs4obj.findAll("i")
+    if authorList:
+        if len(authorList) >= 1:
+            author_str = authorList[0].text
+            return author_str
+    else :
+        return None
+
 def get_download_link(bs4obj, source_website, url):
     """
     Extract download link from paper page1
@@ -494,6 +521,8 @@ def get_download_link(bs4obj, source_website, url):
         download_link = download_link[:-4]+"pdf"
     elif source_website == "spg":
         download_link = get_ddl_from_spg(url)
+    elif source_website == "rbtc":
+        download_link = url[:-4]+"pdf"
 
     else:
         download_link = None
