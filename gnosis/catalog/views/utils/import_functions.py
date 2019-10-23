@@ -187,6 +187,7 @@ def get_title(bs4obj, source_website):
         return title
     elif source_website == "rbtc":
         title = bs4obj.find("h3").get_text()
+        return title
     else:
         titleList = []
     # check the validity of the abstracted titlelist
@@ -317,11 +318,15 @@ def get_abstract_from_spg(bs4obj):
         if heading.get_text() == "Abstract:":
             return heading.next_sibling.get_text()
 
-# def get_abstract_from_rbtc(bs4obj):
-#     h2_list = bs4obj.findAll("h2",{"class":"Heading"})
-#     for heading in h2_list:
-#         if heading.get_text() == "Abstract":
-#             return heading.next_sibling.get_text()
+def get_abstract_from_rbtc(bs4obj):
+    abstract_para = bs4obj.findAll("p")[0]
+    abstract_para_text = abstract_para.text
+    abstract_index = abstract_para_text.find("Abstract:") +9
+    download_index = abstract_para_text.find("Download:")
+    if abstract_para_text[abstract_index:download_index] == "":
+        return abstract_para.next_sibling.text
+    else :
+        return abstract_para_text[abstract_index:download_index]
 
 def get_authors(bs4obj, source_website):
     """
