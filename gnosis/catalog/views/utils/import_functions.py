@@ -313,10 +313,11 @@ def get_abstract_from_jmlr(bs4obj):
     return abstract
 
 def get_abstract_from_spg(bs4obj):
-    h2_list = bs4obj.findAll("b")
+    h2_list = bs4obj.findAll("h2",{"class":"Heading"})
     for heading in h2_list:
-        if heading.get_text() == "Abstract:":
+        if heading.get_text() == "Abstract":
             return heading.next_sibling.get_text()
+
 
 def get_abstract_from_rbtc(bs4obj):
     abstract_para = bs4obj.findAll("p")[0]
