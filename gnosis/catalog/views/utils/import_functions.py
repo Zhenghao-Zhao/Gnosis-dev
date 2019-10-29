@@ -308,8 +308,8 @@ def get_abstract_from_jmlr(bs4obj):
         abstract = bs4obj.find("h3")
         if abstract is not None:
             abstract = abstract.next_sibling
-        if abstract.strip() is "":
-            abstract = abstract.next_sibling.text
+            if abstract.strip() is "":
+                abstract = abstract.next_sibling.text
     return abstract
 
 def get_abstract_from_spg(bs4obj):
