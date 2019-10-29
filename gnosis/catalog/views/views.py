@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, FlaggedComment
+from django.http import Http404, HttpResponseBadRequest
+from catalog.models import Paper, Person, Dataset, Venue, Comment, Code, CommentFlag, HiddenComment
 from notes.forms import NoteForm
 from notes.models import Note
 from catalog.models import ReadingGroup, ReadingGroupEntry
@@ -12,6 +13,8 @@ from bookmark.models import Bookmark, BookmarkEntry
 from datetime import datetime
 import json
 from catalog.views.utils.import_functions import *
+
+from catalog.views.utils.classes import UserComment
 
 from catalog.forms import (
     PaperForm,
@@ -336,8 +339,8 @@ def _get_paper_by_id(id):
         paper = all_papers[0]
     return paper
 
-
 def paper_detail(request, id):
+
     # Retrieve the paper from the database
     query = "MATCH (a) WHERE ID(a)={id} RETURN a"
     results, meta = db.cypher_query(query, dict(id=id))
@@ -350,8 +353,6 @@ def paper_detail(request, id):
             "papers.html",
             {"papers": Paper.nodes.all(), "num_papers": len(Paper.nodes.all())},
         )
-
-    print("ids are:", id, paper.id)
 
     # Retrieve all notes that created by the current user and on current paper.
     notes = []
@@ -368,12 +369,39 @@ def paper_detail(request, id):
     query = "MATCH (:Paper {title: {paper_title}})<--(c:Comment) RETURN c"
 
     results, meta = db.cypher_query(query, dict(paper_title=paper.title))
+
     if len(results) > 0:
         comments = [Comment.inflate(row[0]) for row in results]
         num_comments = len(comments)
     else:
         comments = []
         num_comments = 0
+
+    user = request.user
+    filtered_comments = []
+
+    # One cannot have hidden and flagged comments of the same id
+    # Get all hidden comments
+    if user.is_authenticated:
+        hidden_comments = user.hidden_flags.all()
+        hidden_comment_ids = []
+        for comment in hidden_comments:
+            hidden_comment_ids.append(comment.comment_id)
+
+        # Get all flagged comments
+        flags = user.comment_flags.all()
+        flagged_comment_ids = []
+        for flag in flags:
+            flagged_comment_ids.append(flag.comment_id)
+
+        for c in comments:
+            if c.id in hidden_comment_ids:
+                user_comment = UserComment(c, True, False)
+            elif c.id in flagged_comment_ids:
+                user_comment = UserComment(c, True, True)
+            else:
+                user_comment = UserComment(c, False, False)
+            filtered_comments.append(user_comment)
 
     # Retrieve the code repos that implement the algorithm(s) in this paper
     codes = _get_paper_codes(paper)
@@ -416,35 +444,7 @@ def paper_detail(request, id):
     except:
         bookmarked = False
 
-    user = request.user
-    # if a flagging form is submitted
-    if request.method == "POST":
-        comment_id = request.POST.get("comment_id", None)
-
-        flagged_comment = FlaggedComment()
-        flagged_comment.proposed_by = user
-
-        form = FlaggedCommentForm(instance=flagged_comment, data=request.POST)
-
-        # check if comment_id exists
-        if comment_id is not None:
-            flagged_comment.comment_id = comment_id
-            is_valid = form.is_valid()
-
-            if is_valid:
-                form.save()
-                if not request.is_ajax():
-                    print("comment flag form saved successfully!!")
-                    return HttpResponseRedirect(reverse("paper_detail", kwargs={'id': id}))
-
-            # if the received request is ajax
-            # return a json object for ajax requests containing form validity
-            if request.is_ajax():
-                data = {'is_valid': is_valid}
-                print("ajax request received!")
-                return JsonResponse(data)
-    else:
-        form = FlaggedCommentForm()
+    form = FlaggedCommentForm()
 
     print("ego_network_json: {}".format(ego_network_json))
 
@@ -486,6 +486,7 @@ def paper_detail(request, id):
             "authors": authors,
             "notes": notes,
             "comments": comments,
+            "filtered_comments": filtered_comments,
             "codes": codes,
             "num_notes": num_notes,
             "num_comments": num_comments,
@@ -2572,6 +2573,50 @@ def comment_delete(request, id):
         comment.delete()
         del request.session["last-viewed-paper"]
     return redirect("paper_detail", id=paper_id)
+
+
+@login_required()
+def comment_hide(request, id):
+    user = request.user
+    if request.is_ajax():
+        if id is not None:
+            hidden_comment = HiddenComment(comment_id=id, proposed_by=user)
+            hidden_comment.save()
+            data = {'is_valid': True}
+        else:
+            data = {'is_valid': False}
+        print("ajax request received!")
+        return JsonResponse(data)
+    else:
+        if id is not None:
+            hidden_comment = HiddenComment(comment_id=id, proposed_by=user)
+            hidden_comment.save()
+
+        paper_id = request.session["last-viewed-paper"]
+        return redirect("paper_detail", id=paper_id)
+
+
+@login_required()
+def comment_unhide(request, id):
+    user = request.user
+    if request.is_ajax():
+        data = {'is_valid': False}
+        if id is not None:
+            hidden_comment = user.hidden_flags.get(comment_id=id)
+            if hidden_comment is not None:
+                hidden_comment.delete()
+                data = {'is_valid': True}
+
+        print("ajax request received!")
+        return JsonResponse(data)
+    else:
+        if id is not None:
+            hidden_comment = user.hidden_flags.get(comment_id=id)
+            if hidden_comment is not None:
+                hidden_comment.delete()
+
+        paper_id = request.session["last-viewed-paper"]
+        return redirect("paper_detail", id=paper_id)
 
 #
 # Utility Views (admin required)
